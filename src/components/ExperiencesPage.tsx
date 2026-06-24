@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
 import { api } from '../services/api';
@@ -24,29 +24,42 @@ function driveThumb(url: string): string {
   return url;
 }
 
-function typeColor(type: string): string {
-  if (type?.includes('Adventure')) return '#2d5a3d';
-  if (type?.includes('Academic')) return '#3d5a6b';
-  if (type?.includes('Community')) return '#5a3d2d';
-  if (type?.includes('Wellness')) return '#4a3d6b';
-  return '#2d4a3e';
+function shortDuration(date: string): string {
+  if (!date) return '';
+  return date.split(/[\n(]/)[0].trim();
 }
 
 const VISIBLE_COUNT = 6;
 
-export default function ExperiencesPage() {
+interface ExperiencesPageProps {
+  onSelectActivity: (id: string) => void;
+}
+
+export default function ExperiencesPage({ onSelectActivity }: ExperiencesPageProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
   const [activeType, setActiveType] = useState('ทั้งหมด');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.activities.getAll()
       .then(setActivities)
       .catch(() => setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบ backend'))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   const types = ['ทั้งหมด', ...Array.from(new Set(
@@ -78,7 +91,7 @@ export default function ExperiencesPage() {
           </div>
         </section>
 
-        {/* Search */}
+        {/* Search + active filter chip */}
         <div className="exp-controls">
           <div className="exp-search-wrap">
             <svg className="exp-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -87,27 +100,62 @@ export default function ExperiencesPage() {
             <input
               className="exp-search"
               type="text"
-              placeholder="ค้นหากิจกรรม..."
+              placeholder="Search"
               value={search}
               onChange={e => { setSearch(e.target.value); setShowAll(false); }}
             />
           </div>
 
-          {/* Type filter pills */}
-          <div className="exp-type-pills">
-            {types.map(t => (
-              <button
-                key={t}
-                className={`exp-pill${activeType === t ? ' exp-pill--active' : ''}`}
-                onClick={() => { setActiveType(t); setShowAll(false); }}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
         </div>
 
-        <div className="exp-divider" />
+        {/* Filter / Sort bar */}
+        <div className="exp-filterbar-wrap">
+          <div className="exp-filterbar">
+            <div className="exp-filterbar__right">
+              <div className="exp-filter-dd" ref={filterRef}>
+                <button
+                  className="exp-filterbar__btn"
+                  onClick={() => setFilterOpen(o => !o)}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
+                  </svg>
+                  Filter
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points={filterOpen ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
+                  </svg>
+                </button>
+                {filterOpen && (
+                  <div className="exp-dropdown">
+                    {types.map(t => (
+                      <button
+                        key={t}
+                        className={`exp-dropdown__item${activeType === t ? ' active' : ''}`}
+                        onClick={() => { setActiveType(t); setFilterOpen(false); setShowAll(false); }}
+                      >
+                        {activeType === t && (
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="exp-filterbar__sep" />
+
+              <button className="exp-filterbar__btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="10" y1="18" x2="14" y2="18" />
+                </svg>
+                Sort
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* States */}
         {loading && <p className="exp-state">กำลังโหลดกิจกรรม...</p>}
@@ -118,7 +166,7 @@ export default function ExperiencesPage() {
           <>
             <div className="exp-grid">
               {visible.map(a => (
-                <ActivityCard key={a.id} activity={a} />
+                <ActivityCard key={a.id} activity={a} onClick={() => onSelectActivity(a.id)} />
               ))}
             </div>
 
@@ -129,7 +177,7 @@ export default function ExperiencesPage() {
             {filtered.length > VISIBLE_COUNT && (
               <div className="exp-more-wrap">
                 <button className="exp-more-btn" onClick={() => setShowAll(!showAll)}>
-                  {showAll ? 'Show less' : `See more (${filtered.length - VISIBLE_COUNT} รายการ)`}
+                  {showAll ? 'Show less' : 'See more'}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points={showAll ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
                   </svg>
@@ -145,25 +193,21 @@ export default function ExperiencesPage() {
   );
 }
 
-function ActivityCard({ activity: a }: { activity: Activity }) {
+function ActivityCard({ activity: a, onClick }: { activity: Activity; onClick: () => void }) {
   const tags = a.type?.split(',').map(t => t.trim()) ?? [];
   const imgSrc = driveThumb(a.image);
-  const bg = typeColor(a.type);
+  const duration = shortDuration(a.date);
 
   return (
-    <div className="exp-card">
-      <div className="exp-card__img-wrap" style={{ background: bg }}>
+    <div className="exp-card" onClick={onClick} role="button" tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onClick()}>
+      <div className="exp-card__img-wrap">
         <img
           src={imgSrc}
           alt={a.name}
           className="exp-card__img"
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
-        {a.by && (
-          <div className="exp-badge exp-badge--low">
-            <span className="exp-badge__note">{a.by}</span>
-          </div>
-        )}
       </div>
 
       <div className="exp-card__body">
@@ -177,15 +221,16 @@ function ActivityCard({ activity: a }: { activity: Activity }) {
         </div>
 
         <div className="exp-card__meta">
-          <span className="exp-card__duration">{a.location?.split(' ')[0] ?? ''}</span>
+          <span className="exp-card__duration">{duration}</span>
           <span className="exp-card__price">
-            {Number(a.price).toLocaleString()} ฿
+            {Number(a.price).toLocaleString()} Baht
           </span>
         </div>
 
         {a.description && (
           <p className="exp-card__desc">
-            {a.description.length > 80 ? a.description.slice(0, 80) + '…' : a.description}
+            {a.description.replace(/\n/g, ' ').slice(0, 80)}
+            {a.description.length > 80 ? '…' : ''}
           </p>
         )}
       </div>
@@ -241,33 +286,60 @@ export const EXPERIENCES_CSS = `
   background: #faf9f7;
   outline: none;
   transition: border-color .2s;
+  box-sizing: border-box;
 }
 .exp-search:focus { border-color: var(--mint); }
 
-/* Type filter pills */
-.exp-type-pills {
-  display: flex; flex-wrap: wrap; gap: .5rem;
-}
-.exp-pill {
-  padding: .35rem .9rem;
-  border: 1.5px solid #d4d0c8;
-  border-radius: 20px;
-  background: var(--white);
-  font-size: .82rem; font-weight: 500; color: #666;
-  cursor: pointer;
-  transition: all .2s;
-  font-family: var(--font-th);
-}
-.exp-pill:hover { border-color: var(--mint); color: var(--forest); }
-.exp-pill--active {
-  background: var(--forest); color: var(--white);
-  border-color: var(--forest);
-}
-
-.exp-divider {
+/* Filter bar */
+.exp-filterbar-wrap {
   max-width: 900px; margin: 1rem auto 0;
-  height: 1px; background: #e8e5de;
+  padding: 0 5%;
+  border-top: 1px solid #e8e5de;
+  border-bottom: 1px solid #e8e5de;
 }
+.exp-filterbar {
+  display: flex; justify-content: flex-end; align-items: center;
+  height: 44px;
+}
+.exp-filterbar__right {
+  display: flex; align-items: center; gap: .75rem;
+}
+.exp-filterbar__sep {
+  width: 1px; height: 18px; background: #d4d0c8;
+}
+.exp-filterbar__btn {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: none; border: none;
+  font-size: .88rem; font-weight: 500; color: #444;
+  cursor: pointer; padding: 0;
+  font-family: inherit;
+  transition: color .2s;
+}
+.exp-filterbar__btn:hover { color: var(--forest); }
+
+/* Filter dropdown */
+.exp-filter-dd { position: relative; }
+.exp-dropdown {
+  position: absolute; top: calc(100% + 8px); left: 0;
+  background: var(--white);
+  border: 1px solid #e0ddd5;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  min-width: 200px; z-index: 100;
+  padding: .4rem 0;
+  overflow: hidden;
+}
+.exp-dropdown__item {
+  display: flex; align-items: center; gap: .5rem;
+  width: 100%; padding: .55rem 1rem;
+  background: none; border: none;
+  font-size: .88rem; color: #444;
+  cursor: pointer; text-align: left;
+  font-family: var(--font-th);
+  transition: background .15s;
+}
+.exp-dropdown__item:hover { background: #f5f4f0; }
+.exp-dropdown__item.active { color: var(--forest); font-weight: 600; }
 
 /* State messages */
 .exp-state {
@@ -302,24 +374,25 @@ export const EXPERIENCES_CSS = `
   position: relative;
   aspect-ratio: 4/3;
   overflow: hidden;
+  background: #2d5a3d;
 }
 .exp-card__img {
   width: 100%; height: 100%; object-fit: cover;
 }
 .exp-badge {
   position: absolute; top: .65rem; left: .65rem;
-  display: flex; align-items: center; gap: .3rem;
-  padding: .2rem .55rem;
+  display: flex; flex-direction: column; align-items: center;
+  padding: .3rem .55rem;
   border-radius: 20px;
-  font-size: .75rem;
-  max-width: 80%;
+  background: rgba(255,255,255,.88);
+  color: #1b4332;
+  line-height: 1.2;
 }
-.exp-badge--low { background: rgba(255,255,255,.88); color: #1b4332; }
-.exp-badge__pct { font-weight: 700; font-size: .85rem; }
+.exp-badge__pct { font-weight: 700; font-size: .9rem; }
 .exp-badge__note {
-  font-size: .68rem; line-height: 1.2;
+  font-size: .62rem;
   font-family: var(--font-th);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .exp-card__body { padding: .85rem 1rem 1rem; }
 .exp-card__top-row {

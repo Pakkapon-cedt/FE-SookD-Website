@@ -8,21 +8,35 @@ import LuxuryTravel from './components/LuxuryTravel';
 import SocialImpact from './components/SocialImpact';
 import Footer from './components/Footer';
 import ExperiencesPage, { EXPERIENCES_CSS } from './components/ExperiencesPage';
+import ActivityDetailPage, { ACTIVITY_DETAIL_CSS } from './components/ActivityDetailPage';
 import { SITE_CONTENT as c } from './constants/content';
 
-type Page = 'home' | 'experiences';
+type Page = 'home' | 'experiences' | 'activity-detail';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
+  const [selectedActivityId, setSelectedActivityId] = useState<string>('');
+
+  function navigate(p: string) {
+    setPage(p as Page);
+  }
+
+  function openActivity(id: string) {
+    setSelectedActivityId(id);
+    setPage('activity-detail');
+  }
 
   return (
     <>
       <style>{CSS}</style>
       <style>{EXPERIENCES_CSS}</style>
-      <Navbar links={c.navLinks} onNavigate={(p) => setPage(p as Page)} currentPage={page} />
+      <style>{ACTIVITY_DETAIL_CSS}</style>
+      <Navbar links={c.navLinks} onNavigate={navigate} currentPage={page} />
 
-      {page === 'experiences' ? (
-        <ExperiencesPage />
+      {page === 'activity-detail' ? (
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} />
+      ) : page === 'experiences' ? (
+        <ExperiencesPage onSelectActivity={openActivity} />
       ) : (
         <main>
           <Hero heading={c.hero.heading} subheading={c.hero.subheading} />

@@ -19,18 +19,14 @@ export async function getActivities(): Promise<Activity[]> {
             item.activity_max_participants
         ),
 
-        date: new Date(
-            item.activity_date
-        ),
+        date: item.activity_date,
 
         type: item.activity_type,
 
         participant_requirements:
             item.activity_participant_requirements
-                ?.split(",")
-                .map((requirement: string) =>
-                    requirement.trim()
-                ) || [],
+                ? String(item.activity_participant_requirements).split(",").map((r: string) => r.trim())
+                : [],
 
         price_included_items:
             item.activity_price_included_items,

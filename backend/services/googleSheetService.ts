@@ -6,9 +6,9 @@ export async function getSheetData(sheetName: string) {
     }
 
     const url =
-        `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}`;
+        `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}?raw=true`;
 
     const response = await fetch(url);
-
-    return await response.json();
+    const data = await response.json();
+    return data;
 }
