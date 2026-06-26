@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StartJourney from './components/StartJourney';
@@ -6,40 +7,94 @@ import PursuitFeeling from './components/PursuitFeeling';
 import LuxuryTravel from './components/LuxuryTravel';
 import SocialImpact from './components/SocialImpact';
 import Footer from './components/Footer';
+import ExperiencesPage, { EXPERIENCES_CSS } from './components/ExperiencesPage';
+import ActivityDetailPage, { ACTIVITY_DETAIL_CSS } from './components/ActivityDetailPage';
+import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetailPage';
 import { SITE_CONTENT as c } from './constants/content';
 
+type Page = 'home' | 'experiences' | 'activity-detail' | 'product-detail';
+
 export default function App() {
+  const [page, setPage] = useState<Page>('home');
+  const [selectedActivityId, setSelectedActivityId] = useState<string>('');
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [prevPage, setPrevPage] = useState<Page>('experiences');
+
+  useEffect(() => {
+    window.history.replaceState({ page: 'home' }, '');
+    const handlePop = (e: PopStateEvent) => {
+      const s = e.state;
+      if (!s?.page) { setPage('home'); return; }
+      if (s.activityId) setSelectedActivityId(s.activityId);
+      if (s.productId) setSelectedProductId(s.productId);
+      if (s.prevPage) setPrevPage(s.prevPage);
+      setPage(s.page);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, []);
+
+  function navigate(p: string) {
+    window.history.pushState({ page: p }, '');
+    setPage(p as Page);
+  }
+
+  function openActivity(id: string) {
+    setSelectedActivityId(id);
+    window.history.pushState({ page: 'activity-detail', activityId: id }, '');
+    setPage('activity-detail');
+  }
+
+  function openProduct(id: string, from: Page = 'activity-detail') {
+    setSelectedProductId(id);
+    setPrevPage(from);
+    window.history.pushState({ page: 'product-detail', productId: id, prevPage: from }, '');
+    setPage('product-detail');
+  }
+
   return (
     <>
       <style>{CSS}</style>
-      <Navbar links={c.navLinks} />
-      <main>
-        <Hero heading={c.hero.heading} subheading={c.hero.subheading} />
+      <style>{EXPERIENCES_CSS}</style>
+      <style>{ACTIVITY_DETAIL_CSS}</style>
+      <style>{PRODUCT_DETAIL_CSS}</style>
+      <Navbar links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'} />
 
-        {/* ── Section gap ── */}
-        <div className="section-gap" />
-        <StartJourney heading={c.journey.heading} cards={c.journey.cards} />
-        <div className="section-gap" />
+      {page === 'product-detail' ? (
+        <ProductDetailPage productId={selectedProductId} onBack={() => setPage(prevPage)} onSelectProduct={(id) => openProduct(id, prevPage)} />
+      ) : page === 'activity-detail' ? (
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} onSelectProduct={(id) => openProduct(id, 'activity-detail')} />
+      ) : page === 'experiences' ? (
+        <ExperiencesPage onSelectActivity={openActivity} />
+      ) : (
+        <main>
+          <Hero heading={c.hero.heading} subheading={c.hero.subheading} />
 
-        <NatureQuote heading={c.natureQuote.heading} subtext={c.natureQuote.subtext} />
-        <PursuitFeeling
-          heading={c.pursuit.heading}
-          body={c.pursuit.body}
-          ctaLabel={c.pursuit.ctaLabel}
-          ctaHref={c.pursuit.ctaHref}
-        />
-        {/* Pursuit → Luxury ไม่มี gap เพราะ Luxury image อยู่ซ้าย ต่อเนื่องกัน */}
-        <LuxuryTravel heading={c.luxury.heading} body={c.luxury.body} />
-        <div className="section-gap" />
+          {/* ── Section gap ── */}
+          <div className="section-gap" />
+          <StartJourney heading={c.journey.heading} cards={c.journey.cards} />
+          <div className="section-gap" />
 
-        <SocialImpact
-          heading={c.socialImpact.heading}
-          subheading={c.socialImpact.subheading}
-          stats={c.socialImpact.stats}
-        />
-      </main>
-      <div className="section-gap" />
-      <Footer data={c.footer} />
+          <NatureQuote heading={c.natureQuote.heading} subtext={c.natureQuote.subtext} />
+          <PursuitFeeling
+            heading={c.pursuit.heading}
+            body={c.pursuit.body}
+            ctaLabel={c.pursuit.ctaLabel}
+            ctaHref={c.pursuit.ctaHref}
+          />
+          {/* Pursuit → Luxury ไม่มี gap เพราะ Luxury image อยู่ซ้าย ต่อเนื่องกัน */}
+          <LuxuryTravel heading={c.luxury.heading} body={c.luxury.body} />
+          <div className="section-gap" />
+
+          <SocialImpact
+            heading={c.socialImpact.heading}
+            subheading={c.socialImpact.subheading}
+            stats={c.socialImpact.stats}
+          />
+          <div className="section-gap" />
+          <Footer data={c.footer} />
+        </main>
+      )}
     </>
   );
 }
@@ -105,6 +160,7 @@ address{font-style:normal}
   white-space:nowrap;
 }
 .navbar__link:hover { color: var(--white); opacity:.75; }
+.navbar__link--active { text-decoration: underline; text-underline-offset: 4px; }
 
 .navbar__right { display:flex; align-items:center; gap:1rem; margin-left:auto; }
 .navbar__lang {

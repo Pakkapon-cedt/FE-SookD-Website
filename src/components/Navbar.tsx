@@ -3,9 +3,12 @@ import type { NavLink } from '../types';
 
 interface NavbarProps {
   links: NavLink[];
+  onNavigate?: (page: string) => void;
+  currentPage?: string;
+  lightTop?: boolean;
 }
 
-export default function Navbar({ links }: NavbarProps) {
+export default function Navbar({ links, onNavigate, currentPage = 'home', lightTop = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -14,10 +17,24 @@ export default function Navbar({ links }: NavbarProps) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const handleLink = (e: React.MouseEvent<HTMLAnchorElement>, link: NavLink) => {
+    if (link.page && onNavigate) {
+      e.preventDefault();
+      onNavigate(link.page);
+    }
+  };
+
+  const handleLogo = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onNavigate) {
+      e.preventDefault();
+      onNavigate('home');
+    }
+  };
+
   return (
-    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
+    <nav className={`navbar ${(scrolled || lightTop) ? 'navbar--scrolled' : ''}`}>
       {/* Logo */}
-      <a href="/" className="navbar__logo" aria-label="SookD Home">
+      <a href="/" className="navbar__logo" aria-label="SookD Home" onClick={handleLogo}>
         <img src="/img/logo.png" alt="SookD logo" className="navbar__logo-img" />
       </a>
 
@@ -25,7 +42,13 @@ export default function Navbar({ links }: NavbarProps) {
       <ul className="navbar__links">
         {links.map((link) => (
           <li key={link.href}>
-            <a href={link.href} className="navbar__link">{link.label}</a>
+            <a
+              href={link.href}
+              className={`navbar__link${link.page === currentPage ? ' navbar__link--active' : ''}`}
+              onClick={(e) => handleLink(e, link)}
+            >
+              {link.label}
+            </a>
           </li>
         ))}
       </ul>
