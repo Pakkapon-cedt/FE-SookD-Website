@@ -235,6 +235,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct }
                   <div key={p.id} className="pdet__other-card" onClick={() => onSelectProduct?.(p.id)} style={{ cursor: onSelectProduct ? 'pointer' : 'default' }}>
                     <div className="pdet__other-img-wrap">
                       <img src={driveThumb(p.image, 'w400')} alt={p.name} className="pdet__other-img"
+                        loading="lazy"
                         onError={e => {
                           const img = e.currentTarget as HTMLImageElement;
                           img.src = driveThumb(p.image, 'w200');

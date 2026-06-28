@@ -10,9 +10,10 @@ import Footer from './components/Footer';
 import ExperiencesPage, { EXPERIENCES_CSS } from './components/ExperiencesPage';
 import ActivityDetailPage, { ACTIVITY_DETAIL_CSS } from './components/ActivityDetailPage';
 import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetailPage';
+import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
 import { SITE_CONTENT as c } from './constants/content';
 
-type Page = 'home' | 'experiences' | 'activity-detail' | 'product-detail';
+type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
@@ -58,12 +59,15 @@ export default function App() {
       <style>{EXPERIENCES_CSS}</style>
       <style>{ACTIVITY_DETAIL_CSS}</style>
       <style>{PRODUCT_DETAIL_CSS}</style>
+      <style>{PRODUCTS_CSS}</style>
       <Navbar links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'} />
 
       {page === 'product-detail' ? (
         <ProductDetailPage productId={selectedProductId} onBack={() => setPage(prevPage)} onSelectProduct={(id) => openProduct(id, prevPage)} />
       ) : page === 'activity-detail' ? (
-        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} onSelectProduct={(id) => openProduct(id, 'activity-detail')} />
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} />
+      ) : page === 'products' ? (
+        <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} />
       ) : page === 'experiences' ? (
         <ExperiencesPage onSelectActivity={openActivity} />
       ) : (
@@ -72,7 +76,7 @@ export default function App() {
 
           {/* ── Section gap ── */}
           <div className="section-gap" />
-          <StartJourney heading={c.journey.heading} cards={c.journey.cards} />
+          <StartJourney heading={c.journey.heading} cards={c.journey.cards} onNavigate={navigate} />
           <div className="section-gap" />
 
           <NatureQuote heading={c.natureQuote.heading} subtext={c.natureQuote.subtext} />
@@ -110,8 +114,8 @@ const CSS = `
   --cream:   #f9f9f7;
   --stone:   #666;
   --text:    #222;
-  --font-th: 'Sarabun', 'Noto Sans Thai', sans-serif;
-  --font-en: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-th: 'Kanit', sans-serif;
+  --font-en: 'Kanit', sans-serif;
   --r: 14px;
   --ease: 0.28s ease;
   --section-gap: 100px;
