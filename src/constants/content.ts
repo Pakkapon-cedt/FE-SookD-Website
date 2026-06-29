@@ -3,6 +3,7 @@ import type { SiteContent } from '../types';
 export const SITE_CONTENT: SiteContent = {
   navLinks: [
     { label: 'Experiences', href: '#experiences', page: 'experiences' },
+    { label: 'Product',     href: '#products',    page: 'products' },
     { label: 'Discover',    href: '#discover' },
     { label: 'Membership',  href: '#membership' },
     { label: 'About',       href: '#about' },
@@ -97,8 +98,8 @@ export const SITE_CONTENT: SiteContent = {
   journey: {
     heading: 'Start your Journey',
     cards: [
-      { id: 'taste',    title: 'Taste',    href: '#taste' },
-      { id: 'activity', title: 'Activity', href: '#activity' },
+      { id: 'taste',    title: 'Taste',    href: '#taste',    page: 'products' },
+      { id: 'activity', title: 'Activity', href: '#activity', page: 'experiences' },
       { id: 'travel',   title: 'Travel',   href: '#travel' },
     ],
   },

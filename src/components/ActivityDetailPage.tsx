@@ -6,7 +6,6 @@ import { SITE_CONTENT as c } from '../constants/content';
 interface Props {
   activityId: string;
   onBack: () => void;
-  onSelectProduct?: (id: string) => void;
 }
 
 function driveThumb(url: string, size = 'w800'): string {
@@ -30,14 +29,12 @@ function Stars({ rating, size = 16, emptyFill = '#e0e0e0' }: { rating: number; s
   );
 }
 
-export default function ActivityDetailPage({ activityId, onBack, onSelectProduct }: Props) {
+export default function ActivityDetailPage({ activityId, onBack }: Props) {
   const [activity, setActivity] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
-  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewIdx, setReviewIdx] = useState(0);
-  const [productIdx, setProductIdx] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const isLoggedIn = false;
 
@@ -47,12 +44,10 @@ export default function ActivityDetailPage({ activityId, onBack, onSelectProduct
       api.activities.getOne(activityId),
       api.reviews.getByItemId(activityId).catch(() => []),
       api.reviews.getAvgByItemId(activityId).catch(() => ({ average: 0 })),
-      api.products.getAll().catch(() => []),
-    ]).then(([act, revs, avg, prods]) => {
+    ]).then(([act, revs, avg]) => {
       setActivity(act);
       setReviews(Array.isArray(revs) ? revs : []);
       setAvgRating(Number(avg?.averageRating ?? avg?.average ?? avg?.avg ?? 0));
-      setProducts(Array.isArray(prods) ? prods.slice(0, 12) : []);
     }).finally(() => setLoading(false));
   }, [activityId]);
 
@@ -62,9 +57,7 @@ export default function ActivityDetailPage({ activityId, onBack, onSelectProduct
   const tags = activity.type?.split(',').map((t: string) => t.trim()) ?? [];
   const descLines = activity.description?.split('\n').filter((l: string) => l.trim()) ?? [];
   const REVIEWS_PER_PAGE = 2;
-  const PRODUCTS_PER_PAGE = 3;
   const maxRevIdx = Math.max(0, reviews.length - REVIEWS_PER_PAGE);
-  const maxProdIdx = Math.max(0, products.length - PRODUCTS_PER_PAGE);
 
   return (
     <>
@@ -235,50 +228,6 @@ export default function ActivityDetailPage({ activityId, onBack, onSelectProduct
           </div>
         </div>
 
-        {/* ── Local products ── */}
-        {products.length > 0 && (
-          <section className="adet__section">
-            <h2 className="adet__section-title">Local products</h2>
-            <div className="adet__products-wrap">
-              <button className="adet__arrow" onClick={() => setProductIdx(i => Math.max(0, i - 1))}
-                disabled={productIdx === 0}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-
-              <div className="adet__products">
-                {products.slice(productIdx, productIdx + PRODUCTS_PER_PAGE).map((p: any) => (
-                  <div key={p.id} className="adet__product-card" style={{ cursor: onSelectProduct ? 'pointer' : 'default' }}
-                    onClick={() => onSelectProduct?.(p.id)}>
-                    <div className="adet__product-img-wrap" style={{ background: '#3d5a3d' }}>
-                      <img src={driveThumb(p.image, 'w300')} alt={p.name} className="adet__product-img"
-                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                    </div>
-                    <div className="adet__product-body">
-                      <div className="adet__product-top">
-                        <span className="adet__product-name">{p.name}</span>
-                        <span className="adet__product-origin">{p.origin}</span>
-                      </div>
-                      <div className="adet__product-meta">
-                        <span className="adet__product-qty">สินค้าคงเหลือ: {p.remain ?? 0}</span>
-                        <span className="adet__product-price">{Number(p.price).toLocaleString()} Baht</span>
-                      </div>
-                      <p className="adet__product-note">{p.note?.slice(0, 60)}{p.note?.length > 60 ? '…' : ''}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button className="adet__arrow" onClick={() => setProductIdx(i => Math.min(maxProdIdx, i + 1))}
-                disabled={productIdx >= maxProdIdx}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </button>
-            </div>
-          </section>
-        )}
       </div>
       <div className="section-gap" />
       <Footer data={c.footer} />

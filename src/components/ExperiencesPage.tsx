@@ -206,27 +206,26 @@ function ActivityCard({ activity: a, onClick }: { activity: Activity; onClick: (
           src={imgSrc}
           alt={a.name}
           className="exp-card__img"
+          loading="lazy"
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
+        {tags.length > 0 && (
+          <div className="exp-card__img-tags">
+            {tags.slice(0, 2).map(t => (
+              <span key={t} className="exp-card__img-tag">#{t}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="exp-card__body">
-        <div className="exp-card__top-row">
-          <h3 className="exp-card__title">{a.name}</h3>
-          <div className="exp-card__tags">
-            {tags.map(t => (
-              <span key={t} className="exp-card__tag">#{t}</span>
-            ))}
-          </div>
-        </div>
-
+        <h3 className="exp-card__title">{a.name}</h3>
+        <div className="exp-card__divider" />
         <div className="exp-card__meta">
           <span className="exp-card__duration">{duration}</span>
-          <span className="exp-card__price">
-            {Number(a.price).toLocaleString()} Baht
-          </span>
+          <span className="exp-card__price">{Number(a.price).toLocaleString()} Baht</span>
         </div>
-
+        <div className="exp-card__divider" />
         {a.description && (
           <p className="exp-card__desc">
             {a.description.replace(/\n/g, ' ').slice(0, 80)}
@@ -268,7 +267,7 @@ export const EXPERIENCES_CSS = `
 
 /* Controls */
 .exp-controls {
-  max-width: 900px; margin: 2.5rem auto 0;
+  max-width: 1200px; margin: 2.5rem auto 0;
   padding: 0 5%;
   display: flex; flex-direction: column; gap: 1rem;
 }
@@ -292,7 +291,7 @@ export const EXPERIENCES_CSS = `
 
 /* Filter bar */
 .exp-filterbar-wrap {
-  max-width: 900px; margin: 1rem auto 0;
+  max-width: 1200px; margin: 1rem auto 0;
   padding: 0 5%;
   border-top: 1px solid #e8e5de;
   border-bottom: 1px solid #e8e5de;
@@ -350,7 +349,7 @@ export const EXPERIENCES_CSS = `
 
 /* Grid */
 .exp-grid {
-  max-width: 900px; margin: 2rem auto 0;
+  max-width: 1200px; margin: 2rem auto 0;
   padding: 0 5%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -394,22 +393,25 @@ export const EXPERIENCES_CSS = `
   font-family: var(--font-th);
   white-space: nowrap;
 }
+.exp-card__img-tags {
+  position: absolute; top: .7rem; right: .7rem;
+  display: flex; flex-direction: column; align-items: flex-end; gap: .3rem;
+}
+.exp-card__img-tag {
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(4px);
+  color: #3d3d2b; font-size: .68rem; font-family: var(--font-th);
+  padding: .2rem .55rem; border-radius: 20px;
+  white-space: nowrap; font-weight: 500;
+}
 .exp-card__body { padding: .85rem 1rem 1rem; }
-.exp-card__top-row {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  gap: .5rem; margin-bottom: .5rem;
-}
 .exp-card__title {
-  font-size: .92rem; font-weight: 600;
+  font-size: .95rem; font-weight: 700;
   color: var(--text); font-family: var(--font-th);
-  flex: 1;
-  display: -webkit-box; -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical; overflow: hidden;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: .55rem;
 }
-.exp-card__tags {
-  display: flex; flex-direction: column; align-items: flex-end; gap: .15rem;
-  flex-shrink: 0;
-}
+.exp-card__divider { height: 1px; background: #eee; border: none; margin: .45rem 0; }
 .exp-card__tag {
   font-size: .68rem; color: #6b7c6b;
   font-family: var(--font-th); white-space: nowrap;

@@ -33,6 +33,7 @@ export interface JourneyCard {
   id: string;       // used as image filename: /img/{id}.jpg
   title: string;
   href: string;
+  page?: string;
 }
 
 export interface ImpactStat {
