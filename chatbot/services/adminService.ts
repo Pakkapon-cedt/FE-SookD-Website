@@ -8,7 +8,7 @@ export async function getAdminChats(): Promise<AdminChat[]> {
 
     return data.map((item: any) => ({
 
-        reference: item.reference,
+        reference_id: item.reference_id,
 
         session_id: item.session_id,
 
@@ -26,8 +26,9 @@ export async function createAdminChat(
     adminChat: Omit<AdminChat, "reference_id">
 ): Promise<AdminChat> {
 
-    const adminChats =
-        await getAdminChats();
+    const adminChats = await getAdminChats();
+
+    console.log("adminChats =", adminChats);
 
     const referenceId =
         generateNextId(

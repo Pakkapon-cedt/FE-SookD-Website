@@ -102,9 +102,9 @@
          HERO
 ============================ */
 
-.chat-btn--hero{
+.chat-btn--heroPart{
 
-    width:300px;
+    width:250px;
     height:300px;
 
     border-radius:0;
@@ -115,7 +115,7 @@
     bottom:10px;
 }
 
-.chat-btn--hero img{
+.chat-btn--heroPart img{
     object-fit:contain;
     border-radius:0;
       mask-image: linear-gradient(
@@ -131,7 +131,7 @@
     );
 }
 
-.auto-message--hero{
+.auto-message--heroPart{
     border-radius: 20px 20px 20px 20px;
     bottom: 300px; 
     right: 50px;  /* ปรับตัวเลขได้ */
@@ -273,7 +273,6 @@
 
 .chat-input {
     display: flex;
-    border-top: 1px solid #eee;
 }
 
 .chat-input input {
@@ -355,7 +354,6 @@
 /* =========================
    ADMIN BUTTON
 ========================= */
-
 .admin-btn {
     position: fixed;
     right: 100px;
@@ -374,25 +372,36 @@
     border-radius: 25px;
     text-decoration: none;
 
-    /* box-shadow: 0 4px 12px rgba(0,0,0,0.15); */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 
     z-index: 9999;
     font: inherit;
 
     transition: 0.3s;
+    border: none;
+    outline: none;
 }
 
-.admin-btn:show{
-    animation: bubbleIn 1.0s ease forwards;
+.admin-btn.heroPart{
+    right: 250px;
 }
+
 .admin-btn:hover {
     transform: scale(1.05);
-    background: #0f3a32;
+    background: #40916c;
+}
+
+.admin-btn.small:hover::after {
+    content: " ติดต่อทีมงาน";
 }
 
 .admin-btn.attention {
     animation:bounceAdmin 1.0s ease 3;
  }  
+
+.admin-btn.small.heroPart{
+    right: 250px;
+}
  
 @keyframes bounceAdmin {
     0%, 100% {
@@ -450,4 +459,11 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+
+.send:hover {
+    transform: scale(1.05);
+    transition: 0.3s;
+    background: #40916c;
 }

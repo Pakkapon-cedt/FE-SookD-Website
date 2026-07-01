@@ -202,7 +202,7 @@ export default function ChatWidget() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                     Authorization: `Bearer ${token ?? ""}`
+                    Authorization: `Bearer ${token ?? ""}`
                 },
                 body: JSON.stringify({
                     guestId: getSessionId(),
@@ -255,7 +255,7 @@ export default function ChatWidget() {
                 <div
                     className={`auto-message
             ${bubbleLeaving ? "hide" : "show"}
-            ${heroVisible ? "auto-message--hero" : ""}
+            ${heroVisible ? "auto-message--heroPart" : ""}
         `}
                 >
                     สวัสดีจ้า มีอะไรให้ลุงช่วยไหมจ๊ะ 😊
@@ -280,13 +280,14 @@ export default function ChatWidget() {
 
             {showAdmin && (
                 <button
-                    className={`admin-btn 
-            ${adminAttention ? "attention" : ""} 
-            ${adminMinimized ? "small" : ""}
-        `}
-                    rel="noreferrer"
+                    className={`admin-btn
+      ${adminAttention ? "attention" : ""}
+      ${adminMinimized ? "small" : ""}
+      ${heroVisible ? "heroPart" : ""}
+    `}
                     onClick={handleContactAdmin}
                 >
+
                     {adminMinimized ? "💬" : "💬 ติดต่อทีมงาน"}
                 </button>
             )}
@@ -294,7 +295,7 @@ export default function ChatWidget() {
             {/* Floating Button */}
 
             <button
-                className={`chat-btn ${heroVisible ? "chat-btn--hero" : ""
+                className={`chat-btn ${heroVisible ? "chat-btn--heroPart" : ""
                     }`}
                 onClick={() => {
 
@@ -425,7 +426,7 @@ export default function ChatWidget() {
 
                     />
 
-                    <button
+                    <button className="send"
                         onClick={sendMessage}
                     >
 
