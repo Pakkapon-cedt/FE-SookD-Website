@@ -23,6 +23,7 @@ export default function App() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [prevPage, setPrevPage] = useState<Page>('experiences');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [orderData, setOrderData] = useState<any>(null);
 
   useEffect(() => {
     window.history.replaceState({ page: 'home' }, '');
@@ -56,6 +57,21 @@ export default function App() {
     setPage('product-detail');
   }
 
+  function openProductFromOrder(productId: string, order: any) {
+    setOrderData(order);
+    setSelectedProductId(productId);
+    setPrevPage('profile');
+    window.history.pushState({ page: 'product-detail', productId, prevPage: 'profile' }, '');
+    setPage('product-detail');
+  }
+
+  function openActivityFromOrder(activityId: string, order: any) {
+    setOrderData(order);
+    setSelectedActivityId(activityId);
+    window.history.pushState({ page: 'activity-detail', activityId }, '');
+    setPage('activity-detail');
+  }
+
   return (
     <>
       <style>{CSS}</style>
@@ -72,16 +88,17 @@ export default function App() {
       />
 
       {page === 'profile' ? (
-        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)} />
+        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)}
+          onSelectProduct={openProductFromOrder} onSelectActivity={openActivityFromOrder} />
       ) : page === 'login' ? (
         <AuthPage
           onBack={() => navigate('home')}
           onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
         />
       ) : page === 'product-detail' ? (
-        <ProductDetailPage productId={selectedProductId} onBack={() => setPage(prevPage)} onSelectProduct={(id) => openProduct(id, prevPage)} />
+        <ProductDetailPage productId={selectedProductId} onBack={() => { setOrderData(null); setPage(prevPage); }} onSelectProduct={(id) => openProduct(id, prevPage)} orderData={orderData} />
       ) : page === 'activity-detail' ? (
-        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} />
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => { setOrderData(null); setPage(prevPage || 'experiences'); }} orderData={orderData} />
       ) : page === 'products' ? (
         <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} />
       ) : page === 'experiences' ? (
