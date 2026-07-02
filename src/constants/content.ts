@@ -6,7 +6,7 @@ export const SITE_CONTENT: SiteContent = {
     { label: 'Product',     href: '#products',    page: 'products' },
     { label: 'Discover',    href: '#discover' },
     { label: 'Membership',  href: '#membership' },
-    { label: 'About',       href: '#about',  page: 'about' },
+    { label: 'About',       href: '#about' },
   ],
 
   experiences: {
@@ -139,14 +139,15 @@ export const SITE_CONTENT: SiteContent = {
         'มุ่งเชื่อมโยงนักเดินทางเข้ากับประสบการณ์ที่มีความหมาย การเดินทางไม่ควรเป็นเพียงการพักผ่อน แต่ควรเป็นโอกาสในการเรียนรู้ สร้างความสัมพันธ์กับธรรมชาติและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้ ด้วยการคัดสรรประสบการณ์คุณภาพจากผู้ให้บริการที่ใส่ใจ ทั้งผู้คน ชุมชน และสิ่งแวดล้อม',
     },
     address: {
-      lines: ['68/7 หมู่ 3 ตำบลบางกอบัว', 'อำเภอพระประแดง', 'จังหวัดสมุทรปราการ 10130'],
+      lines: ['00/0 หมู่ 0', 'ตำบลxxxxxxxx อำเภอxxxxxxxx', 'จังหวัดxxxxxxxx 00000'],
     },
     contact: {
       items: [
-        { icon: 'phone',    label: '+66925054994',             href: 'tel:+66925054994' },
-        { icon: 'email',    label: 'info.learndo@gmail.com',   href: 'mailto:info.learndo@gmail.com' },
-        { icon: 'facebook', label: 'facebook.com/LearnDoClub', href: 'https://www.facebook.com/LearnDoClub' },
-        { icon: 'line',     label: '@learndo',                 href: 'https://line.me/R/ti/p/@learndo' },
+        { icon: '📞', label: '+66123456789',    href: 'tel:+66123456789' },
+        { icon: '✉️', label: 'example@mail.com', href: 'mailto:example@mail.com' },
+        { icon: '📘', label: 'example',          href: '#' },
+        { icon: '🐦', label: '@example',         href: '#' },
+        { icon: '▶️', label: 'example',          href: '#' },
       ],
     },
     copyright: 'Copyright © 2026 – VANA. All rights reserved.',

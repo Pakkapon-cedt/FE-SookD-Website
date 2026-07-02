@@ -1,5 +1,4 @@
 import type { FooterData } from '../types';
-import ContactIcon from './ContactIcon';
 
 interface FooterProps {
   data: FooterData;
@@ -37,9 +36,7 @@ export default function Footer({ data }: FooterProps) {
           <ul className="footer__contact-list">
             {data.contact.items.map((item) => (
               <li key={item.label} className="footer__contact-item">
-                <span className="footer__contact-icon">
-                  <ContactIcon type={item.icon} size={16} color="rgba(255,255,255,0.85)" />
-                </span>
+                <span className="footer__contact-icon">{item.icon}</span>
                 <a href={item.href} className="footer__contact-link">{item.label}</a>
               </li>
             ))}

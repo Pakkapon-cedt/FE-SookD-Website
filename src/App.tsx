@@ -13,13 +13,12 @@ import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetai
 import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
 import AuthPage, { AUTH_CSS } from './components/AuthPage';
 import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
-import AboutPage, { ABOUT_CSS } from './components/AboutPage';
 import { SITE_CONTENT as c } from './constants/content';
 
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import { getSessionId } from './utils/session';
 
-type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile' | 'about';
+type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
@@ -90,7 +89,6 @@ export default function App() {
       <style>{PRODUCTS_CSS}</style>
       <style>{AUTH_CSS}</style>
       <style>{USER_DASHBOARD_CSS}</style>
-      <style>{ABOUT_CSS}</style>
       <ChatWidget />
       <Navbar
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
@@ -114,8 +112,6 @@ export default function App() {
         <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} />
       ) : page === 'experiences' ? (
         <ExperiencesPage onSelectActivity={openActivity} />
-      ) : page === 'about' ? (
-        <AboutPage />
       ) : (
         <main>
           <Hero heading={c.hero.heading} subheading={c.hero.subheading} />
