@@ -228,7 +228,7 @@ address{font-style:normal}
   position:absolute; top:1rem; right:1.2rem;
   background:none; border:none; font-size:1.8rem; cursor:pointer; color:#111; line-height:1; font-weight:400;
 }
-.navbar-logout-modal__title { font-size:2.6rem; font-weight:700; color:#607a68; margin-bottom:1.2rem; text-align:center; }
+.navbar-logout-modal__title { font-size:1.9rem; font-weight:400; color:#607a68; margin-bottom:1.2rem; text-align:center; }
 .navbar-logout-modal__body { font-size:.88rem; color:#666; margin-bottom:2.2rem; text-align:center; line-height:1.7; }
 .navbar-logout-modal__btns { display:flex; gap:.8rem; }
 .navbar-logout-modal__btn {

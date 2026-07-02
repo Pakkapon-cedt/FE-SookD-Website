@@ -1,7 +1,7 @@
 import { User } from "../models/User";
 import { generateNextId } from "../utils/idGenerator";
 
-import { getSheetData, clearSheetCache } from "./googleSheetService";
+import { getSheetData, clearSheetCache, patchSheetCache } from "./googleSheetService";
 import bcrypt from "bcrypt";
 
 export async function getUsers(): Promise<User[]> {
@@ -131,7 +131,7 @@ export async function updateUser(userId: string, updates: Partial<User>): Promis
     const result = await response.json();
     if (!result.success) throw new Error(result.message ?? "ไม่สามารถอัพเดทข้อมูลได้");
 
-    clearSheetCache("users");
+    patchSheetCache("users", "user_id", userId, updatedUser);
     return updatedUser;
 }
 
