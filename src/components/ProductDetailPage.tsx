@@ -8,6 +8,8 @@ interface Props {
   onBack: () => void;
   onSelectProduct?: (id: string) => void;
   orderData?: any;
+  onNavigate?: (page: string) => void;
+  currentUser?: any;
 }
 
 function fmtOrderDate(d: any) {
@@ -59,7 +61,7 @@ function Stars({ rating, size = 16, emptyFill = '#d0d0d0' }: { rating: number; s
   );
 }
 
-export default function ProductDetailPage({ productId, onBack, onSelectProduct, orderData }: Props) {
+export default function ProductDetailPage({ productId, onBack, onSelectProduct, orderData, onNavigate, currentUser }: Props) {
   const [product, setProduct] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -68,6 +70,8 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
   const [qty, setQty] = useState(1);
   const [reviewIdx, setReviewIdx] = useState(0);
   const [otherIdx, setOtherIdx] = useState(0);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const isLoggedIn = !!currentUser;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -117,6 +121,10 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                   img.src = driveThumb(product.image, 'w200');
                   img.onerror = () => { img.style.display = 'none'; };
                 }} />
+              <div className="impact-badge">
+                <span className="impact-badge__pct">10%</span>
+                <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+              </div>
             </div>
           </div>
 
@@ -191,7 +199,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                     <button onClick={() => setQty(q => q + 1)}>+</button>
                   </div>
                 </div>
-                <button className="pdet__cart-btn">Add to cart</button>
+                <button className="pdet__cart-btn" onClick={() => { if (!isLoggedIn) setShowLoginModal(true); }}>Add to cart</button>
               </>
             )}
           </div>
@@ -311,6 +319,25 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
       </div>
       <div className="section-gap" />
       <Footer data={c.footer} />
+
+      {showLoginModal && (
+        <div className="adet__modal-overlay" onClick={() => setShowLoginModal(false)}>
+          <div className="adet__modal" onClick={e => e.stopPropagation()}>
+            <button className="adet__modal-close" onClick={() => setShowLoginModal(false)}>✕</button>
+            <h3 className="adet__modal-title">Sign in to Continue</h3>
+            <p className="adet__modal-msg">Please log in or register an account to add items to your cart and proceed with checkout.</p>
+            <div className="adet__modal-actions">
+              <button className="adet__modal-login" onClick={() => { setShowLoginModal(false); onNavigate?.('login'); }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Login/Register
+              </button>
+              <button className="adet__modal-later" onClick={() => setShowLoginModal(false)}>Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

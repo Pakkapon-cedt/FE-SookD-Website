@@ -36,9 +36,19 @@ const VISIBLE_COUNT = 6;
 
 interface ExperiencesPageProps {
   onSelectActivity: (id: string) => void;
+  currentUser?: any;
 }
 
-export default function ExperiencesPage({ onSelectActivity }: ExperiencesPageProps) {
+function isActivityVisible(activityId: string, user: any): boolean {
+  const id = activityId?.toUpperCase() ?? '';
+  const hasB2B = id.includes('B2B');
+  const hasB2C = id.includes('B2C');
+  if (hasB2B) return user?.user_type === 'legal_entity';
+  if (hasB2C) return !user || user?.user_type === 'individual';
+  return true;
+}
+
+export default function ExperiencesPage({ onSelectActivity, currentUser }: ExperiencesPageProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -70,6 +80,7 @@ export default function ExperiencesPage({ onSelectActivity }: ExperiencesPagePro
   ))];
 
   const filtered = activities.filter(a => {
+    if (!isActivityVisible(a.id, currentUser)) return false;
     const matchSearch =
       a.name?.toLowerCase().includes(search.toLowerCase()) ||
       a.description?.toLowerCase().includes(search.toLowerCase()) ||
@@ -212,6 +223,10 @@ function ActivityCard({ activity: a, onClick }: { activity: Activity; onClick: (
           loading="lazy"
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
+        <div className="impact-badge">
+          <span className="impact-badge__pct">10%</span>
+          <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+        </div>
         {tags.length > 0 && (
           <div className="exp-card__img-tags">
             {tags.slice(0, 2).map(t => (

@@ -7,6 +7,8 @@ interface Props {
   activityId: string;
   onBack: () => void;
   orderData?: any;
+  currentUser?: any;
+  onNavigate?: (page: string) => void;
 }
 
 function fmtOrderDate(d: any) {
@@ -58,14 +60,14 @@ function Stars({ rating, size = 16, emptyFill = '#e0e0e0' }: { rating: number; s
   );
 }
 
-export default function ActivityDetailPage({ activityId, onBack, orderData }: Props) {
+export default function ActivityDetailPage({ activityId, onBack, orderData, currentUser, onNavigate }: Props) {
   const [activity, setActivity] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
   const [loading, setLoading] = useState(true);
   const [reviewIdx, setReviewIdx] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const isLoggedIn = false;
+  const isLoggedIn = !!currentUser;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -108,6 +110,10 @@ export default function ActivityDetailPage({ activityId, onBack, orderData }: Pr
             <div className="adet__img-bg" style={{ background: '#2d5a3d' }}>
               <img src={driveThumb(activity.image)} alt={activity.name} className="adet__img"
                 onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+              <div className="impact-badge">
+                <span className="impact-badge__pct">10%</span>
+                <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+              </div>
             </div>
           </div>
 
@@ -304,7 +310,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData }: Pr
             <h3 className="adet__modal-title">Sign in to Continue</h3>
             <p className="adet__modal-msg">Please log in or register an account to add items to your cart and proceed with checkout.</p>
             <div className="adet__modal-actions">
-              <button className="adet__modal-login">
+              <button className="adet__modal-login" onClick={() => { setShowLoginModal(false); onNavigate?.('login'); }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                 </svg>

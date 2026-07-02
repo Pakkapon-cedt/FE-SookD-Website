@@ -176,6 +176,10 @@ function ProductCard({ product: p, onClick }: { product: any; onClick: () => voi
       <div className="exp-card__img-wrap">
         <img src={imgSrc} alt={p.name} className="exp-card__img" loading="lazy"
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+        <div className="impact-badge">
+          <span className="impact-badge__pct">10%</span>
+          <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+        </div>
         {tags.length > 0 && (
           <div className="exp-card__img-tags">
             {tags.slice(0, 2).map((t: string) => (

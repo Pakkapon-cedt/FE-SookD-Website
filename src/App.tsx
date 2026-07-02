@@ -107,13 +107,13 @@ export default function App() {
           onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
         />
       ) : page === 'product-detail' ? (
-        <ProductDetailPage productId={selectedProductId} onBack={() => { setOrderData(null); setPage(prevPage); }} onSelectProduct={(id) => openProduct(id, prevPage)} orderData={orderData} />
+        <ProductDetailPage productId={selectedProductId} onBack={() => { setOrderData(null); setPage(prevPage); }} onSelectProduct={(id) => openProduct(id, prevPage)} orderData={orderData} onNavigate={navigate} currentUser={currentUser} />
       ) : page === 'activity-detail' ? (
-        <ActivityDetailPage activityId={selectedActivityId} onBack={() => { setOrderData(null); setPage(prevPage || 'experiences'); }} orderData={orderData} />
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => { setOrderData(null); setPage(prevPage || 'experiences'); }} orderData={orderData} currentUser={currentUser} onNavigate={navigate} />
       ) : page === 'products' ? (
         <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} />
       ) : page === 'experiences' ? (
-        <ExperiencesPage onSelectActivity={openActivity} />
+        <ExperiencesPage onSelectActivity={openActivity} currentUser={currentUser} />
       ) : page === 'about' ? (
         <AboutPage />
       ) : (
@@ -524,6 +524,31 @@ address{font-style:normal}
   border-top:1px solid rgba(255,255,255,.12);
   padding-top:1.25rem; text-align:center;
   font-size:.82rem; color:rgba(255,255,255,.55);
+}
+
+/* ── Impact badge (shared across cards + detail pages) ──────── */
+.impact-badge {
+  position: absolute; bottom: 0; right: 0;
+  display: flex; align-items: center; gap: .35rem;
+  background: rgba(27,67,50,.60);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 8px 0 0 0;
+  padding: .35rem .5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.impact-badge__pct {
+  padding: .18rem .38rem;
+  background: rgba(255,255,255,.95);
+  border: 1.5px solid #fff;
+  border-radius: 5px;
+  font-size: .72rem; font-weight: 700; color: #1b4332;
+  white-space: nowrap; flex-shrink: 0;
+  line-height: 1.2;
+}
+.impact-badge__text {
+  font-size: .6rem; color: rgba(255,255,255,.95);
+  font-family: var(--font-th); line-height: 1.45;
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
