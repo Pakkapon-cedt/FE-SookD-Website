@@ -1,7 +1,14 @@
 import { Product } from "../models/Product";
 import { getSheetData } from "./googleSheetService";
 export async function getProducts(): Promise<Product[]> {
-    const data = await getSheetData("products");
+    // const data = await getSheetData("products");
+    const res = await getSheetData("products");
+    const data = Array.isArray(res) ? res : res?.data;
+
+    if (!Array.isArray(data)) {
+        console.error("Invalid sheet response:", res);
+        return [];
+    }
 
     return data.map((item: any) => ({
         id:item.product_id,

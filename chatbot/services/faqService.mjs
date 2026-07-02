@@ -14,8 +14,6 @@ export async function getFAQ() {
     const data = await getSheetData("faqs");
     // console.log("FAQ RAW:", data);
 
-    if (!Array.isArray(data)) return [];
-
     return data.map(item => ({
 
         question: item.question,

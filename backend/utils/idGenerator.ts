@@ -5,6 +5,7 @@ export function generateNextId(
     prefix: string
 ): string {
 
+    console.log("IDS INPUT =", ids);
     const maxId = Math.max(
         ...ids.map(id =>
             Number(
