@@ -9,6 +9,8 @@ interface Props {
   user: any;
   onNavigate: (page: string) => void;
   onUserUpdate?: (user: any) => void;
+  onSelectProduct?: (productId: string, order: any) => void;
+  onSelectActivity?: (activityId: string, order: any) => void;
 }
 
 /* ── helpers ──────────────────────────────── */
@@ -24,24 +26,36 @@ function driveImg(src: string) {
   return `https://res.cloudinary.com/zgor0mh6/image/fetch/w_200,q_auto,f_auto/${driveUrl}`;
 }
 
-function fmtDate(d: string | Date) {
-  if (!d) return '-';
-  try { return new Date(d).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
-  catch { return String(d); }
+function fmtDate(d: string | Date | number) {
+  if (d === '' || d === null || d === undefined) return '-';
+  try {
+    const n = Number(d);
+    let date: Date;
+    if (!isNaN(n) && n > 1000) {
+      // Google Sheets serial date: days since Dec 30, 1899
+      date = new Date((n - 25569) * 86400 * 1000);
+    } else {
+      date = new Date(d as string | Date);
+    }
+    if (isNaN(date.getTime())) return String(d);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  } catch { return String(d); }
 }
 
 const STATUS_MAP: Record<string, [string, string]> = {
-  cancelled: ['Cancelled', '#e53935'],
-  completed: ['Complete', '#2d6a4f'],
-  pending:   ['Processing', '#b07d0a'],
-  paid:      ['Processing', '#b07d0a'],
-  shipping:  ['Processing', '#b07d0a'],
+  completed: ['Completed', '#2d6a4f'],
+  paid:      ['Paid',      '#1a6b8a'],
+  shipped:   ['Shipped',   '#5a3e8a'],
+  pending:   ['Pending',   '#b07d0a'],
+  cancelled: ['Cancelled', '#b03a2e'],
 };
 
 function StatusBadge({ s }: { s: string }) {
-  const [label, color] = STATUS_MAP[s?.toLowerCase()] ?? ['Processing', '#b07d0a'];
-  const icons: Record<string, string> = { Cancelled: '⊗', Complete: '✓', Processing: '🚚' };
-  return <span style={{ color, fontWeight: 600, fontSize: '.88rem' }}>{icons[label]} {label}</span>;
+  const [label, color] = STATUS_MAP[s?.toLowerCase()] ?? [s ?? '-', '#555'];
+  return <span style={{ color, fontWeight: 600, fontSize: '.88rem' }}>{label}</span>;
 }
 
 function Stars({ n, max = 5, onClick }: { n: number; max?: number; onClick?: (i: number) => void }) {
@@ -99,7 +113,7 @@ const NAV_ITEMS = [
 
 
 /* ── main component ───────────────────────── */
-export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props) {
+export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelectProduct, onSelectActivity }: Props) {
   const [tab, setTab] = useState<DashTab>('profile');
   const [products, setProducts] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
@@ -112,6 +126,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
   const [editId, setEditId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(0);
+
+  /* review filter state */
+  const [reviewTypeFilter, setReviewTypeFilter] = useState<'all' | 'product' | 'activity'>('all');
+  const [reviewDateFilter, setReviewDateFilter] = useState('');
 
   /* edit info modal state */
   const [showEditInfo, setShowEditInfo] = useState(false);
@@ -385,7 +403,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
                           <span><strong>TOTAL</strong><br />{o.total_price} Baht</span>
                         </div>
                       </div>
-                      <button className="ud-detail-btn" onClick={() => onNavigate('products')}>
+                      <button className="ud-detail-btn" onClick={() => onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products')}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg> Detail
@@ -418,7 +436,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
                           <span><strong>TOTAL</strong><br />{o.total_price} Baht</span>
                         </div>
                       </div>
-                      <button className="ud-detail-btn" onClick={() => onNavigate('experiences')}>
+                      <button className="ud-detail-btn" onClick={() => onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences')}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg> Detail
@@ -434,65 +452,140 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
             <div className="ud-section">
               <h2 className="ud-section__title">To Reviews</h2>
               <p className="ud-section__sub">Your voice matters. Share your thoughts on our sustainable products and experiences.</p>
+
+              {/* Filter bar */}
+              <div className="ud-review-filterbar">
+                <div className="ud-review-filter-select">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+                  </svg>
+                  <select value={reviewTypeFilter} onChange={e => setReviewTypeFilter(e.target.value as any)}
+                    className="ud-review-select">
+                    <option value="all">Type of services</option>
+                    <option value="product">Products</option>
+                    <option value="activity">Activities</option>
+                  </select>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+                <div className="ud-review-filter-date">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <input type="date" className="ud-review-date-input" value={reviewDateFilter}
+                    onChange={e => setReviewDateFilter(e.target.value)} placeholder="mm/dd/yyyy" />
+                </div>
+              </div>
+
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : reviews.length === 0
                 ? <p className="ud-empty">ยังไม่มีรีวิว</p>
-                : (
-                  <div className="ud-review-grid">
-                    {reviews.map(r => {
-                      const isProduct = String(r.item_id).startsWith('PRD');
-                      const item = isProduct ? getProduct(r.item_id) : getActivity(r.item_id);
-                      const imgId = item?.image;
-                      const name = item?.name;
-                      const isEditing = editId === r.review_id;
-                      return (
-                        <div key={r.review_id} className="ud-review-card">
-                          <div className="ud-review-card__top">
-                            <img className="ud-review-card__img" src={driveImg(imgId ?? '')} alt={name}
-                              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                            <div className="ud-review-card__info">
-                              <h4 className="ud-review-card__name">{name ?? r.item_id}</h4>
-                              {isProduct
-                                ? <p className="ud-review-card__meta"><strong>Total</strong> : {item?.price ?? '-'} Baht</p>
-                                : <>
-                                    {r.review_date && (
-                                      <p className="ud-review-card__meta"><strong>Date</strong> : {fmtDate(r.review_date)}</p>
+                : (() => {
+                  const filtered = reviews.filter(r => {
+                    const isPrd = String(r.item_id).startsWith('PRD');
+                    if (reviewTypeFilter === 'product' && !isPrd) return false;
+                    if (reviewTypeFilter === 'activity' && isPrd) return false;
+                    if (reviewDateFilter && r.review_date) {
+                      const rd = r.review_date.slice(0, 10);
+                      if (rd !== reviewDateFilter) return false;
+                    }
+                    return true;
+                  });
+                  if (filtered.length === 0) return <p className="ud-empty">ไม่พบรีวิวที่ตรงกับตัวกรอง</p>;
+                  return (
+                    <div className="ud-review-grid">
+                      {filtered.map((r, i) => {
+                        const isProduct = String(r.item_id).startsWith('PRD');
+                        const item = isProduct ? getProduct(r.item_id) : getActivity(r.item_id);
+                        const name = item?.name;
+                        const isEditing = editId === r.review_id;
+                        const isCheckerA = (Math.floor(i / 2) + (i % 2)) % 2 === 0;
+                        return (
+                          <div key={r.review_id} className={`ud-review-card ${isCheckerA ? 'ud-review-card--a' : 'ud-review-card--b'}`}>
+                            <div className="ud-review-card__top">
+                              <img className="ud-review-card__img" src={driveImg(item?.image ?? '')} alt={name}
+                                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                              <div className="ud-review-card__info">
+                                <h4 className="ud-review-card__name">{name ?? r.item_id}</h4>
+                                <table className="ud-review-meta-table">
+                                  <tbody>
+                                    {isProduct ? (
+                                      <>
+                                        {r.review_date && (
+                                          <tr>
+                                            <td className="ud-rmt-label">Date</td>
+                                            <td className="ud-rmt-sep">:</td>
+                                            <td className="ud-rmt-val">{fmtDate(r.review_date)}</td>
+                                          </tr>
+                                        )}
+                                        <tr>
+                                          <td className="ud-rmt-label">Total</td>
+                                          <td className="ud-rmt-sep">:</td>
+                                          <td className="ud-rmt-val">{item?.price ?? '-'} Baht</td>
+                                        </tr>
+                                      </>
+                                    ) : (
+                                      <>
+                                        {r.review_date && (
+                                          <tr>
+                                            <td className="ud-rmt-label">Date</td>
+                                            <td className="ud-rmt-sep">:</td>
+                                            <td className="ud-rmt-val">{fmtDate(r.review_date)}</td>
+                                          </tr>
+                                        )}
+                                        {item?.date && (
+                                          <tr>
+                                            <td className="ud-rmt-label">Time</td>
+                                            <td className="ud-rmt-sep">:</td>
+                                            <td className="ud-rmt-val">{item.date}</td>
+                                          </tr>
+                                        )}
+                                        {item?.location && (
+                                          <tr>
+                                            <td className="ud-rmt-label">Location</td>
+                                            <td className="ud-rmt-sep">:</td>
+                                            <td className="ud-rmt-val">{item.location}</td>
+                                          </tr>
+                                        )}
+                                      </>
                                     )}
-                                    {item?.location && (
-                                      <p className="ud-review-card__meta"><strong>Location</strong> : {item.location}</p>
-                                    )}
-                                  </>
-                              }
+                                  </tbody>
+                                </table>
+                              </div>
                             </div>
+                            {isEditing ? (
+                              <>
+                                <Stars n={editRating} onClick={setEditRating} />
+                                <textarea className="ud-review-textarea"
+                                  value={editText} onChange={e => setEditText(e.target.value)} />
+                                <div className="ud-review-actions">
+                                  <button className="ud-review-btn--save" onClick={() => doSave(r.review_id)}>Save Changes</button>
+                                  <button className="ud-review-btn--cancel" onClick={() => setEditId(null)}>Cancel</button>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <Stars n={Number(r.rating)} />
+                                <p className="ud-review-comment">{r.comment}</p>
+                                <div className="ud-review-actions">
+                                  <button className="ud-review-btn" onClick={() => { setEditId(r.review_id); setEditText(r.comment); setEditRating(Number(r.rating)); }}>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    Edit Review
+                                  </button>
+                                  <button className="ud-review-btn ud-review-btn--del" onClick={() => setDeleteId(r.review_id)}>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                    Delete Review
+                                  </button>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          {isEditing ? (
-                            <>
-                              <Stars n={editRating} onClick={setEditRating} />
-                              <textarea className="ud-review-textarea"
-                                value={editText} onChange={e => setEditText(e.target.value)} />
-                              <div className="ud-review-actions">
-                                <button className="ud-review-btn" onClick={() => doSave(r.review_id)}>Save Changes</button>
-                                <button className="ud-review-btn ud-review-btn--cancel" onClick={() => setEditId(null)}>Cancel</button>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <Stars n={Number(r.rating)} />
-                              <p className="ud-review-comment">{r.comment}</p>
-                              <div className="ud-review-actions">
-                                <button className="ud-review-btn" onClick={() => { setEditId(r.review_id); setEditText(r.comment); setEditRating(Number(r.rating)); }}>
-                                  ✏ Edit Review
-                                </button>
-                                <button className="ud-review-btn ud-review-btn--del" onClick={() => setDeleteId(r.review_id)}>
-                                  🗑 Delete Review
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
             </div>
           )}
         </main>
@@ -869,47 +962,99 @@ export const USER_DASHBOARD_CSS = `
 }
 .ud-detail-btn:hover { background: #1a3d2e; }
 
+/* ── Review filter bar ──────────────────── */
+.ud-review-filterbar {
+  display: flex; gap: .8rem; justify-content: flex-end;
+  margin-bottom: 1.4rem;
+}
+.ud-review-filter-select,
+.ud-review-filter-date {
+  display: flex; align-items: center; gap: .5rem;
+  border: 1.5px solid #c8b89a; border-radius: 8px;
+  padding: .45rem .9rem; background: #EDE8DE;
+  color: #555; font-size: .82rem; cursor: pointer;
+}
+.ud-review-select {
+  border: none; outline: none; background: #EDE8DE;
+  font-size: .82rem; color: #555; cursor: pointer;
+  font-family: var(--font-th); appearance: none;
+  -webkit-appearance: none; min-width: 110px;
+}
+.ud-review-date-input {
+  border: none; outline: none; background: #EDE8DE;
+  font-size: .82rem; color: #555; cursor: pointer;
+  font-family: var(--font-th); width: 110px;
+}
+
 /* ── Reviews ────────────────────────────── */
 .ud-review-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
+  gap: 1.4rem;
 }
 .ud-review-card {
-  background: var(--white); border-radius: 12px;
-  padding: 1.1rem; box-shadow: 0 1px 8px rgba(0,0,0,.05);
+  background: var(--white); border-radius: 18px;
+  padding: 1.2rem; border: 1.5px solid #d4d4d4;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
 }
-.ud-review-card__top { display: flex; gap: .9rem; margin-bottom: .8rem; }
+.ud-review-card--a { background: #C5D2D2; border-color: #b0c2c2; }
+.ud-review-card--b { background: #EDE8DE; border-color: #d4cdc0; }
+.ud-review-card__top { display: flex; gap: 1rem; margin-bottom: .9rem; }
 .ud-review-card__img {
-  width: 70px; height: 70px; object-fit: cover;
-  border-radius: 8px; flex-shrink: 0; background: #eee;
+  width: 110px; height: 110px; object-fit: cover;
+  border-radius: 10px; flex-shrink: 0; background: #ddd;
 }
-.ud-review-card__info { flex: 1; }
-.ud-review-card__name { font-size: .9rem; font-weight: 600; margin-bottom: .3rem; font-family: var(--font-th); }
-.ud-review-card__meta { font-size: .78rem; color: #666; line-height: 1.7; font-family: var(--font-th); }
-.ud-stars { display: flex; gap: 2px; margin: .5rem 0; }
+.ud-review-card__info { flex: 1; padding-top: .2rem; }
+.ud-review-card__name { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; font-family: var(--font-th); color: var(--text); }
+
+/* meta table inside review card */
+.ud-review-meta-table { border-collapse: collapse; width: 100%; }
+.ud-rmt-label {
+  font-size: .8rem; color: #666; font-weight: 500;
+  padding: .18rem .6rem .18rem 0; white-space: nowrap;
+  vertical-align: top; font-family: var(--font-th); width: 70px;
+}
+.ud-rmt-sep { padding: .18rem .5rem; color: #888; vertical-align: top; font-size: .8rem; }
+.ud-rmt-val {
+  font-size: .8rem; color: #333; line-height: 1.55;
+  vertical-align: top; font-family: var(--font-th);
+}
+.ud-stars { display: flex; gap: 3px; margin: .6rem 0 .3rem; }
 .ud-star { transition: fill .15s; }
 .ud-star--on { fill: #c8880a; stroke: #c8880a; }
-.ud-review-comment { font-size: .83rem; color: #555; margin: .4rem 0 .8rem; font-family: var(--font-th); line-height: 1.5; }
+.ud-review-comment { font-size: .84rem; color: #555; margin: .3rem 0 .9rem; font-family: var(--font-th); line-height: 1.55; }
 .ud-review-textarea {
   width: 100%; min-height: 80px;
-  border: 1.5px solid #d5d5d5; border-radius: 8px;
-  padding: .6rem; font-size: .85rem; font-family: var(--font-th);
-  resize: vertical; outline: none; margin: .4rem 0 .8rem; box-sizing: border-box;
+  border: 1.5px solid #bbb; border-radius: 10px;
+  padding: .65rem .75rem; font-size: .85rem; font-family: var(--font-th);
+  resize: vertical; outline: none; margin: .4rem 0 .9rem;
+  box-sizing: border-box; background: rgba(255,255,255,.7);
 }
 .ud-review-textarea:focus { border-color: var(--forest); }
-.ud-review-actions { display: flex; gap: .6rem; }
+.ud-review-actions { display: flex; gap: .7rem; }
 .ud-review-btn {
-  padding: .45rem 1rem; border-radius: 50px;
-  font-size: .78rem; font-weight: 600; cursor: pointer;
-  border: 1.5px solid var(--forest); background: none;
-  color: var(--forest); transition: .2s;
-  font-family: var(--font-th);
+  padding: .48rem 1.1rem; border-radius: 50px;
+  font-size: .8rem; font-weight: 600; cursor: pointer;
+  border: 1.5px solid #444; background: none;
+  color: #333; transition: .2s; font-family: var(--font-th);
+  display: flex; align-items: center; gap: .35rem;
 }
-.ud-review-btn:hover { background: #f0f5f2; }
+.ud-review-btn:hover { background: rgba(0,0,0,.06); }
 .ud-review-btn--del { border-color: #e53935; color: #e53935; }
-.ud-review-btn--del:hover { background: #fff5f5; }
-.ud-review-btn--cancel { border-color: #999; color: #666; }
-.ud-review-btn--cancel:hover { background: #f5f5f5; }
+.ud-review-btn--del:hover { background: rgba(229,57,53,.07); }
+.ud-review-btn--save {
+  background: #3d2f2a; color: #fff;
+  border: none; border-radius: 50px;
+  padding: .48rem 1.3rem; font-size: .8rem;
+  font-weight: 600; cursor: pointer; font-family: var(--font-th);
+}
+.ud-review-btn--save:hover { background: #5a453e; }
+.ud-review-btn--cancel {
+  background: #c0533a; color: #fff;
+  border: none; border-radius: 50px;
+  padding: .48rem 1.1rem; font-size: .8rem;
+  font-weight: 600; cursor: pointer; font-family: var(--font-th);
+}
+.ud-review-btn--cancel:hover { background: #a8422c; }
 
 /* ── Overlay / Modal ─────────────────────── */
 .ud-overlay {

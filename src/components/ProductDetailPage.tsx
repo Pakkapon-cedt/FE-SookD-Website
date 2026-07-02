@@ -7,6 +7,32 @@ interface Props {
   productId: string;
   onBack: () => void;
   onSelectProduct?: (id: string) => void;
+  orderData?: any;
+}
+
+function fmtOrderDate(d: any) {
+  if (!d) return '-';
+  const n = Number(d);
+  let date: Date;
+  if (!isNaN(n) && n > 1000) {
+    date = new Date((n - 25569) * 86400 * 1000);
+  } else {
+    date = new Date(d);
+  }
+  if (isNaN(date.getTime())) return String(d);
+  return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+}
+
+const ORDER_STATUS_MAP: Record<string, [string, string]> = {
+  completed: ['Completed', '#2d6a4f'],
+  paid:      ['Paid',      '#1a6b8a'],
+  shipped:   ['Shipped',   '#5a3e8a'],
+  pending:   ['Pending',   '#b07d0a'],
+  cancelled: ['Cancelled', '#b03a2e'],
+};
+function OrderStatusBadge({ s }: { s: string }) {
+  const [label, color] = ORDER_STATUS_MAP[s?.toLowerCase()] ?? [s ?? '-', '#555'];
+  return <span style={{ color, fontWeight: 600 }}>{label}</span>;
 }
 
 function driveThumb(url: string, size = 'w800'): string {
@@ -33,7 +59,7 @@ function Stars({ rating, size = 16, emptyFill = '#d0d0d0' }: { rating: number; s
   );
 }
 
-export default function ProductDetailPage({ productId, onBack, onSelectProduct }: Props) {
+export default function ProductDetailPage({ productId, onBack, onSelectProduct, orderData }: Props) {
   const [product, setProduct] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -95,65 +121,79 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct }
           </div>
 
           <div className="pdet__info">
-            {/* Origin tags */}
-            {tags.length > 0 && (
-              <div className="pdet__tags">
-                {tags.map((t: string) => (
-                  <span key={t} className="pdet__tag">#{t}</span>
-                ))}
-              </div>
+            {orderData ? (
+              /* ── ORDER VIEW ── */
+              <>
+                <h1 className="pdet__title">{product.name}</h1>
+                <div className="pdet__order-panel">
+                  <div className="pdet__order-row">
+                    <div className="pdet__order-col">
+                      <span className="pdet__order-label">DATE</span>
+                      <span className="pdet__order-val">{fmtOrderDate(orderData.order_date)}</span>
+                    </div>
+                    <div className="pdet__order-sep" />
+                    <div className="pdet__order-col">
+                      <span className="pdet__order-label">TOTAL</span>
+                      <span className="pdet__order-val">{orderData.total_price} Baht</span>
+                    </div>
+                  </div>
+                  <div className="pdet__order-divider" />
+                  <div className="pdet__order-col">
+                    <span className="pdet__order-label">Status</span>
+                    <OrderStatusBadge s={orderData.order_status} />
+                  </div>
+                  {orderData.shipping_address && (
+                    <>
+                      <div className="pdet__order-divider" />
+                      <div className="pdet__order-col">
+                        <span className="pdet__order-label">Location</span>
+                        <span className="pdet__order-val">{orderData.shipping_address}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            ) : (
+              /* ── NORMAL VIEW ── */
+              <>
+                {tags.length > 0 && (
+                  <div className="pdet__tags">
+                    {tags.map((t: string) => (
+                      <span key={t} className="pdet__tag">#{t}</span>
+                    ))}
+                  </div>
+                )}
+                <div className="pdet__title-row">
+                  <h1 className="pdet__title">{product.name}</h1>
+                  <div className="pdet__rating-inline">
+                    <span className="pdet__rating-num">{avgRating > 0 ? avgRating : '—'}</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </div>
+                </div>
+                {product.quantity ? <p className="pdet__qty-label">{product.quantity} กรัม</p> : null}
+                <p className="pdet__remain"><span className="pdet__remain-label">สินค้าคงเหลือ:</span> {product.remain ?? 0}</p>
+                {product.note && <p className="pdet__short-desc">{product.note.split('\n')[0]}</p>}
+                {product.shipping_duration && (
+                  <div className="pdet__shipping">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                    <span>shipping {product.shipping_duration}</span>
+                  </div>
+                )}
+                <div className="pdet__buy-row">
+                  <div className="pdet__price">{(Number(product.price) * qty).toLocaleString()} Baht</div>
+                  <div className="pdet__qty-ctrl">
+                    <button onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                    <span>{qty}</span>
+                    <button onClick={() => setQty(q => q + 1)}>+</button>
+                  </div>
+                </div>
+                <button className="pdet__cart-btn">Add to cart</button>
+              </>
             )}
-
-            {/* Name + rating */}
-            <div className="pdet__title-row">
-              <h1 className="pdet__title">{product.name}</h1>
-              <div className="pdet__rating-inline">
-                <span className="pdet__rating-num">{avgRating > 0 ? avgRating : '—'}</span>
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                  fill="none" stroke="var(--text)" strokeWidth="1.5">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Quantity label */}
-            {product.quantity ? (
-              <p className="pdet__qty-label">{product.quantity} กรัม</p>
-            ) : null}
-
-            {/* Remain */}
-            <p className="pdet__remain">
-              <span className="pdet__remain-label">สินค้าคงเหลือ:</span> {product.remain ?? 0}
-            </p>
-
-            {/* Short description */}
-            {product.note && (
-              <p className="pdet__short-desc">
-                {product.note.split('\n')[0]}
-              </p>
-            )}
-
-            {/* Shipping */}
-            {product.shipping_duration && (
-              <div className="pdet__shipping">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-                </svg>
-                <span>shipping {product.shipping_duration}</span>
-              </div>
-            )}
-
-            {/* Price + qty selector */}
-            <div className="pdet__buy-row">
-              <div className="pdet__price">{(Number(product.price) * qty).toLocaleString()} Baht</div>
-              <div className="pdet__qty-ctrl">
-                <button onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-                <span>{qty}</span>
-                <button onClick={() => setQty(q => q + 1)}>+</button>
-              </div>
-            </div>
-
-            <button className="pdet__cart-btn">Add to cart</button>
           </div>
         </div>
 
@@ -170,7 +210,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct }
         )}
 
         {/* Reviews */}
-        {reviews.length > 0 && (
+        {!orderData && reviews.length > 0 && (
           <section className="pdet__section">
             <h2 className="pdet__section-title">Reviews</h2>
             <div className="pdet__reviews-wrap">
@@ -214,16 +254,16 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct }
         )}
 
         {/* Promo banner */}
-        <div className="pdet__promo">
+        {!orderData && (<div className="pdet__promo">
           <div className="pdet__promo-overlay" />
           <div className="pdet__promo-content">
             <p className="pdet__promo-heading">Equip with Elegance</p>
             <p className="pdet__promo-sub"><strong>15% Off</strong> Your Second Item.</p>
           </div>
-        </div>
+        </div>)}
 
         {/* Other products */}
-        {others.length > 0 && (
+        {!orderData && others.length > 0 && (
           <section className="pdet__section">
             <h2 className="pdet__section-title">Other</h2>
             <div className="pdet__others-wrap">
@@ -480,5 +520,47 @@ export const PRODUCT_DETAIL_CSS = `
 }
 @media(max-width:480px) {
   .pdet__others { grid-template-columns: 1fr; }
+}
+
+/* Order Panel */
+.pdet__order-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: .5rem;
+}
+.pdet__order-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+.pdet__order-sep {
+  width: 1px;
+  background: #c8bfaf;
+  margin: 0 1.4rem;
+  align-self: stretch;
+  min-height: 48px;
+}
+.pdet__order-divider {
+  height: 1px;
+  background: #c8bfaf;
+  margin: 1rem 0;
+}
+.pdet__order-col {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+.pdet__order-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: #9a8877;
+  text-transform: uppercase;
+}
+.pdet__order-val {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3d2f2a;
 }
 `;
