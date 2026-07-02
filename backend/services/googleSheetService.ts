@@ -19,12 +19,6 @@ export function patchSheetCache(sheetName: string, idField: string, idValue: str
     cache.set(key, { data: patched, exp: cached.exp });
 }
 
-export function clearSheetCache(sheetName: string) {
-    const spreadsheetId = process.env.SPREADSHEET_ID;
-    if (!spreadsheetId) return;
-    cache.delete(`${spreadsheetId}:${sheetName}`);
-}
-
 export async function getSheetData(sheetName: string) {
     const spreadsheetId = process.env.SPREADSHEET_ID;
     if (!spreadsheetId) throw new Error("SPREADSHEET_ID not found");

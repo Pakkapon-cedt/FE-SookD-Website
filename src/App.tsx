@@ -13,8 +13,6 @@ import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetai
 import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
 import AuthPage, { AUTH_CSS } from './components/AuthPage';
 import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
-import AuthPage, { AUTH_CSS } from './components/AuthPage';
-import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
 import { SITE_CONTENT as c } from './constants/content';
 
 import ChatWidget from "./components/ChatWidget/ChatWidget";
@@ -98,15 +96,6 @@ export default function App() {
         onLogout={() => { setCurrentUser(null); navigate('home'); }}
       />
 
-      {page === 'profile' ? (
-        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)}
-          onSelectProduct={openProductFromOrder} onSelectActivity={openActivityFromOrder} />
-      ) : page === 'login' ? (
-        <AuthPage
-          onBack={() => navigate('home')}
-          onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
-        />
-      ) : page === 'product-detail' ? (
       {page === 'profile' ? (
         <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)}
           onSelectProduct={openProductFromOrder} onSelectActivity={openActivityFromOrder} />
