@@ -29,18 +29,26 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [orderData, setOrderData] = useState<any>(null);
 
-  useEffect(() => {
+ useEffect(() => {
     // ============= sessionCheck ========//
     getSessionId();
     // ================================= //
-    window.history.replaceState({ page: 'home' }, '');
+
+    const existingState = window.history.state;
+    if (existingState?.page) {
+      if (existingState.activityId) setSelectedActivityId(existingState.activityId);
+      if (existingState.productId) setSelectedProductId(existingState.productId);
+      if (existingState.prevPage) setPrevPage(existingState.prevPage as Page);
+      setPage(existingState.page as Page);
+    } else {
+      window.history.replaceState({ page: 'home' }, '');
+    }
+
     const handlePop = (e: PopStateEvent) => {
       const s = e.state;
       if (!s?.page) { setPage('home'); return; }
       if (s.activityId) setSelectedActivityId(s.activityId);
       if (s.productId) setSelectedProductId(s.productId);
-      if (s.prevPage) setPrevPage(s.prevPage as Page);
-      setPage(s.page as Page);
       if (s.prevPage) setPrevPage(s.prevPage as Page);
       setPage(s.page as Page);
     };
