@@ -80,7 +80,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     setLoginLoading(true);
     try {
       const res = await api.auth.login({ email: loginEmail, password: loginPass });
-      if (res.success) { onLoginSuccess?.(res.user); onBack(); }
+      if (res.success) { (window as any).gtag?.('event', 'login', { method: 'email' }); onLoginSuccess?.(res.user); onBack(); }
       else setLoginApiErr(res.message ?? 'เข้าสู่ระบบไม่สำเร็จ');
     } catch {
       setLoginApiErr('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
@@ -138,13 +138,13 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
       phone_number: r1.phone_number,
       address: r1.address,
       email: r2.email,
-      username: r2.username,
+      user_name: r2.username,
       password: r2.password,
     };
     console.log("body",body);
     try {
       const res = await api.auth.register(body);
-      if (res.success) { setView('login'); }
+      if (res.success) { (window as any).gtag?.('event', 'sign_up', { method: 'email' }); setView('login'); }
       else setRegApiErr(res.message ?? 'สมัครสมาชิกไม่สำเร็จ');
     } catch {
       setRegApiErr('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
@@ -233,7 +233,14 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           </form>
           <p className="auth-link-row">
             Don't have an account?{' '}
-            <button className="auth-link" onClick={() => setView('reg1')}>Register</button>
+            <button className="auth-link" onClick={() => {
+              (window as any).gtag?.('event', 'click_register_link');
+              setUserType('individual');
+              setR1({ user_name: '', first_name: '', last_name: '', phone_number: '', address: '', gender: '', bd_day: '', bd_month: '', bd_year: '', legal_entity_name: '', business_registration_number: '', business_type: '' });
+              setR2({ email: '', username: '', password: '', confirm: '' });
+              setR1Err({}); setR2Err({}); setAgreed(false);
+              setView('reg1');
+            }}>Register</button>
           </p>
         </div>
       </div>
@@ -250,9 +257,9 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           {/* Tabs */}
           <div className="auth-tabs">
             <button className={`auth-tab${userType === 'individual' ? ' auth-tab--active' : ''}`}
-              onClick={() => { setUserType('individual'); setR1Err({}); }}>Individual</button>
+              onClick={() => { (window as any).gtag?.('event', 'select_account_type', { type: 'individual' }); setUserType('individual'); setR1Err({}); }}>Individual</button>
             <button className={`auth-tab${userType === 'legal_entity' ? ' auth-tab--active' : ''}`}
-              onClick={() => { setUserType('legal_entity'); setR1Err({}); }}>Legal Entity</button>
+              onClick={() => { (window as any).gtag?.('event', 'select_account_type', { type: 'legal_entity' }); setUserType('legal_entity'); setR1Err({}); }}>Legal Entity</button>
           </div>
 
           {userType === 'individual' ? (
@@ -260,7 +267,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
               {field('Name', 'first_name', r1.first_name, v => setR1({ ...r1, first_name: v }), r1Err, { placeholder: 'Enter your name' })}
               {field('Surname', 'last_name', r1.last_name, v => setR1({ ...r1, last_name: v }), r1Err, { placeholder: 'Enter your surname' })}
               {field('Phone Number', 'phone_number', r1.phone_number, v => setR1({ ...r1, phone_number: v }), r1Err, { placeholder: 'e.g. 0123456789' })}
-              {field('Address', 'address', r1.address, v => setR1({ ...r1, address: v }), r1Err, { placeholder: 'Enter your address' })}
+              {field('Shipping Address', 'address', r1.address, v => setR1({ ...r1, address: v }), r1Err, { placeholder: 'Enter your shipping address' })}
               {selectField('Gender', 'gender', r1.gender, v => setR1({ ...r1, gender: v }), r1Err,
                 ['Male', 'Female', 'Other'], 'Select your gender')}
 
@@ -316,12 +323,12 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           )}
 
           <div className="auth-btn-row">
-            <button className="auth-btn auth-btn--outline" onClick={() => setView('login')}>Maybe later</button>
-            <button className="auth-btn auth-btn--primary" onClick={() => { if (validateR1()) setView('reg2'); }}>Next</button>
+            <button className="auth-btn auth-btn--outline" onClick={() => { (window as any).gtag?.('event', 'click_skip_registration', { step: 1 }); setView('login'); }}>Maybe later</button>
+            <button className="auth-btn auth-btn--primary" onClick={() => { if (validateR1()) { (window as any).gtag?.('event', 'sign_up_progress', { step: 1, funnel_name: 'sign_up' }); setView('reg2'); } }}>Next</button>
           </div>
           <p className="auth-link-row">
             Already have an account?{' '}
-            <button className="auth-link" onClick={() => setView('login')}>Login</button>
+            <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>Login</button>
           </p>
         </div>
       </div>
@@ -385,7 +392,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
             {regApiErr && <p className="auth-api-err">{regApiErr}</p>}
 
             <div className="auth-btn-row">
-              <button type="button" className="auth-btn auth-btn--outline" onClick={() => setView('login')}>Maybe later</button>
+              <button type="button" className="auth-btn auth-btn--outline" onClick={() => { (window as any).gtag?.('event', 'click_skip_registration', { step: 2 }); setView('login'); }}>Maybe later</button>
               <button type="submit" className="auth-btn auth-btn--primary" disabled={regLoading}>
                 {regLoading ? 'กำลังสมัคร...' : 'Register'}
               </button>
@@ -393,7 +400,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           </form>
           <p className="auth-link-row">
             Already have an account?{' '}
-            <button className="auth-link" onClick={() => setView('login')}>Login</button>
+            <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>Login</button>
           </p>
         </div>
       </div>

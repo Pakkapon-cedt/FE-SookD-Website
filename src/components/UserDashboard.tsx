@@ -112,6 +112,14 @@ const NAV_ITEMS = [
 ];
 
 
+/* ── tier helper ──────────────────────────── */
+function getTierInfo(points: number) {
+  if (points >= 1000) return { tier: 'Legend', relPts: points - 1000, maxPts: null as number | null, nextTier: null as string | null, needed: 0, fillPct: 100 };
+  if (points >= 500)  return { tier: 'Gold',   relPts: points - 500,  maxPts: 499, nextTier: 'Legend', needed: 1000 - points, fillPct: Math.min(100, (points - 500)  / 499 * 100) };
+  if (points >= 200)  return { tier: 'Silver',  relPts: points - 200,  maxPts: 299, nextTier: 'Gold',   needed: 500  - points, fillPct: Math.min(100, (points - 200)  / 299 * 100) };
+  return                     { tier: 'Nature',  relPts: points,        maxPts: 199, nextTier: 'Silver', needed: 200  - points, fillPct: Math.min(100, points / 199 * 100) };
+}
+
 /* ── main component ───────────────────────── */
 export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelectProduct, onSelectActivity }: Props) {
   const [tab, setTab] = useState<DashTab>('profile');
@@ -144,6 +152,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const [showCfmPw, setShowCfmPw] = useState(false);
   const [showCurPw, setShowCurPw] = useState(false);
 
+  const [calculatedPoints, setCalculatedPoints] = useState(Number(user?.point ?? 0));
   const displayName = user?.user_type === 'legal_entity' ? user?.legal_entity_name : user?.first_name;
 
   /* reference data */
@@ -151,6 +160,24 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     api.products.getAll().then(setProducts).catch(() => { });
     api.activities.getAll().then(setActivities).catch(() => { });
   }, []);
+
+  /* load orders for points on mount */
+  useEffect(() => {
+    if (!user?.user_id) return;
+    api.orders.getByUserId(user.user_id)
+      .then((allOrders: any[]) => {
+        const pts = allOrders
+          .filter(o => o.order_status?.toLowerCase() === 'completed')
+          .reduce((sum, o) => sum + Math.floor(Number(o.total_price || 0) / 10), 0);
+        setCalculatedPoints(pts);
+        if (pts !== Number(user.point ?? 0)) {
+          api.auth.updateUser(user.user_id, { point: pts })
+            .then((res: any) => { if (res.success) onUserUpdate?.({ ...user, point: pts }); })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }, [user?.user_id]);
 
   /* tab data */
   useEffect(() => {
@@ -256,20 +283,38 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <div className="ud-profile-col">
 
                 {/* Membership card */}
-                <div className="ud-member-card">
-                  <img src="/img/sookd card.png" alt="" />
-                </div>
+                {(() => {
+                  const tierInfo = getTierInfo(calculatedPoints);
+                  return (
+                    <>
+                      <div className="ud-member-card">
+                        <img
+                          src={`/img/${tierInfo.tier.toLowerCase()}-card.png`}
+                          alt={tierInfo.tier}
+                          onError={e => { (e.currentTarget as HTMLImageElement).src = '/img/sookd card.png'; }}
+                        />
+                      </div>
 
-                {/* Points */}
-                <div className="ud-points-section">
-                  <div className="ud-points-top">
-                    <span className="ud-points-label">20/199 SookD Points</span>
-                  </div>
-                  <div className="ud-points-bar">
-                    <div className="ud-points-fill" style={{ width: '10%' }} />
-                  </div>
-                  <p className="ud-points-hint">สะสมอีก 180 SookD Point เพื่อเลื่อนขึ้นเป็นระดับ Silver</p>
-                </div>
+                      {/* Points */}
+                      <div className="ud-points-section">
+                        <div className="ud-points-top">
+                          <span className="ud-points-label">
+                            {tierInfo.maxPts !== null
+                              ? `${tierInfo.relPts}/${tierInfo.maxPts} SookD Points`
+                              : `${calculatedPoints} SookD Points`}
+                          </span>
+                        </div>
+                        <div className="ud-points-bar">
+                          <div className="ud-points-fill" style={{ width: `${tierInfo.fillPct}%` }} />
+                        </div>
+                        {tierInfo.nextTier
+                          ? <p className="ud-points-hint">สะสมอีก {tierInfo.needed} SookD Point เพื่อเลื่อนขึ้นเป็นระดับ {tierInfo.nextTier}</p>
+                          : <p className="ud-points-hint">คุณอยู่ในระดับสูงสุด Legend แล้ว!</p>
+                        }
+                      </div>
+                    </>
+                  );
+                })()}
 
                 <hr className="ud-divider" />
 
@@ -353,7 +398,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       <td className="ud-info-val">{user.phone_number || '-'}</td>
                     </tr>
                     <tr>
-                      <td className="ud-info-key">Address</td>
+                      <td className="ud-info-key">Shipping Address</td>
                       <td className="ud-info-sep">:</td>
                       <td className="ud-info-val">{user.address || '-'}</td>
                     </tr>
@@ -621,6 +666,11 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
             <div className="ud-form">
               {user?.user_type === 'individual' ? (
                 <>
+                  <div className="ud-field">
+                    <label className="ud-field__label">Username</label>
+                    <input className="ud-field__input" value={editInfo.user_name || ''}
+                      onChange={e => setEditInfo((p: any) => ({ ...p, user_name: e.target.value }))} />
+                  </div>
                   <div className="ud-form-row">
                     <div className="ud-field">
                       <label className="ud-field__label">First Name</label>
@@ -681,7 +731,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   onChange={e => setEditInfo((p: any) => ({ ...p, phone_number: e.target.value }))} />
               </div>
               <div className="ud-field">
-                <label className="ud-field__label">Address</label>
+                <label className="ud-field__label">Shipping Address</label>
                 <textarea className="ud-field__input ud-field__textarea" value={editInfo.address || ''}
                   onChange={e => setEditInfo((p: any) => ({ ...p, address: e.target.value }))} rows={2} />
               </div>

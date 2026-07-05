@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Footer from './Footer';
+import ContactIcon from './ContactIcon';
+import BookingModal from './BookingModal';
 import { SITE_CONTENT as c } from '../constants/content';
+
+const BOOKING_ACTIVITY_IDS = ['ACT010', 'ACT011', 'ACT012'];
 
 interface Props {
   activityId: string;
@@ -67,6 +71,11 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
   const [loading, setLoading] = useState(true);
   const [reviewIdx, setReviewIdx] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [userTab, setUserTab] = useState<'individual' | 'legal_entity'>(
+    currentUser?.user_type === 'legal_entity' ? 'legal_entity' : 'individual'
+  );
   const isLoggedIn = !!currentUser;
 
   useEffect(() => {
@@ -193,8 +202,25 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                     <span>{activity.max_participants} seats</span>
                   </div>
                 )}
+                {/* User type tabs */}
+                <div className="adet__user-tabs">
+                  <button
+                    className={`adet__user-tab${userTab === 'individual' ? ' adet__user-tab--active' : ''}`}
+                    onClick={() => setUserTab('individual')}
+                  >Individual</button>
+                  <button
+                    className={`adet__user-tab${userTab === 'legal_entity' ? ' adet__user-tab--active' : ''}`}
+                    onClick={() => setUserTab('legal_entity')}
+                  >Legal Entity</button>
+                </div>
+
                 <div className="adet__price">{Number(activity.price).toLocaleString()} Baht</div>
-                <button className="adet__reserve" onClick={() => { if (!isLoggedIn) setShowLoginModal(true); }}>Reserve a Spot</button>
+                <button className="adet__reserve" onClick={() => {
+                  if (!isLoggedIn) { setShowLoginModal(true); }
+                  else if (userTab === 'legal_entity') { setShowContactModal(true); }
+                  else if (BOOKING_ACTIVITY_IDS.includes(activity?.id)) { setShowBookingModal(true); }
+                  else { (window as any).gtag?.('event', 'add_to_cart', { item_id: activity?.id, item_name: activity?.name, price: activity?.price, quantity: 1 }); }
+                }}>Reserve a Spot</button>
               </>
             )}
           </div>
@@ -302,6 +328,35 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
       <div className="section-gap" />
       <Footer data={c.footer} />
 
+      {/* ── Booking Modal ── */}
+      {showBookingModal && (
+        <BookingModal
+          activity={activity}
+          currentUser={currentUser}
+          onClose={() => setShowBookingModal(false)}
+        />
+      )}
+
+      {/* ── Legal Entity Contact Modal ── */}
+      {showContactModal && (
+        <div className="adet__modal-overlay" onClick={() => setShowContactModal(false)}>
+          <div className="adet__modal" onClick={e => e.stopPropagation()}>
+            <button className="adet__modal-close" onClick={() => setShowContactModal(false)}>✕</button>
+            <h3 className="adet__modal-title">Contact Administrator</h3>
+            <p className="adet__modal-msg">For legal entities, please contact the administrator for further inquiries via the channels below:</p>
+            <h4 className="adet__contact-modal-subtitle">Contact Us</h4>
+            <ul className="adet__contact-modal-list">
+              {c.footer.contact.items.map(item => (
+                <li key={item.label} className="adet__contact-modal-item">
+                  <ContactIcon type={item.icon} size={18} color="var(--forest)" />
+                  <a href={item.href} className="adet__contact-modal-link" target="_blank" rel="noopener noreferrer">{item.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* ── Login Modal ── */}
       {showLoginModal && (
         <div className="adet__modal-overlay" onClick={() => setShowLoginModal(false)}>
@@ -391,6 +446,27 @@ export const ACTIVITY_DETAIL_CSS = `
 .adet__price {
   font-size: 1.8rem; font-weight: 700; color: var(--text);
   margin-top: .5rem;
+}
+.adet__user-tabs {
+  display: flex;
+  border: 1.5px solid var(--forest);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+  width: fit-content;
+}
+.adet__user-tab {
+  padding: .45rem 1.4rem;
+  background: none; border: none; cursor: pointer;
+  font-size: .88rem; font-weight: 500;
+  color: var(--forest); transition: all .2s;
+  font-family: var(--font-th);
+}
+.adet__user-tab + .adet__user-tab {
+  border-left: 1.5px solid var(--forest);
+}
+.adet__user-tab--active {
+  background: var(--forest); color: var(--white);
 }
 .adet__reserve {
   padding: .85rem 2rem;
@@ -525,6 +601,26 @@ export const ACTIVITY_DETAIL_CSS = `
 .adet__product-qty { font-size: .78rem; color: #888; font-family: var(--font-th); }
 .adet__product-price { font-size: .85rem; font-weight: 600; color: var(--forest); }
 .adet__product-note { font-size: .72rem; color: #aaa; font-family: var(--font-th); line-height: 1.4; }
+
+/* Contact Modal */
+.adet__contact-modal-subtitle {
+  font-size: 1rem; font-weight: 700;
+  color: var(--text); margin: .25rem 0 1rem;
+  font-family: Georgia, serif;
+}
+.adet__contact-modal-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: .85rem;
+  text-align: left;
+}
+.adet__contact-modal-item {
+  display: flex; align-items: center; gap: .75rem;
+}
+.adet__contact-modal-link {
+  font-size: .92rem; color: var(--forest); text-decoration: none;
+  font-weight: 500; transition: opacity .2s;
+}
+.adet__contact-modal-link:hover { opacity: .75; }
 
 /* Login Modal */
 .adet__modal-overlay {

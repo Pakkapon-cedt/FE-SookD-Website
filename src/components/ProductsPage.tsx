@@ -86,6 +86,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
               placeholder="Search"
               value={search}
               onChange={e => { setSearch(e.target.value); setShowAll(false); }}
+              onBlur={e => { if (e.target.value) (window as any).gtag?.('event', 'search', { search_term: e.target.value }); }}
             />
           </div>
         </div>
@@ -109,7 +110,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
                     {origins.map(o => (
                       <button key={o}
                         className={`exp-dropdown__item${activeOrigin === o ? ' active' : ''}`}
-                        onClick={() => { setActiveOrigin(o); setFilterOpen(false); setShowAll(false); }}>
+                        onClick={() => { (window as any).gtag?.('event', 'click_filter', { filter_value: o, list_name: 'Products' }); setActiveOrigin(o); setFilterOpen(false); setShowAll(false); }}>
                         {activeOrigin === o && (
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <polyline points="20 6 9 17 4 12" />
@@ -122,7 +123,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
                 )}
               </div>
               <div className="exp-filterbar__sep" />
-              <button className="exp-filterbar__btn">
+              <button className="exp-filterbar__btn" onClick={() => (window as any).gtag?.('event', 'click_sort', { list_name: 'Products' })}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="10" y1="18" x2="14" y2="18" />
                 </svg>
@@ -139,7 +140,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
           <>
             <div className="exp-grid">
               {visible.map(p => (
-                <ProductCard key={p.id} product={p} onClick={() => onSelectProduct(p.id)} />
+                <ProductCard key={p.id} product={p} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Products', item_id: p.id, item_name: p.name }); onSelectProduct(p.id); }} />
               ))}
             </div>
 
@@ -149,7 +150,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
 
             {filtered.length > VISIBLE_COUNT && (
               <div className="exp-more-wrap">
-                <button className="exp-more-btn" onClick={() => setShowAll(!showAll)}>
+                <button className="exp-more-btn" onClick={() => { if (!showAll) (window as any).gtag?.('event', 'click_load_more', { list_name: 'Products' }); setShowAll(!showAll); }}>
                   {showAll ? 'Show less' : 'See more'}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points={showAll ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />

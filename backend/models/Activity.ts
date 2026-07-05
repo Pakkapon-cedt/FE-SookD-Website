@@ -14,4 +14,6 @@ export interface Activity {
     activity_image: string;
     activity_note: string;
     activity_by: string;
+    activity_time: string;
+    activity_duration: string;
 }

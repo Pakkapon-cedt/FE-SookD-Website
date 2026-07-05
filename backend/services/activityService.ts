@@ -47,7 +47,13 @@ export async function getActivities(): Promise<Activity[]> {
             item.activity_note,
 
         by:
-            item.activity_by
+            item.activity_by,
+
+        activity_time:
+            item.activity_time ?? '',
+
+        activity_duration:
+            item.activity_duration ?? item.activity_hour ?? ''
     }));
 }
 

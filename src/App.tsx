@@ -9,6 +9,7 @@ import SocialImpact from './components/SocialImpact';
 import Footer from './components/Footer';
 import ExperiencesPage, { EXPERIENCES_CSS } from './components/ExperiencesPage';
 import ActivityDetailPage, { ACTIVITY_DETAIL_CSS } from './components/ActivityDetailPage';
+import { BOOKING_MODAL_CSS } from './components/BookingModal';
 import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetailPage';
 import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
 import AuthPage, { AUTH_CSS } from './components/AuthPage';
@@ -94,6 +95,7 @@ export default function App() {
       <style>{CSS}</style>
       <style>{EXPERIENCES_CSS}</style>
       <style>{ACTIVITY_DETAIL_CSS}</style>
+      <style>{BOOKING_MODAL_CSS}</style>
       <style>{PRODUCT_DETAIL_CSS}</style>
       <style>{PRODUCTS_CSS}</style>
       <style>{AUTH_CSS}</style>

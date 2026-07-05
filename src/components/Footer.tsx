@@ -38,7 +38,9 @@ export default function Footer({ data }: FooterProps) {
             {data.contact.items.map((item) => (
               <li key={item.label} className="footer__contact-item">
                 <span className="footer__contact-icon"><ContactIcon type={item.icon} size={16} color="rgba(255,255,255,0.85)" /></span>
-                <a href={item.href} className="footer__contact-link">{item.label}</a>
+                <a href={item.href} className="footer__contact-link"
+                  onClick={() => (window as any).gtag?.('event', 'click_contact_channel', { channel: item.icon })}
+                >{item.label}</a>
               </li>
             ))}
           </ul>

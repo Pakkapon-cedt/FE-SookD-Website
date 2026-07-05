@@ -199,7 +199,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                     <button onClick={() => setQty(q => q + 1)}>+</button>
                   </div>
                 </div>
-                <button className="pdet__cart-btn" onClick={() => { if (!isLoggedIn) setShowLoginModal(true); }}>Add to cart</button>
+                <button className="pdet__cart-btn" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); } else { (window as any).gtag?.('event', 'add_to_cart', { item_id: product?.id, item_name: product?.name, price: product?.price, quantity: qty }); } }}>Add to cart</button>
               </>
             )}
           </div>

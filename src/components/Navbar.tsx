@@ -21,7 +21,11 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
   }, []);
 
   const handleLink = (e: React.MouseEvent<HTMLAnchorElement>, link: NavLink) => {
-    if (link.page && onNavigate) { e.preventDefault(); onNavigate(link.page); }
+    if (link.page && onNavigate) {
+      e.preventDefault();
+      (window as any).gtag?.('event', 'click_nav_menu', { menu_item: link.label });
+      onNavigate(link.page);
+    }
   };
 
   const handleLogo = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -30,7 +34,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
 
   const displayName = currentUser?.user_type === 'legal_entity'
     ? currentUser?.legal_entity_name
-    : currentUser?.first_name;
+    : currentUser?.user_name;
 
   const initial = displayName?.[0]?.toUpperCase() ?? '?';
 
@@ -82,7 +86,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
             </>
           ) : (
             <>
-              <a href="#join" className="navbar__cta" onClick={e => { e.preventDefault(); onNavigate?.('login'); }}>Join Us</a>
+              <a href="#join" className="navbar__cta" onClick={e => { e.preventDefault(); (window as any).gtag?.('event', 'click_join_us'); onNavigate?.('login'); }}>Join Us</a>
             </>
           )}
         </div>

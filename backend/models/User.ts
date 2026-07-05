@@ -8,7 +8,7 @@ export interface User {
 
     user_type: UserType;
 
-    username: string;
+    user_name: string;
 
     first_name: string;
 
@@ -31,5 +31,7 @@ export interface User {
     gender: string;
 
     birthdate: string;
+
+    point: number;
 
 }

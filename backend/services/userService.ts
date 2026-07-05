@@ -50,7 +50,10 @@ export async function getUsers(): Promise<User[]> {
             item.gender,
 
         birthdate:
-            item.birthdate
+            item.birthdate,
+
+        point:
+            Number(item.point ?? 0)
 
     }));
 

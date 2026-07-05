@@ -39,14 +39,6 @@ interface ExperiencesPageProps {
   currentUser?: any;
 }
 
-function isActivityVisible(activityId: string, user: any): boolean {
-  const id = activityId?.toUpperCase() ?? '';
-  const hasB2B = id.includes('B2B');
-  const hasB2C = id.includes('B2C');
-  if (hasB2B) return user?.user_type === 'legal_entity';
-  if (hasB2C) return !user || user?.user_type === 'individual';
-  return true;
-}
 
 export default function ExperiencesPage({ onSelectActivity, currentUser }: ExperiencesPageProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -80,7 +72,6 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
   ))];
 
   const filtered = activities.filter(a => {
-    if (!isActivityVisible(a.id, currentUser)) return false;
     const matchSearch =
       a.name?.toLowerCase().includes(search.toLowerCase()) ||
       a.description?.toLowerCase().includes(search.toLowerCase()) ||
@@ -117,6 +108,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
               placeholder="Search"
               value={search}
               onChange={e => { setSearch(e.target.value); setShowAll(false); }}
+              onBlur={e => { if (e.target.value) (window as any).gtag?.('event', 'search', { search_term: e.target.value }); }}
             />
           </div>
 
@@ -145,7 +137,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
                       <button
                         key={t}
                         className={`exp-dropdown__item${activeType === t ? ' active' : ''}`}
-                        onClick={() => { setActiveType(t); setFilterOpen(false); setShowAll(false); }}
+                        onClick={() => { (window as any).gtag?.('event', 'click_filter', { filter_value: t, list_name: 'Experiences' }); setActiveType(t); setFilterOpen(false); setShowAll(false); }}
                       >
                         {activeType === t && (
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -161,7 +153,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
 
               <div className="exp-filterbar__sep" />
 
-              <button className="exp-filterbar__btn">
+              <button className="exp-filterbar__btn" onClick={() => (window as any).gtag?.('event', 'click_sort', { list_name: 'Experiences' })}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="10" y1="18" x2="14" y2="18" />
                 </svg>
@@ -180,7 +172,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
           <>
             <div className="exp-grid">
               {visible.map(a => (
-                <ActivityCard key={a.id} activity={a} onClick={() => onSelectActivity(a.id)} />
+                <ActivityCard key={a.id} activity={a} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Experiences', item_id: a.id, item_name: a.name }); onSelectActivity(a.id); }} />
               ))}
             </div>
 
@@ -190,7 +182,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
 
             {filtered.length > VISIBLE_COUNT && (
               <div className="exp-more-wrap">
-                <button className="exp-more-btn" onClick={() => setShowAll(!showAll)}>
+                <button className="exp-more-btn" onClick={() => { if (!showAll) (window as any).gtag?.('event', 'click_load_more', { list_name: 'Experiences' }); setShowAll(!showAll); }}>
                   {showAll ? 'Show less' : 'See more'}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points={showAll ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
