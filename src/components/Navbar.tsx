@@ -66,7 +66,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
           {currentUser ? (
             <>
               {/* Cart */}
-              <button className="navbar__icon-btn" aria-label="Cart">
+              <button className="navbar__icon-btn" aria-label="Cart" onClick={() => onNavigate?.('cart')}>
                 <img src="/img/cart icon.png" alt="Cart" width="26" height="26" style={{ objectFit: 'contain', borderRadius: 2 }} />
               </button>
               <div className="navbar__divider" />

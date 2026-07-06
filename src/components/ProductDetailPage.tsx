@@ -61,6 +61,23 @@ function Stars({ rating, size = 16, emptyFill = '#d0d0d0' }: { rating: number; s
   );
 }
 
+const SIZE_TAB_CONFIG: Record<string, { label: string; altId?: string }[]> = {
+  PRD001_A: [
+    { label: 'ไซส์ยักษ์ (13-16 ลูก/กก.)' },
+    { label: 'รวมมิตร (17-20 ลูก/กก.)', altId: 'PRD002_A' },
+  ],
+  PRD004_A: [
+    { label: 'กล่อง 3+ กิโล' },
+    { label: 'กล่อง 5+ กิโล', altId: 'PRD004_B' },
+    { label: 'กล่อง 7+ กิโล', altId: 'PRD004_C' },
+  ],
+  PRD005_A: [
+    { label: 'ชุด 3 กระปุก' },
+    { label: 'ชุด 8 กระปุก', altId: 'PRD005_B' },
+    { label: 'ชุด 20 กระปุก', altId: 'PRD005_C' },
+  ],
+};
+
 export default function ProductDetailPage({ productId, onBack, onSelectProduct, orderData, onNavigate, currentUser }: Props) {
   const [product, setProduct] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -71,9 +88,12 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
   const [reviewIdx, setReviewIdx] = useState(0);
   const [otherIdx, setOtherIdx] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [tabIdx, setTabIdx] = useState(0);
+  const [altProducts, setAltProducts] = useState<Record<string, any>>({});
   const isLoggedIn = !!currentUser;
 
   useEffect(() => {
+    setTabIdx(0);
     window.scrollTo(0, 0);
     Promise.all([
       api.products.getOne(productId),
@@ -84,8 +104,18 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
       setProduct(prod);
       setReviews(Array.isArray(revs) ? revs : []);
       setAvgRating(Math.ceil(Number(avg?.averageRating ?? avg?.average ?? 0)));
-      setOthers(Array.isArray(allProds) ? allProds.filter((p: any) => p.id !== productId).slice(0, 9) : []);
+      const HIDDEN_IDS = ['PRD002_A', 'PRD004_B', 'PRD004_C', 'PRD005_B', 'PRD005_C'];
+      setOthers(Array.isArray(allProds) ? allProds.filter((p: any) => p.id !== productId && !HIDDEN_IDS.includes(p.id)).slice(0, 9) : []);
     }).finally(() => setLoading(false));
+  }, [productId]);
+
+  useEffect(() => {
+    const tabConfig = SIZE_TAB_CONFIG[productId];
+    if (!tabConfig) return;
+    const altIds = tabConfig.map(t => t.altId).filter(Boolean) as string[];
+    altIds.forEach(id => {
+      api.products.getOne(id).then(p => setAltProducts(prev => ({ ...prev, [id]: p }))).catch(() => {});
+    });
   }, [productId]);
 
   if (loading) return <div className="pdet__loading">กำลังโหลด...</div>;
@@ -191,15 +221,35 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                     <span>shipping {product.shipping_duration}</span>
                   </div>
                 )}
-                <div className="pdet__buy-row">
-                  <div className="pdet__price">{(Number(product.price) * qty).toLocaleString()} Baht</div>
-                  <div className="pdet__qty-ctrl">
-                    <button onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-                    <span>{qty}</span>
-                    <button onClick={() => setQty(q => q + 1)}>+</button>
+                {SIZE_TAB_CONFIG[productId] && (
+                  <div className="pdet__size-tabs">
+                    {SIZE_TAB_CONFIG[productId].map((tab, i) => (
+                      <button
+                        key={i}
+                        className={`pdet__size-tab${tabIdx === i ? ' pdet__size-tab--active' : ''}`}
+                        onClick={() => setTabIdx(i)}
+                      >{tab.label}</button>
+                    ))}
                   </div>
-                </div>
-                <button className="pdet__cart-btn" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); } else { (window as any).gtag?.('event', 'add_to_cart', { item_id: product?.id, item_name: product?.name, price: product?.price, quantity: qty }); } }}>Add to cart</button>
+                )}
+                {(() => {
+                  const tabConfig = SIZE_TAB_CONFIG[productId];
+                  const altId = tabConfig?.[tabIdx]?.altId;
+                  const activeProduct = (altId && altProducts[altId]) ? altProducts[altId] : product;
+                  return (
+                    <>
+                      <div className="pdet__buy-row">
+                        <div className="pdet__price">{(Number(activeProduct.price) * qty).toLocaleString()} Baht</div>
+                        <div className="pdet__qty-ctrl">
+                          <button onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                          <span>{qty}</span>
+                          <button onClick={() => setQty(q => q + 1)}>+</button>
+                        </div>
+                      </div>
+                      <button className="pdet__cart-btn" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); } else { (window as any).gtag?.('event', 'add_to_cart', { item_id: activeProduct?.id, item_name: activeProduct?.name, price: activeProduct?.price, quantity: qty }); } }}>Add to cart</button>
+                    </>
+                  );
+                })()}
               </>
             )}
           </div>
@@ -427,6 +477,34 @@ export const PRODUCT_DETAIL_CSS = `
   font-size: .95rem; font-weight: 600;
   border-left: 1px solid #d0d0d0; border-right: 1px solid #d0d0d0;
   line-height: 36px;
+}
+.pdet__size-tabs {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: .75rem;
+}
+.pdet__size-tab {
+  flex: 1;
+  padding: .55rem .75rem;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  color: #555;
+  font-size: .82rem;
+  font-family: 'Kanit', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+}
+.pdet__size-tab--active {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+  font-weight: 600;
+}
+.pdet__size-tab:hover:not(.pdet__size-tab--active) {
+  border-color: var(--forest);
+  color: var(--forest);
 }
 .pdet__cart-btn {
   padding: .85rem 2rem;

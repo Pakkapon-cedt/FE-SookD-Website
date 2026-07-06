@@ -49,7 +49,10 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
     products.flatMap(p => p.origin?.split(',').map((o: string) => o.trim()) ?? [])
   ))];
 
+  const HIDDEN_IDS = ['PRD002_A', 'PRD004_B', 'PRD004_C', 'PRD005_B', 'PRD005_C'];
+
   const filtered = products.filter(p => {
+    if (HIDDEN_IDS.includes(p.id)) return false;
     const matchSearch =
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
       p.note?.toLowerCase().includes(search.toLowerCase()) ||

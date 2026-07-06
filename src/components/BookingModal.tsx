@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { addToCart } from '../utils/cart';
 
-const OPTIONAL_IDS = ['ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018'];
-const OFFER_IDS = ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'];
+const DEFAULT_OPTIONAL_IDS = ['ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018'];
+const DEFAULT_OFFER_IDS = ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'];
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAY_NAMES = ['Mo','Tu','We','Th','Fr','Sa','Su'];
 
@@ -9,6 +10,9 @@ interface Props {
   activity: any;
   currentUser?: any;
   onClose: () => void;
+  onNavigateToCart?: () => void;
+  optionalIds?: string[];
+  offerIds?: string[];
 }
 
 interface OptItem {
@@ -87,7 +91,7 @@ function Calendar({ selected, onSelect, error }: { selected: Date | null; onSele
   );
 }
 
-export default function BookingModal({ activity, currentUser, onClose }: Props) {
+export default function BookingModal({ activity, currentUser: _currentUser, onClose, onNavigateToCart, optionalIds = DEFAULT_OPTIONAL_IDS, offerIds = DEFAULT_OFFER_IDS }: Props) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [participants, setParticipants] = useState(1);
   const [selectedTime, setSelectedTime] = useState('');
@@ -98,8 +102,6 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
   const [offerQtys, setOfferQtys] = useState<Record<string,number>>({});
   const [cartItems, setCartItems] = useState<{product: any; qty: number}[]>([]);
   const [showDateError, setShowDateError] = useState(false);
-  const [paying, setPaying] = useState(false);
-  const [paySuccess, setPaySuccess] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const timeSlots: string[] = activity.activity_time
@@ -115,7 +117,7 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
       .then(r => r.json())
       .then((acts: any[]) => {
         const opts = acts
-          .filter((a: any) => OPTIONAL_IDS.includes(a.id))
+          .filter((a: any) => optionalIds.includes(a.id))
           .map((a: any) => {
             const times: string[] = a.activity_time
               ? String(a.activity_time).split(',').map((t: string) => t.trim()).filter(Boolean)
@@ -132,7 +134,7 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
     fetch('http://localhost:3000/api/products')
       .then(r => r.json())
       .then((prds: any[]) => {
-        const filtered = prds.filter((p: any) => OFFER_IDS.includes(p.id));
+        const filtered = prds.filter((p: any) => offerIds.includes(p.id));
         setOfferItems(filtered);
         const qtys: Record<string,number> = {};
         filtered.forEach((p: any) => { qtys[p.id] = 1; });
@@ -149,7 +151,7 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
     checkedOpts.reduce((s, o) => s + (Number(o.act.price) * o.qty), 0) +
     cartItems.reduce((s, c) => s + (Number(c.product.price) * c.qty), 0);
 
-  const addToCart = (product: any, qty: number) => {
+  const addOfferToLocalCart = (product: any, qty: number) => {
     setCartItems(prev => {
       const idx = prev.findIndex(c => c.product.id === product.id);
       if (idx >= 0) return prev.map((c, i) => i === idx ? { ...c, qty: c.qty + qty } : c);
@@ -163,46 +165,49 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
   const removeCartItem = (productId: string) =>
     setCartItems(prev => prev.filter(c => c.product.id !== productId));
 
-  const handlePayNow = async () => {
-    if (!currentUser || paying) return;
-    setPaying(true);
-    const todayStr = new Date().toISOString().split('T')[0];
+  const handleAddToCart = () => {
     const actDateStr = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
-    const userId = currentUser.user_id || '';
-
-    const buildOrder = (itemId: string, qty: number, price: number, actTime: string, addr: string) => ({
-      user_id: userId,
-      order_date: todayStr,
-      item_id: itemId,
-      quantity: qty,
-      total_price: price,
-      order_status: 'pending',
-      shipping_address: addr,
-      act_date: actDateStr,
-      act_time: actTime,
-      applied_promotion_id: '',
-    });
-
-    const orders = [
-      buildOrder(activity.id, participants, activity.price * participants, selectedTime, ''),
-      ...checkedOpts.map(o => buildOrder(o.act.id, o.qty, Number(o.act.price) * o.qty, o.time, '')),
-      ...cartItems.map(c => buildOrder(c.product.id, c.qty, Number(c.product.price) * c.qty, '', currentUser.shipping_address || '')),
+    const items: Parameters<typeof addToCart>[0] = [
+      {
+        itemId: activity.id,
+        itemType: 'activity',
+        name: activity.name?.trim() || '',
+        image: activity.image || '',
+        price: activity.price,
+        qty: participants,
+        sellerName: activity.by || '',
+        actDate: actDateStr,
+        actTime: selectedTime,
+        weightInfo: '',
+      },
+      ...checkedOpts.map(o => ({
+        itemId: o.act.id,
+        itemType: 'activity' as const,
+        name: o.act.name?.trim() || '',
+        image: o.act.image || '',
+        price: Number(o.act.price),
+        qty: o.qty,
+        sellerName: o.act.by || '',
+        actDate: actDateStr,
+        actTime: o.time,
+        weightInfo: '',
+      })),
+      ...cartItems.map(c => ({
+        itemId: c.product.id,
+        itemType: 'product' as const,
+        name: c.product.name?.trim() || '',
+        image: c.product.image || '',
+        price: Number(c.product.price),
+        qty: c.qty,
+        sellerName: c.product.origin || '',
+        actDate: '',
+        actTime: '',
+        weightInfo: c.product.note || '',
+      })),
     ];
-
-    try {
-      await Promise.all(orders.map(body =>
-        fetch('http://localhost:3000/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        }).then(r => r.json())
-      ));
-      setPaySuccess(true);
-      setTimeout(() => onClose(), 1800);
-    } catch (err) {
-      console.error('Order failed:', err);
-      setPaying(false);
-    }
+    addToCart(items);
+    onClose();
+    onNavigateToCart?.();
   };
   const fmtDate = (d: Date) =>
     `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
@@ -528,7 +533,7 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
                           <span className="bk__offer-price">{Number(item.price).toLocaleString()} Baht</span>
                         </div>
                         <p className="bk__offer-desc">{item.note}</p>
-                        <button className="bk__add-cart" onClick={() => addToCart(item, qty)}>Add to cart</button>
+                        <button className="bk__add-cart" onClick={() => addOfferToLocalCart(item, qty)}>Add to cart</button>
                       </div>
                     </div>
                   );
@@ -536,9 +541,7 @@ export default function BookingModal({ activity, currentUser, onClose }: Props) 
               </div>
               <div className="bk__offer-footer">
                 <button className="bk__close-btn" onClick={onClose}>Close</button>
-                <button className="bk__pay-btn" onClick={handlePayNow} disabled={paying || paySuccess}>
-                  {paySuccess ? '✓ สำเร็จแล้ว!' : paying ? 'กำลังดำเนินการ...' : `${total.toLocaleString()} Baht (Pay now)`}
-                </button>
+                <button className="bk__pay-btn" onClick={handleAddToCart}>Add to cart</button>
               </div>
             </div>
           </>)}

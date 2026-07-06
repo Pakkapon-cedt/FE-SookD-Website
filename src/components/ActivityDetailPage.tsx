@@ -5,7 +5,76 @@ import ContactIcon from './ContactIcon';
 import BookingModal from './BookingModal';
 import { SITE_CONTENT as c } from '../constants/content';
 
-const BOOKING_ACTIVITY_IDS = ['ACT010', 'ACT011', 'ACT012'];
+const BOOKING_ACTIVITY_IDS = [
+  'ACT001', 'ACT002', 'ACT003', 'ACT004',
+  'ACT010', 'ACT011', 'ACT012',
+  'ACT005_B2C', 'ACT006_B2C',
+  'ACT007_B2C', 'ACT008', 'ACT009',
+  'ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018',
+];
+
+const BOOKING_CONFIG: Record<string, { optionalIds: string[]; offerIds: string[] }> = {
+  default: {
+    optionalIds: ['ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018'],
+    offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+  ACT005_B2C: {
+    optionalIds: ['ACT007_B2C', 'ACT008', 'ACT009'],
+    offerIds: ['PRD015','PRD016','PRD017','PRD018'],
+  },
+  ACT006_B2C: {
+    optionalIds: ['ACT007_B2C', 'ACT008', 'ACT009'],
+    offerIds: ['PRD015','PRD016','PRD017','PRD018'],
+  },
+  ACT001: {
+    optionalIds: [],
+    offerIds: ['PRD001_A','PRD002','PRD003','PRD004','PRD005','PRD006','PRD007','PRD008','PRD009','PRD010','PRD011'],
+  },
+  ACT002: {
+    optionalIds: [],
+    offerIds: ['PRD001_A','PRD002','PRD003','PRD004','PRD005','PRD006','PRD007','PRD008','PRD009','PRD010','PRD011'],
+  },
+  ACT003: {
+    optionalIds: [],
+    offerIds: ['PRD001_A','PRD002','PRD003','PRD004','PRD005','PRD006','PRD007','PRD008','PRD009','PRD010','PRD011'],
+  },
+  ACT004: {
+    optionalIds: [],
+    offerIds: ['PRD001_A','PRD002','PRD003','PRD004','PRD005','PRD006','PRD007','PRD008','PRD009','PRD010','PRD011'],
+  },
+  ACT007_B2C: {
+    optionalIds: ['ACT005_B2C', 'ACT006_B2C'],
+    offerIds: ['PRD015','PRD016','PRD017','PRD018'],
+  },
+  ACT008: {
+    optionalIds: ['ACT005_B2C', 'ACT006_B2C'],
+    offerIds: ['PRD015','PRD016','PRD017','PRD018'],
+  },
+  ACT009: {
+    optionalIds: ['ACT005_B2C', 'ACT006_B2C'],
+    offerIds: ['PRD015','PRD016','PRD017','PRD018'],
+  },
+  ACT014: {
+    optionalIds: ['ACT010', 'ACT011', 'ACT012'],
+    offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+  ACT015: {
+    optionalIds: ['ACT010', 'ACT011', 'ACT012'],
+    offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+  ACT016: {
+    optionalIds: ['ACT010', 'ACT011', 'ACT012'],
+    offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+  ACT017: {
+    optionalIds: ['ACT010', 'ACT011', 'ACT012'],
+    offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+  ACT018: {
+    optionalIds: ['ACT010', 'ACT011', 'ACT012'],
+    offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+};
 
 interface Props {
   activityId: string;
@@ -334,6 +403,9 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
           activity={activity}
           currentUser={currentUser}
           onClose={() => setShowBookingModal(false)}
+          onNavigateToCart={() => onNavigate?.('cart')}
+          optionalIds={(BOOKING_CONFIG[activity?.id] ?? BOOKING_CONFIG.default).optionalIds}
+          offerIds={(BOOKING_CONFIG[activity?.id] ?? BOOKING_CONFIG.default).offerIds}
         />
       )}
 
