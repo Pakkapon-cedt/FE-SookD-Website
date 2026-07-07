@@ -37,10 +37,11 @@ const VISIBLE_COUNT = 6;
 interface ExperiencesPageProps {
   onSelectActivity: (id: string) => void;
   currentUser?: any;
+  lang?: 'TH' | 'ENG';
 }
 
 
-export default function ExperiencesPage({ onSelectActivity, currentUser }: ExperiencesPageProps) {
+export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 'TH' }: ExperiencesPageProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,17 +68,24 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const types = ['ทั้งหมด', ...Array.from(new Set(
-    activities.flatMap(a => a.type?.split(',').map(t => t.trim()) ?? [])
+  const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+  const allLabel = 'ทั้งหมด';
+
+  useEffect(() => { setActiveType(allLabel); }, [lang]);
+
+  const langActivities = activities.filter(a => a.id?.endsWith(langSuffix));
+
+  const types = [allLabel, ...Array.from(new Set(
+    langActivities.flatMap(a => a.type?.split(',').map(t => t.trim()) ?? [])
   ))];
 
-  const filtered = activities.filter(a => {
+  const filtered = langActivities.filter(a => {
     const matchSearch =
       a.name?.toLowerCase().includes(search.toLowerCase()) ||
       a.description?.toLowerCase().includes(search.toLowerCase()) ||
       a.location?.toLowerCase().includes(search.toLowerCase());
     const matchType =
-      activeType === 'ทั้งหมด' ||
+      activeType === allLabel ||
       a.type?.split(',').map(t => t.trim()).includes(activeType);
     return matchSearch && matchType;
   });
@@ -172,7 +180,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
           <>
             <div className="exp-grid">
               {visible.map(a => (
-                <ActivityCard key={a.id} activity={a} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Experiences', item_id: a.id, item_name: a.name }); onSelectActivity(a.id); }} />
+                <ActivityCard key={a.id} activity={a} lang={lang} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Experiences', item_id: a.id, item_name: a.name }); onSelectActivity(a.id); }} />
               ))}
             </div>
 
@@ -199,7 +207,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser }: Exper
   );
 }
 
-function ActivityCard({ activity: a, onClick }: { activity: Activity; onClick: () => void }) {
+function ActivityCard({ activity: a, onClick, lang = 'TH' }: { activity: Activity; onClick: () => void; lang?: 'TH' | 'ENG' }) {
   const tags = a.type?.split(',').map(t => t.trim()) ?? [];
   const imgSrc = driveThumb(a.image);
   const duration = shortDuration(a.date);
@@ -217,7 +225,7 @@ function ActivityCard({ activity: a, onClick }: { activity: Activity; onClick: (
         />
         <div className="impact-badge">
           <span className="impact-badge__pct">10%</span>
-          <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+          <span className="impact-badge__text">{lang === 'TH' ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>
         </div>
         {tags.length > 0 && (
           <div className="exp-card__img-tags">
@@ -233,7 +241,7 @@ function ActivityCard({ activity: a, onClick }: { activity: Activity; onClick: (
         <div className="exp-card__divider" />
         <div className="exp-card__meta">
           <span className="exp-card__duration">{duration}</span>
-          <span className="exp-card__price">{Number(a.price).toLocaleString()} Baht</span>
+          <span className="exp-card__price">{Number(a.price).toLocaleString()} {lang === 'TH' ? 'บาท' : 'Baht'}</span>
         </div>
         <div className="exp-card__divider" />
         {a.description && (

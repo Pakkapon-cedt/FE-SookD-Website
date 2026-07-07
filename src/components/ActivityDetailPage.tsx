@@ -82,6 +82,7 @@ interface Props {
   orderData?: any;
   currentUser?: any;
   onNavigate?: (page: string) => void;
+  lang?: 'TH' | 'ENG';
 }
 
 function fmtOrderDate(d: any) {
@@ -133,7 +134,9 @@ function Stars({ rating, size = 16, emptyFill = '#e0e0e0' }: { rating: number; s
   );
 }
 
-export default function ActivityDetailPage({ activityId, onBack, orderData, currentUser, onNavigate }: Props) {
+const normalizeId = (id: string) => id.replace(/_(TH|EN)$/, '');
+
+export default function ActivityDetailPage({ activityId, onBack, orderData, currentUser, onNavigate, lang = 'TH' }: Props) {
   const [activity, setActivity] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -177,7 +180,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            กลับ
+            {lang === 'TH' ? 'กลับ' : 'Back'}
           </button>
         </div>
 
@@ -190,7 +193,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                 onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               <div className="impact-badge">
                 <span className="impact-badge__pct">10%</span>
-                <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+                <span className="impact-badge__text">{lang === 'TH' ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>
               </div>
             </div>
           </div>
@@ -210,7 +213,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                     <div className="pdet__order-sep" />
                     <div className="pdet__order-col">
                       <span className="pdet__order-label">TOTAL</span>
-                      <span className="pdet__order-val">{orderData.total_price} Baht</span>
+                      <span className="pdet__order-val">{orderData.total_price} {lang === 'TH' ? 'บาท' : 'Baht'}</span>
                     </div>
                   </div>
                   <div className="pdet__order-divider" />
@@ -276,20 +279,20 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                   <button
                     className={`adet__user-tab${userTab === 'individual' ? ' adet__user-tab--active' : ''}`}
                     onClick={() => setUserTab('individual')}
-                  >Individual</button>
+                  >{lang === 'TH' ? 'บุคคลธรรมดา' : 'Individual'}</button>
                   <button
                     className={`adet__user-tab${userTab === 'legal_entity' ? ' adet__user-tab--active' : ''}`}
                     onClick={() => setUserTab('legal_entity')}
-                  >Legal Entity</button>
+                  >{lang === 'TH' ? 'นิติบุคคล' : 'Legal Entity'}</button>
                 </div>
 
-                <div className="adet__price">{Number(activity.price).toLocaleString()} Baht</div>
+                <div className="adet__price">{Number(activity.price).toLocaleString()} {lang === 'TH' ? 'บาท' : 'Baht'}</div>
                 <button className="adet__reserve" onClick={() => {
                   if (!isLoggedIn) { setShowLoginModal(true); }
                   else if (userTab === 'legal_entity') { setShowContactModal(true); }
-                  else if (BOOKING_ACTIVITY_IDS.includes(activity?.id)) { setShowBookingModal(true); }
+                  else if (BOOKING_ACTIVITY_IDS.includes(normalizeId(activity?.id ?? ''))) { setShowBookingModal(true); }
                   else { (window as any).gtag?.('event', 'add_to_cart', { item_id: activity?.id, item_name: activity?.name, price: activity?.price, quantity: 1 }); }
-                }}>Reserve a Spot</button>
+                }}>{lang === 'TH' ? 'จองกิจกรรม' : 'Reserve a Spot'}</button>
               </>
             )}
           </div>
@@ -297,7 +300,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
 
         {/* ── Description ── */}
         <section className="adet__section">
-          <h2 className="adet__section-title">Description</h2>
+          <h2 className="adet__section-title">{lang === 'TH' ? 'รายละเอียดกิจกรรม' : 'Description'}</h2>
           <div className="adet__desc">
             {descLines.length > 0 && (
               <ul className="adet__desc-list">
@@ -310,13 +313,13 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
             <div className="adet__desc-fields">
               {activity.location && (
                 <div className="adet__field">
-                  <span className="adet__field-label">สถานที่จัดกิจกรรม:</span>
+                  <span className="adet__field-label">{lang === 'TH' ? 'สถานที่จัดกิจกรรม' : 'Event location'}:</span>
                   <span className="adet__field-val">{activity.location}</span>
                 </div>
               )}
               {activity.note && (
                 <div className="adet__field">
-                  <span className="adet__field-label">หมายเหตุ:</span>
+                  <span className="adet__field-label">{lang === 'TH' ? 'หมายเหตุ' : 'Note'}:</span>
                   <span className="adet__field-val">{activity.note}</span>
                 </div>
               )}
@@ -328,7 +331,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
               )}
               {activity.min_participants > 0 && (
                 <div className="adet__field">
-                  <span className="adet__field-label">จำนวนผู้เข้าร่วมขั้นต่ำ:</span>
+                  <span className="adet__field-label">{lang === 'TH' ? 'จำนวนผู้เข้าร่วมขั้นต่ำ' : 'Minimum number of participants'}:</span>
                   <span className="adet__field-val">{activity.min_participants} คน</span>
                 </div>
               )}
@@ -404,8 +407,9 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
           currentUser={currentUser}
           onClose={() => setShowBookingModal(false)}
           onNavigateToCart={() => onNavigate?.('cart')}
-          optionalIds={(BOOKING_CONFIG[activity?.id] ?? BOOKING_CONFIG.default).optionalIds}
-          offerIds={(BOOKING_CONFIG[activity?.id] ?? BOOKING_CONFIG.default).offerIds}
+          optionalIds={(BOOKING_CONFIG[normalizeId(activity?.id ?? '')] ?? BOOKING_CONFIG.default).optionalIds.map(id => id + (lang === 'TH' ? '_TH' : '_EN'))}
+          offerIds={(BOOKING_CONFIG[normalizeId(activity?.id ?? '')] ?? BOOKING_CONFIG.default).offerIds.map(id => id + (lang === 'TH' ? '_TH' : '_EN'))}
+          lang={lang}
         />
       )}
 
@@ -434,8 +438,8 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
         <div className="adet__modal-overlay" onClick={() => setShowLoginModal(false)}>
           <div className="adet__modal" onClick={e => e.stopPropagation()}>
             <button className="adet__modal-close" onClick={() => setShowLoginModal(false)}>✕</button>
-            <h3 className="adet__modal-title">Sign in to Continue</h3>
-            <p className="adet__modal-msg">Please log in or register an account to add items to your cart and proceed with checkout.</p>
+            <h3 className="adet__modal-title">{lang === 'TH' ? 'เข้าสู่ระบบเพื่อดำเนินการต่อ' : 'Sign in to Continue'}</h3>
+            <p className="adet__modal-msg">{lang === 'TH' ? 'โปรดเข้าสู่ระบบหรือสมัครสมาชิก เพื่อเพิ่มสินค้าลงในรถเข็นและดำเนินการชำระเงิน' : 'Please log in or register an account to add items to your cart and proceed with checkout.'}</p>
             <div className="adet__modal-actions">
               <button className="adet__modal-login" onClick={() => { setShowLoginModal(false); onNavigate?.('login'); }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -443,7 +447,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                 </svg>
                 Login/Register
               </button>
-              <button className="adet__modal-later" onClick={() => setShowLoginModal(false)}>Maybe Later</button>
+              <button className="adet__modal-later" onClick={() => setShowLoginModal(false)}>{lang === 'TH' ? 'ไว้ทีหลัง' : 'Maybe Later'}</button>
             </div>
           </div>
         </div>

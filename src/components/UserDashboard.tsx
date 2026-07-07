@@ -11,6 +11,7 @@ interface Props {
   onUserUpdate?: (user: any) => void;
   onSelectProduct?: (productId: string, order: any) => void;
   onSelectActivity?: (activityId: string, order: any) => void;
+  lang?: 'TH' | 'ENG';
 }
 
 /* ── helpers ──────────────────────────────── */
@@ -104,11 +105,18 @@ const IconEdit = () => (
   </svg>
 );
 
+const NAV_LABELS: Record<string, { th: string; en: string }> = {
+  profile:     { th: 'โปรไฟล์ของฉัน',    en: 'My Profile' },
+  orders:      { th: 'สถานะคำสั่งซื้อ',   en: 'Order status' },
+  activities:  { th: 'การจองกิจกรรม',     en: 'Activity Reservations' },
+  reviews:     { th: 'รีวิว',             en: 'To Reviews' },
+};
+
 const NAV_ITEMS = [
-  { key: 'profile' as DashTab, label: 'My Profile', icon: <IconProfile /> },
-  { key: 'orders' as DashTab, label: 'Order status', icon: <IconBag /> },
-  { key: 'activities' as DashTab, label: 'Activity Reservations', icon: <IconWave /> },
-  { key: 'reviews' as DashTab, label: 'To Reviews', icon: <IconStar /> },
+  { key: 'profile' as DashTab, icon: <IconProfile /> },
+  { key: 'orders' as DashTab, icon: <IconBag /> },
+  { key: 'activities' as DashTab, icon: <IconWave /> },
+  { key: 'reviews' as DashTab, icon: <IconStar /> },
 ];
 
 
@@ -121,7 +129,8 @@ function getTierInfo(points: number) {
 }
 
 /* ── main component ───────────────────────── */
-export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelectProduct, onSelectActivity }: Props) {
+export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelectProduct, onSelectActivity, lang = 'TH' }: Props) {
+  const isTH = lang === 'TH';
   const [tab, setTab] = useState<DashTab>('profile');
   const [products, setProducts] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
@@ -192,8 +201,18 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     }
   }, [tab, user?.user_id]);
 
-  const getProduct = (id: string) => products.find(p => p.id === id);
-  const getActivity = (id: string) => activities.find(a => a.id === id);
+  const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+  const normalizeId = (id: string) => id?.replace(/_(TH|EN)$/, '').replace(/_B2C/, '') ?? '';
+  const getProduct = (id: string) => {
+    const base = normalizeId(id);
+    return products.find(p => normalizeId(p.id) === base && p.id?.endsWith(langSuffix))
+        ?? products.find(p => normalizeId(p.id) === base);
+  };
+  const getActivity = (id: string) => {
+    const base = normalizeId(id);
+    return activities.find(a => normalizeId(a.id) === base && a.id?.endsWith(langSuffix))
+        ?? activities.find(a => normalizeId(a.id) === base);
+  };
   const productOrders = orders.filter(o => !!getProduct(o.item_id));
   const activityOrders = orders.filter(o => !!getActivity(o.item_id));
 
@@ -267,7 +286,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               className={`ud-nav-item ${tab === item.key ? 'ud-nav-item--active' : ''}`}
               onClick={() => setTab(item.key)}>
               {item.icon}
-              <span>{item.label}</span>
+              <span>{isTH ? NAV_LABELS[item.key].th : NAV_LABELS[item.key].en}</span>
             </button>
           ))}
         </aside>
@@ -332,73 +351,73 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 </div>
 
                 {/* User information */}
-                <h3 className="ud-info-title">User Information</h3>
+                <h3 className="ud-info-title">{isTH ? 'ข้อมูลผู้ใช้' : 'User Information'}</h3>
                 <table className="ud-info-table">
                   <tbody>
                     {user?.user_type === 'individual' ? (
                       <>
                         <tr>
-                          <td className="ud-info-key">Username</td>
+                          <td className="ud-info-key">{isTH ? 'ชื่อผู้ใช้' : 'Username'}</td>
                           <td className="ud-info-sep">:</td>
                           <td className="ud-info-val">{user.user_name}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Name</td>
+                          <td className="ud-info-key">{isTH ? 'ชื่อ-นามสกุล' : 'Name'}</td>
                           <td className="ud-info-sep">:</td>
                           <td className="ud-info-val">{user.first_name} {user.last_name}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Role</td>
+                          <td className="ud-info-key">{isTH ? 'ประเภท' : 'Role'}</td>
                           <td className="ud-info-sep">:</td>
-                          <td className="ud-info-val">Individual</td>
+                          <td className="ud-info-val">{isTH ? 'บุคคลธรรมดา' : 'Individual'}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Gender</td>
+                          <td className="ud-info-key">{isTH ? 'เพศ' : 'Gender'}</td>
                           <td className="ud-info-sep">:</td>
                           <td className="ud-info-val">{user.gender || '-'}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Birthdate</td>
+                          <td className="ud-info-key">{isTH ? 'วันเกิด' : 'Birthdate'}</td>
                           <td className="ud-info-sep">:</td>
-                          <td className="ud-info-val">{user.birthdate || '-'}</td>
+                          <td className="ud-info-val">{fmtDate(user.birthdate)}</td>
                         </tr>
                       </>
                     ) : (
                       <>
                         <tr>
-                          <td className="ud-info-key">Name</td>
+                          <td className="ud-info-key">{isTH ? 'ชื่อนิติบุคคล' : 'Name'}</td>
                           <td className="ud-info-sep">:</td>
                           <td className="ud-info-val">{user.legal_entity_name}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Role</td>
+                          <td className="ud-info-key">{isTH ? 'ประเภท' : 'Role'}</td>
                           <td className="ud-info-sep">:</td>
-                          <td className="ud-info-val">Legal Entity</td>
+                          <td className="ud-info-val">{isTH ? 'นิติบุคคล' : 'Legal Entity'}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Type</td>
+                          <td className="ud-info-key">{isTH ? 'ประเภทธุรกิจ' : 'Type'}</td>
                           <td className="ud-info-sep">:</td>
                           <td className="ud-info-val">{user.business_type || '-'}</td>
                         </tr>
                         <tr>
-                          <td className="ud-info-key">Reg No.</td>
+                          <td className="ud-info-key">{isTH ? 'เลขทะเบียน' : 'Reg No.'}</td>
                           <td className="ud-info-sep">:</td>
                           <td className="ud-info-val">{user.business_registration_number || '-'}</td>
                         </tr>
                       </>
                     )}
                     <tr>
-                      <td className="ud-info-key">Email</td>
+                      <td className="ud-info-key">{isTH ? 'อีเมล' : 'Email'}</td>
                       <td className="ud-info-sep">:</td>
                       <td className="ud-info-val">{user.email}</td>
                     </tr>
                     <tr>
-                      <td className="ud-info-key">Phone</td>
+                      <td className="ud-info-key">{isTH ? 'เบอร์โทรศัพท์' : 'Phone'}</td>
                       <td className="ud-info-sep">:</td>
                       <td className="ud-info-val">{user.phone_number || '-'}</td>
                     </tr>
                     <tr>
-                      <td className="ud-info-key">Shipping Address</td>
+                      <td className="ud-info-key">{isTH ? 'ที่อยู่จัดส่ง' : 'Shipping Address'}</td>
                       <td className="ud-info-sep">:</td>
                       <td className="ud-info-val">{user.address || '-'}</td>
                     </tr>
@@ -412,7 +431,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     setEditErr('');
                     setShowEditInfo(true);
                   }}>
-                    <IconEdit /> Edit Information
+                    <IconEdit /> {isTH ? 'แก้ไขข้อมูล' : 'Edit Information'}
                   </button>
                   <button className="ud-edit-btn" onClick={() => {
                     setEditPw({ current: '', newPw: '', confirm: '' });
@@ -423,7 +442,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
-                    Edit Password
+                    {isTH ? 'เปลี่ยนรหัสผ่าน' : 'Edit Password'}
                   </button>
                 </div>
 
@@ -435,8 +454,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
           {/* ── ORDER STATUS TAB ── */}
           {tab === 'orders' && (
             <div className="ud-section">
-              <h2 className="ud-section__title">Order Status</h2>
-              <p className="ud-section__sub">Monitor your recent acquisitions. Every piece is handled with care for you and nature.</p>
+              <h2 className="ud-section__title">{isTH ? 'สถานะคำสั่งซื้อ' : 'Order Status'}</h2>
+              <p className="ud-section__sub">{isTH ? 'ติดตามสินค้าของคุณ ทุกชิ้นดูแลด้วยใจใส่ใจ' : 'Monitor your recent acquisitions. Every piece is handled with care for you and nature.'}</p>
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : productOrders.length === 0
                 ? <p className="ud-empty">ยังไม่มีคำสั่งซื้อ</p>
                 : productOrders.map(o => {
@@ -448,15 +467,15 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       <div className="ud-card__body">
                         <h3 className="ud-card__name">{p?.name ?? o.item_id}</h3>
                         <div className="ud-card__meta">
-                          <span><strong>DATE</strong><br />{fmtDate(o.order_date)}</span>
-                          <span><strong>STATUS</strong><br /><StatusBadge s={o.order_status} /></span>
-                          <span><strong>TOTAL</strong><br />{o.total_price} Baht</span>
+                          <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
+                          <span><strong>{isTH ? 'สถานะ' : 'STATUS'}</strong><br /><StatusBadge s={o.order_status} /></span>
+                          <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
                       <button className="ud-detail-btn" onClick={() => onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products')}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                        </svg> Detail
+                        </svg> {isTH ? 'รายละเอียด' : 'Detail'}
                       </button>
                     </div>
                   );
@@ -467,8 +486,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
           {/* ── ACTIVITY RESERVATIONS TAB ── */}
           {tab === 'activities' && (
             <div className="ud-section">
-              <h2 className="ud-section__title">Activity Reservations</h2>
-              <p className="ud-section__sub">Anticipate your upcoming eco-experiences. Seamlessly manage your mindful itineraries.</p>
+              <h2 className="ud-section__title">{isTH ? 'การจองกิจกรรม' : 'Activity Reservations'}</h2>
+              <p className="ud-section__sub">{isTH ? 'จัดการการจองกิจกรรมของคุณได้ที่นี่' : 'Anticipate your upcoming eco-experiences. Seamlessly manage your mindful itineraries.'}</p>
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : activityOrders.length === 0
                 ? <p className="ud-empty">ยังไม่มีการจองกิจกรรม</p>
                 : activityOrders.map(o => {
@@ -480,16 +499,16 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       <div className="ud-card__body">
                         <h3 className="ud-card__name">{a?.name ?? o.item_id}</h3>
                         <div className="ud-card__meta">
-                          <span><strong>DATE</strong><br />{fmtDate(o.order_date)}</span>
-                          {a?.date && <span><strong>Time</strong><br />{a.date}</span>}
-                          {a?.location && <span><strong>Location</strong><br />{a.location}</span>}
-                          <span><strong>TOTAL</strong><br />{o.total_price} Baht</span>
+                          <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
+                          {a?.date && <span><strong>{isTH ? 'เวลา' : 'Time'}</strong><br />{a.date}</span>}
+                          {a?.location && <span><strong>{isTH ? 'สถานที่' : 'Location'}</strong><br />{a.location}</span>}
+                          <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
                       <button className="ud-detail-btn" onClick={() => onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences')}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                        </svg> Detail
+                        </svg> {isTH ? 'รายละเอียด' : 'Detail'}
                       </button>
                     </div>
                   );
@@ -500,8 +519,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
           {/* ── TO REVIEWS TAB ── */}
           {tab === 'reviews' && (
             <div className="ud-section">
-              <h2 className="ud-section__title">To Reviews</h2>
-              <p className="ud-section__sub">Your voice matters. Share your thoughts on our sustainable products and experiences.</p>
+              <h2 className="ud-section__title">{isTH ? 'รีวิว' : 'To Reviews'}</h2>
+              <p className="ud-section__sub">{isTH ? 'แบ่งปันความคิดเห็นของคุณเกี่ยวกับสินค้าและกิจกรรมของเรา' : 'Your voice matters. Share your thoughts on our sustainable products and experiences.'}</p>
 
               {/* Filter bar */}
               <div className="ud-review-filterbar">
@@ -511,9 +530,9 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   </svg>
                   <select value={reviewTypeFilter} onChange={e => setReviewTypeFilter(e.target.value as any)}
                     className="ud-review-select">
-                    <option value="all">Type of services</option>
-                    <option value="product">Products</option>
-                    <option value="activity">Activities</option>
+                    <option value="all">{isTH ? 'ประเภทบริการ' : 'Type of services'}</option>
+                    <option value="product">{isTH ? 'สินค้า' : 'Products'}</option>
+                    <option value="activity">{isTH ? 'กิจกรรม' : 'Activities'}</option>
                   </select>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <polyline points="6 9 12 15 18 9" />
@@ -564,36 +583,36 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                                       <>
                                         {r.review_date && (
                                           <tr>
-                                            <td className="ud-rmt-label">Date</td>
+                                            <td className="ud-rmt-label">{isTH ? 'วันที่' : 'Date'}</td>
                                             <td className="ud-rmt-sep">:</td>
                                             <td className="ud-rmt-val">{fmtDate(r.review_date)}</td>
                                           </tr>
                                         )}
                                         <tr>
-                                          <td className="ud-rmt-label">Total</td>
+                                          <td className="ud-rmt-label">{isTH ? 'รวม' : 'Total'}</td>
                                           <td className="ud-rmt-sep">:</td>
-                                          <td className="ud-rmt-val">{item?.price ?? '-'} Baht</td>
+                                          <td className="ud-rmt-val">{item?.price ?? '-'} {isTH ? 'บาท' : 'Baht'}</td>
                                         </tr>
                                       </>
                                     ) : (
                                       <>
                                         {r.review_date && (
                                           <tr>
-                                            <td className="ud-rmt-label">Date</td>
+                                            <td className="ud-rmt-label">{isTH ? 'วันที่' : 'Date'}</td>
                                             <td className="ud-rmt-sep">:</td>
                                             <td className="ud-rmt-val">{fmtDate(r.review_date)}</td>
                                           </tr>
                                         )}
                                         {item?.date && (
                                           <tr>
-                                            <td className="ud-rmt-label">Time</td>
+                                            <td className="ud-rmt-label">{isTH ? 'เวลา' : 'Time'}</td>
                                             <td className="ud-rmt-sep">:</td>
                                             <td className="ud-rmt-val">{item.date}</td>
                                           </tr>
                                         )}
                                         {item?.location && (
                                           <tr>
-                                            <td className="ud-rmt-label">Location</td>
+                                            <td className="ud-rmt-label">{isTH ? 'สถานที่' : 'Location'}</td>
                                             <td className="ud-rmt-sep">:</td>
                                             <td className="ud-rmt-val">{item.location}</td>
                                           </tr>
@@ -610,8 +629,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                                 <textarea className="ud-review-textarea"
                                   value={editText} onChange={e => setEditText(e.target.value)} />
                                 <div className="ud-review-actions">
-                                  <button className="ud-review-btn--save" onClick={() => doSave(r.review_id)}>Save Changes</button>
-                                  <button className="ud-review-btn--cancel" onClick={() => setEditId(null)}>Cancel</button>
+                                  <button className="ud-review-btn--save" onClick={() => doSave(r.review_id)}>{isTH ? 'บันทึก' : 'Save Changes'}</button>
+                                  <button className="ud-review-btn--cancel" onClick={() => setEditId(null)}>{isTH ? 'ยกเลิก' : 'Cancel'}</button>
                                 </div>
                               </>
                             ) : (
@@ -621,11 +640,11 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                                 <div className="ud-review-actions">
                                   <button className="ud-review-btn" onClick={() => { setEditId(r.review_id); setEditText(r.comment); setEditRating(Number(r.rating)); }}>
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                    Edit Review
+                                    {isTH ? 'แก้ไขรีวิว' : 'Edit Review'}
                                   </button>
                                   <button className="ud-review-btn ud-review-btn--del" onClick={() => setDeleteId(r.review_id)}>
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
-                                    Delete Review
+                                    {isTH ? 'ลบรีวิว' : 'Delete Review'}
                                   </button>
                                 </div>
                               </>
@@ -646,11 +665,11 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
         <div className="ud-overlay" onClick={() => setDeleteId(null)}>
           <div className="ud-modal" onClick={e => e.stopPropagation()}>
             <button className="ud-modal__x" onClick={() => setDeleteId(null)}>×</button>
-            <h3 className="ud-modal__title">Are you sure?</h3>
-            <p className="ud-modal__body">Do you really want to delete the comment/rating? This action cannot be done.</p>
+            <h3 className="ud-modal__title">{isTH ? 'ยืนยันการลบ?' : 'Are you sure?'}</h3>
+            <p className="ud-modal__body">{isTH ? 'คุณต้องการลบความคิดเห็น/คะแนนนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถยกเลิกได้' : 'Do you really want to delete the comment/rating? This action cannot be done.'}</p>
             <div className="ud-modal__btns">
-              <button className="ud-modal__btn ud-modal__btn--confirm" onClick={doDelete}>✓ Confirm</button>
-              <button className="ud-modal__btn ud-modal__btn--cancel" onClick={() => setDeleteId(null)}>✕ Cancel</button>
+              <button className="ud-modal__btn ud-modal__btn--confirm" onClick={doDelete}>✓ {isTH ? 'ยืนยัน' : 'Confirm'}</button>
+              <button className="ud-modal__btn ud-modal__btn--cancel" onClick={() => setDeleteId(null)}>✕ {isTH ? 'ยกเลิก' : 'Cancel'}</button>
             </div>
           </div>
         </div>
@@ -661,51 +680,51 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
         <div className="ud-overlay" onClick={() => setShowEditInfo(false)}>
           <div className="ud-modal ud-modal--form" onClick={e => e.stopPropagation()}>
             <button className="ud-modal__x" onClick={() => setShowEditInfo(false)}>×</button>
-            <h3 className="ud-modal__title"><IconEdit /> Edit Information</h3>
+            <h3 className="ud-modal__title"><IconEdit /> {isTH ? 'แก้ไขข้อมูล' : 'Edit Information'}</h3>
 
             <div className="ud-form">
               {user?.user_type === 'individual' ? (
                 <>
                   <div className="ud-field">
-                    <label className="ud-field__label">Username</label>
+                    <label className="ud-field__label">{isTH ? 'ชื่อผู้ใช้' : 'Username'}</label>
                     <input className="ud-field__input" value={editInfo.user_name || ''}
                       onChange={e => setEditInfo((p: any) => ({ ...p, user_name: e.target.value }))} />
                   </div>
                   <div className="ud-form-row">
                     <div className="ud-field">
-                      <label className="ud-field__label">First Name</label>
+                      <label className="ud-field__label">{isTH ? 'ชื่อ' : 'First Name'}</label>
                       <input className="ud-field__input" value={editInfo.first_name || ''}
                         onChange={e => setEditInfo((p: any) => ({ ...p, first_name: e.target.value }))} />
                     </div>
                     <div className="ud-field">
-                      <label className="ud-field__label">Last Name</label>
+                      <label className="ud-field__label">{isTH ? 'นามสกุล' : 'Last Name'}</label>
                       <input className="ud-field__input" value={editInfo.last_name || ''}
                         onChange={e => setEditInfo((p: any) => ({ ...p, last_name: e.target.value }))} />
                     </div>
                   </div>
                   <div className="ud-field">
-                    <label className="ud-field__label">Gender</label>
+                    <label className="ud-field__label">{isTH ? 'เพศ' : 'Gender'}</label>
                     <select className="ud-field__input" value={editInfo.gender || ''}
                       onChange={e => setEditInfo((p: any) => ({ ...p, gender: e.target.value }))}>
-                      <option value="">-- เลือก --</option>
-                      <option value="ชาย">ชาย</option>
-                      <option value="หญิง">หญิง</option>
-                      <option value="อื่นๆ">อื่นๆ</option>
+                      <option value="">-- {isTH ? 'เลือก' : 'Select'} --</option>
+                      <option value={isTH ? 'ชาย' : 'Male'}>{isTH ? 'ชาย' : 'Male'}</option>
+                      <option value={isTH ? 'หญิง' : 'Female'}>{isTH ? 'หญิง' : 'Female'}</option>
+                      <option value={isTH ? 'อื่นๆ' : 'Other'}>{isTH ? 'อื่นๆ' : 'Other'}</option>
                     </select>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="ud-field">
-                    <label className="ud-field__label">Organization Name</label>
+                    <label className="ud-field__label">{isTH ? 'ชื่อนิติบุคคล' : 'Organization Name'}</label>
                     <input className="ud-field__input" value={editInfo.legal_entity_name || ''}
                       onChange={e => setEditInfo((p: any) => ({ ...p, legal_entity_name: e.target.value }))} />
                   </div>
                   <div className="ud-field">
-                    <label className="ud-field__label">Type</label>
+                    <label className="ud-field__label">{isTH ? 'ประเภทธุรกิจ' : 'Type'}</label>
                     <select className="ud-field__input" value={editInfo.business_type || ''}
                       onChange={e => setEditInfo((p: any) => ({ ...p, business_type: e.target.value }))}>
-                      <option value="">-- เลือก --</option>
+                      <option value="">-- {isTH ? 'เลือก' : 'Select'} --</option>
                       <option value="บริษัท">บริษัท</option>
                       <option value="ห้างหุ้นส่วน">ห้างหุ้นส่วน</option>
                       <option value="มูลนิธิ">มูลนิธิ</option>
@@ -714,24 +733,24 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     </select>
                   </div>
                   <div className="ud-field">
-                    <label className="ud-field__label">Registration Number</label>
+                    <label className="ud-field__label">{isTH ? 'เลขทะเบียน' : 'Registration Number'}</label>
                     <input className="ud-field__input" value={editInfo.business_registration_number || ''}
                       onChange={e => setEditInfo((p: any) => ({ ...p, business_registration_number: e.target.value }))} />
                   </div>
                 </>
               )}
               <div className="ud-field">
-                <label className="ud-field__label">Email</label>
+                <label className="ud-field__label">{isTH ? 'อีเมล' : 'Email'}</label>
                 <input className="ud-field__input" type="email" value={editInfo.email || ''}
                   onChange={e => setEditInfo((p: any) => ({ ...p, email: e.target.value }))} />
               </div>
               <div className="ud-field">
-                <label className="ud-field__label">Phone Number</label>
+                <label className="ud-field__label">{isTH ? 'เบอร์โทรศัพท์' : 'Phone Number'}</label>
                 <input className="ud-field__input" value={editInfo.phone_number || ''}
                   onChange={e => setEditInfo((p: any) => ({ ...p, phone_number: e.target.value }))} />
               </div>
               <div className="ud-field">
-                <label className="ud-field__label">Shipping Address</label>
+                <label className="ud-field__label">{isTH ? 'ที่อยู่จัดส่ง' : 'Shipping Address'}</label>
                 <textarea className="ud-field__input ud-field__textarea" value={editInfo.address || ''}
                   onChange={e => setEditInfo((p: any) => ({ ...p, address: e.target.value }))} rows={2} />
               </div>
@@ -741,10 +760,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
 
             <div className="ud-modal__btns">
               <button className="ud-modal__btn ud-modal__btn--save" onClick={handleSaveInfo} disabled={editSaving}>
-                {editSaving ? 'กำลังบันทึก...' : 'Save Changes'}
+                {editSaving ? 'กำลังบันทึก...' : (isTH ? 'บันทึก' : 'Save Changes')}
               </button>
               <button className="ud-modal__btn ud-modal__btn--cancel-outline" onClick={() => setShowEditInfo(false)}>
-                Cancel
+                {isTH ? 'ยกเลิก' : 'Cancel'}
               </button>
             </div>
           </div>
@@ -761,12 +780,12 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Edit Password
+              {isTH ? 'เปลี่ยนรหัสผ่าน' : 'Edit Password'}
             </h3>
 
             <div className="ud-form">
               <div className="ud-field">
-                <label className="ud-field__label">New Password</label>
+                <label className="ud-field__label">{isTH ? 'รหัสผ่านใหม่' : 'New Password'}</label>
                 <div className="ud-pw-wrap">
                   <input className="ud-field__input ud-pw-input" type={showNewPw ? 'text' : 'password'}
                     value={editPw.newPw} onChange={e => setEditPw(p => ({ ...p, newPw: e.target.value }))} />
@@ -776,7 +795,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 </div>
               </div>
               <div className="ud-field">
-                <label className="ud-field__label">Confirm New Password</label>
+                <label className="ud-field__label">{isTH ? 'ยืนยันรหัสผ่านใหม่' : 'Confirm New Password'}</label>
                 <div className="ud-pw-wrap">
                   <input className="ud-field__input ud-pw-input" type={showCfmPw ? 'text' : 'password'}
                     value={editPw.confirm} onChange={e => setEditPw(p => ({ ...p, confirm: e.target.value }))} />
@@ -787,7 +806,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               </div>
               <hr className="ud-form-divider" />
               <div className="ud-field">
-                <label className="ud-field__label">Current Password</label>
+                <label className="ud-field__label">{isTH ? 'รหัสผ่านปัจจุบัน' : 'Current Password'}</label>
                 <div className="ud-pw-wrap">
                   <input className="ud-field__input ud-pw-input" type={showCurPw ? 'text' : 'password'}
                     value={editPw.current} onChange={e => setEditPw(p => ({ ...p, current: e.target.value }))} />
@@ -802,10 +821,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
 
             <div className="ud-modal__btns">
               <button className="ud-modal__btn ud-modal__btn--save" onClick={handleSavePw} disabled={editSaving}>
-                {editSaving ? 'กำลังบันทึก...' : 'Save Changes'}
+                {editSaving ? 'กำลังบันทึก...' : (isTH ? 'บันทึก' : 'Save Changes')}
               </button>
               <button className="ud-modal__btn ud-modal__btn--cancel-outline" onClick={() => setShowEditPw(false)}>
-                Cancel
+                {isTH ? 'ยกเลิก' : 'Cancel'}
               </button>
             </div>
           </div>
@@ -993,11 +1012,13 @@ export const USER_DASHBOARD_CSS = `
 
 /* ── Order / Activity cards ─────────────── */
 .ud-card {
-  background: var(--white); border-radius: 12px;
+  border-radius: 12px;
   padding: 1rem 1.2rem; margin-bottom: 1rem;
   display: flex; align-items: center; gap: 1.2rem;
   box-shadow: 0 1px 8px rgba(0,0,0,.05);
 }
+.ud-card:nth-child(odd)  { background: #C5D2D2; border: 1px solid #b0c2c2; }
+.ud-card:nth-child(even) { background: #EDE8DE; border: 1px solid #d4cdc0; }
 .ud-card__img {
   width: 88px; height: 70px; object-fit: cover;
   border-radius: 8px; flex-shrink: 0; background: #eee;

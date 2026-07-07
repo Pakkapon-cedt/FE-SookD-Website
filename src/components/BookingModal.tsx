@@ -13,6 +13,7 @@ interface Props {
   onNavigateToCart?: () => void;
   optionalIds?: string[];
   offerIds?: string[];
+  lang?: 'TH' | 'ENG';
 }
 
 interface OptItem {
@@ -91,7 +92,8 @@ function Calendar({ selected, onSelect, error }: { selected: Date | null; onSele
   );
 }
 
-export default function BookingModal({ activity, currentUser: _currentUser, onClose, onNavigateToCart, optionalIds = DEFAULT_OPTIONAL_IDS, offerIds = DEFAULT_OFFER_IDS }: Props) {
+export default function BookingModal({ activity, currentUser: _currentUser, onClose, onNavigateToCart, optionalIds = DEFAULT_OPTIONAL_IDS, offerIds = DEFAULT_OFFER_IDS, lang = 'TH' }: Props) {
+  const isTH = lang === 'TH';
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [participants, setParticipants] = useState(1);
   const [selectedTime, setSelectedTime] = useState('');
@@ -257,13 +259,15 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
         {/* ── Optional activities ── */}
         <div className="bk__optional">
           <div className="bk__opt-title-row">
-            <h4 className="bk__opt-title">Activity (Optional)</h4>
+            <h4 className="bk__opt-title">{isTH ? 'กิจกรรม (เลือกเพิ่มได้)' : 'Activity (Optional)'}</h4>
             {showDateError && !selectedDate && (
               <span className="bk__date-error">กรุณาเลือกวันเข้าร่วมกิจกรรม</span>
             )}
           </div>
           <p className="bk__opt-desc">
-            Order now along with your activity booking and enjoy <strong>Free Shipping</strong>. You can conveniently pick up your items directly at the location on the day of your visit.
+            {isTH
+              ? <>สั่งซื้อพร้อมการจองกิจกรรมวันนี้ รับสิทธิ์<strong>ส่งฟรี</strong> และรับสินค้าได้ง่ายๆ ที่หน้างานในวันที่เข้าชม</>
+              : <>Order now along with your activity booking and enjoy <strong>Free Shipping</strong>. You can conveniently pick up your items directly at the location on the day of your visit.</>}
           </p>
 
           <div className="bk__opt-list">
@@ -305,8 +309,8 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                       </div>
                     )}
                     <div className="bk__opt-badge">
-                      <span className="bk__opt-badge-pct">20%</span>
-                      <span className="bk__opt-badge-txt">&#xe23a;&#xe2d2;&#xe44d; 20%<br/>&#xe17e;&#xe19c;&#xe01a;&#xe32;&#xe23;&#xe28;&#xe36;&#xe01;&#xe29;&#xe32;<br/>&#xe43;&#xe19;&#xe17;&#xe49;&#xe2d;&#xe07;&#xe16;&#xe34;&#xe48;&#xe19;</span>
+                      <span className="bk__opt-badge-pct">10%</span>
+                      <span className="bk__opt-badge-txt">{isTH ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>
                     </div>
                   </div>
 
@@ -343,7 +347,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                     {/* Row 3: description + price */}
                     <div className="bk__opt-row3">
                       <span className="bk__opt-desc-text">{item.act.description}</span>
-                      <span className="bk__opt-price">{Number(item.act.price).toLocaleString()} Baht</span>
+                      <span className="bk__opt-price">{Number(item.act.price).toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
                     </div>
                   </div>
                 </div>
@@ -372,7 +376,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
               }
               setShowDateError(false);
               setStep(2);
-            }}>Next</button>
+            }}>{isTH ? 'ถัดไป' : 'Next'}</button>
           </div>
         </div>
         </>)}
@@ -380,8 +384,10 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
         {step === 2 && (<>
           {/* ── Reservation Summary ── */}
           <div className="bk__sum">
-            <h3 className="bk__sum-title">Reservation Summary</h3>
-            <p className="bk__sum-sub">Don't forget to double-check your booking details before confirming! If anything looks off, just click 'Back' to edit.</p>
+            <h3 className="bk__sum-title">{isTH ? 'สรุปรายละเอียดการจอง' : 'Reservation Summary'}</h3>
+            <p className="bk__sum-sub">{isTH
+              ? "โปรดตรวจสอบรายละเอียดการจองของคุณให้ถูกต้องก่อนยืนยัน หากพบข้อมูลไม่ถูกต้อง สามารถคลิก 'ย้อนกลับ' เพื่อแก้ไขได้ทันที"
+              : "Don't forget to double-check your booking details before confirming! If anything looks off, just click 'Back' to edit."}</p>
             <div className="bk__sum-main">
               <div className="bk__sum-img-wrap">
                 {activity.image
@@ -393,15 +399,15 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                 <h4 className="bk__sum-name">{activity.name}</h4>
                 <div className="bk__sum-table">
                   <div className="bk__sum-col">
-                    <p className="bk__sum-lbl">Date</p>
+                    <p className="bk__sum-lbl">{isTH ? 'วันที่' : 'Date'}</p>
                     <p className="bk__sum-val">{selectedDate ? fmtDate(selectedDate) : '–'}</p>
                   </div>
                   <div className="bk__sum-col">
-                    <p className="bk__sum-lbl">Activity Detail</p>
-                    <p className="bk__sum-val">Time : {selectedTime || '–'}</p>
+                    <p className="bk__sum-lbl">{isTH ? 'รายละเอียดกิจกรรม' : 'Activity Detail'}</p>
+                    <p className="bk__sum-val">{isTH ? 'เวลา' : 'Time'} : {selectedTime || '–'}</p>
                   </div>
                   <div className="bk__sum-col">
-                    <p className="bk__sum-lbl">Quantity</p>
+                    <p className="bk__sum-lbl">{isTH ? 'จำนวน' : 'Quantity'}</p>
                     <p className="bk__sum-val">{participants}</p>
                   </div>
                 </div>
@@ -429,15 +435,15 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                       </div>
                       <div className="bk__sum-table">
                         <div className="bk__sum-col">
-                          <p className="bk__sum-lbl">Date</p>
+                          <p className="bk__sum-lbl">{isTH ? 'วันที่' : 'Date'}</p>
                           <p className="bk__sum-val">{selectedDate ? fmtDate(selectedDate) : '–'}</p>
                         </div>
                         <div className="bk__sum-col">
-                          <p className="bk__sum-lbl">Activity Detail</p>
-                          <p className="bk__sum-val">Time : {o.time || '–'}</p>
+                          <p className="bk__sum-lbl">{isTH ? 'รายละเอียดกิจกรรม' : 'Activity Detail'}</p>
+                          <p className="bk__sum-val">{isTH ? 'เวลา' : 'Time'} : {o.time || '–'}</p>
                         </div>
                         <div className="bk__sum-col">
-                          <p className="bk__sum-lbl">Quantity</p>
+                          <p className="bk__sum-lbl">{isTH ? 'จำนวน' : 'Quantity'}</p>
                           <p className="bk__sum-val">{o.qty}</p>
                         </div>
                       </div>
@@ -469,11 +475,11 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                       </div>
                       <div className="bk__sum-table">
                         <div className="bk__sum-col">
-                          <p className="bk__sum-lbl">Date</p>
+                          <p className="bk__sum-lbl">{isTH ? 'วันที่' : 'Date'}</p>
                           <p className="bk__sum-val">{selectedDate ? fmtDate(selectedDate) : '–'}</p>
                         </div>
                         <div className="bk__sum-col">
-                          <p className="bk__sum-lbl">Quantity</p>
+                          <p className="bk__sum-lbl">{isTH ? 'จำนวน' : 'Quantity'}</p>
                           <p className="bk__sum-val">{c.qty}</p>
                         </div>
                       </div>
@@ -488,7 +494,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="15 18 9 12 15 6"/>
                 </svg>
-                Back
+                {isTH ? 'ย้อนกลับ' : 'Back'}
               </button>
             </div>
           </div>
@@ -496,8 +502,10 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
           {offerItems.length > 0 && (<>
             <div className="bk__divider" />
             <div className="bk__offer">
-              <h4 className="bk__offer-title">Exclusive On-Site Offer: <em>Zero Shipping Fees!</em></h4>
-              <p className="bk__offer-sub">Order now along with your activity booking and enjoy <strong>Free Shipping</strong>. You can conveniently pick up your items directly at the location on the day of your visit.</p>
+              <h4 className="bk__offer-title">{isTH ? <>สิทธิพิเศษ: <em>ฟรีค่าจัดส่งเมื่อรับที่หน้างาน!</em></> : <>Exclusive On-Site Offer: <em>Zero Shipping Fees!</em></>}</h4>
+              <p className="bk__offer-sub">{isTH
+                ? <>สั่งซื้อพร้อมการจองกิจกรรมวันนี้ รับสิทธิ์<strong>ส่งฟรี</strong> และรับสินค้าได้ง่ายๆ ที่หน้างานในวันที่เข้าชม</>
+                : <>Order now along with your activity booking and enjoy <strong>Free Shipping</strong>. You can conveniently pick up your items directly at the location on the day of your visit.</>}</p>
               <div className="bk__offer-list">
                 {offerItems.map(item => {
                   const tag = item.origin || '';
@@ -510,8 +518,8 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                               onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                           : <div className="bk__offer-img-ph" />}
                         <div className="bk__opt-badge">
-                          <span className="bk__opt-badge-pct">20%</span>
-                          <span className="bk__opt-badge-txt">รายได้ 20%<br/>ทุนการศึกษา<br/>ในท้องถิ่น</span>
+                          <span className="bk__opt-badge-pct">10%</span>
+                          <span className="bk__opt-badge-txt">{isTH ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>
                         </div>
                       </div>
                       <div className="bk__offer-info">
@@ -530,18 +538,18 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                               onClick={() => setOfferQtys(q => ({...q, [item.id]: (q[item.id]??1)+1}))}
                             >+</button>
                           </div>
-                          <span className="bk__offer-price">{Number(item.price).toLocaleString()} Baht</span>
+                          <span className="bk__offer-price">{Number(item.price).toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                         <p className="bk__offer-desc">{item.note}</p>
-                        <button className="bk__add-cart" onClick={() => addOfferToLocalCart(item, qty)}>Add to cart</button>
+                        <button className="bk__add-cart" onClick={() => addOfferToLocalCart(item, qty)}>{isTH ? 'เพิ่มในตะกร้าสินค้า' : 'Add to cart'}</button>
                       </div>
                     </div>
                   );
                 })}
               </div>
               <div className="bk__offer-footer">
-                <button className="bk__close-btn" onClick={onClose}>Close</button>
-                <button className="bk__pay-btn" onClick={handleAddToCart}>Add to cart</button>
+                <button className="bk__close-btn" onClick={onClose}>{isTH ? 'ปิด' : 'Close'}</button>
+                <button className="bk__pay-btn" onClick={handleAddToCart}>{isTH ? 'เพิ่มในตะกร้าสินค้า' : 'Add to cart'}</button>
               </div>
             </div>
           </>)}

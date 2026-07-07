@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
+import { addToCart } from '../utils/cart';
 
 interface Props {
   productId: string;
@@ -10,6 +11,7 @@ interface Props {
   orderData?: any;
   onNavigate?: (page: string) => void;
   currentUser?: any;
+  lang?: 'TH' | 'ENG';
 }
 
 function fmtOrderDate(d: any) {
@@ -61,24 +63,26 @@ function Stars({ rating, size = 16, emptyFill = '#d0d0d0' }: { rating: number; s
   );
 }
 
-const SIZE_TAB_CONFIG: Record<string, { label: string; altId?: string }[]> = {
+const SIZE_TAB_CONFIG: Record<string, { label: string; labelEn?: string; altId?: string }[]> = {
   PRD001_A: [
-    { label: 'ไซส์ยักษ์ (13-16 ลูก/กก.)' },
-    { label: 'รวมมิตร (17-20 ลูก/กก.)', altId: 'PRD002_A' },
+    { label: 'ไซส์ยักษ์ (13-16 ลูก/กก.)',   labelEn: 'Jumbo Size (13-16 pcs/kg)' },
+    { label: 'รวมมิตร (17-20 ลูก/กก.)',       labelEn: 'Mixed Sizes (17-20 pcs/kg)', altId: 'PRD002_A' },
   ],
   PRD004_A: [
-    { label: 'กล่อง 3+ กิโล' },
-    { label: 'กล่อง 5+ กิโล', altId: 'PRD004_B' },
-    { label: 'กล่อง 7+ กิโล', altId: 'PRD004_C' },
+    { label: 'กล่อง 3+ กิโล', labelEn: '3+ kg Box' },
+    { label: 'กล่อง 5+ กิโล', labelEn: '5+ kg Box', altId: 'PRD004_B' },
+    { label: 'กล่อง 7+ กิโล', labelEn: '7+ kg Box', altId: 'PRD004_C' },
   ],
   PRD005_A: [
-    { label: 'ชุด 3 กระปุก' },
-    { label: 'ชุด 8 กระปุก', altId: 'PRD005_B' },
-    { label: 'ชุด 20 กระปุก', altId: 'PRD005_C' },
+    { label: 'ชุด 3 กระปุก',  labelEn: 'Set of 3 Jars' },
+    { label: 'ชุด 8 กระปุก',  labelEn: 'Set of 8 Jars',  altId: 'PRD005_B' },
+    { label: 'ชุด 20 กระปุก', labelEn: 'Set of 20 Jars', altId: 'PRD005_C' },
   ],
 };
 
-export default function ProductDetailPage({ productId, onBack, onSelectProduct, orderData, onNavigate, currentUser }: Props) {
+const normalizeId = (id: string) => id.replace(/_(TH|EN)$/, '');
+
+export default function ProductDetailPage({ productId, onBack, onSelectProduct, orderData, onNavigate, currentUser, lang = 'TH' }: Props) {
   const [product, setProduct] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -105,18 +109,25 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
       setReviews(Array.isArray(revs) ? revs : []);
       setAvgRating(Math.ceil(Number(avg?.averageRating ?? avg?.average ?? 0)));
       const HIDDEN_IDS = ['PRD002_A', 'PRD004_B', 'PRD004_C', 'PRD005_B', 'PRD005_C'];
-      setOthers(Array.isArray(allProds) ? allProds.filter((p: any) => p.id !== productId && !HIDDEN_IDS.includes(p.id)).slice(0, 9) : []);
+      const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+      setOthers(Array.isArray(allProds) ? allProds.filter((p: any) =>
+        p.id !== productId &&
+        p.id?.endsWith(langSuffix) &&
+        !HIDDEN_IDS.includes(normalizeId(p.id))
+      ).slice(0, 9) : []);
     }).finally(() => setLoading(false));
   }, [productId]);
 
   useEffect(() => {
-    const tabConfig = SIZE_TAB_CONFIG[productId];
+    const baseId = normalizeId(productId);
+    const tabConfig = SIZE_TAB_CONFIG[baseId];
     if (!tabConfig) return;
-    const altIds = tabConfig.map(t => t.altId).filter(Boolean) as string[];
+    const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+    const altIds = tabConfig.map(t => t.altId ? t.altId + langSuffix : undefined).filter(Boolean) as string[];
     altIds.forEach(id => {
       api.products.getOne(id).then(p => setAltProducts(prev => ({ ...prev, [id]: p }))).catch(() => {});
     });
-  }, [productId]);
+  }, [productId, lang]);
 
   if (loading) return <div className="pdet__loading">กำลังโหลด...</div>;
   if (!product) return <div className="pdet__loading">ไม่พบสินค้า</div>;
@@ -137,7 +148,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            กลับ
+            {lang === 'TH' ? 'กลับ' : 'Back'}
           </button>
         </div>
 
@@ -153,7 +164,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                 }} />
               <div className="impact-badge">
                 <span className="impact-badge__pct">10%</span>
-                <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+                <span className="impact-badge__text">{lang === 'TH' ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>
               </div>
             </div>
           </div>
@@ -172,7 +183,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                     <div className="pdet__order-sep" />
                     <div className="pdet__order-col">
                       <span className="pdet__order-label">TOTAL</span>
-                      <span className="pdet__order-val">{orderData.total_price} Baht</span>
+                      <span className="pdet__order-val">{orderData.total_price} {lang === 'TH' ? 'บาท' : 'Baht'}</span>
                     </div>
                   </div>
                   <div className="pdet__order-divider" />
@@ -211,7 +222,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                   </div>
                 </div>
                 {product.quantity ? <p className="pdet__qty-label">{product.quantity} กรัม</p> : null}
-                <p className="pdet__remain"><span className="pdet__remain-label">สินค้าคงเหลือ:</span> {product.remain ?? 0}</p>
+                <p className="pdet__remain"><span className="pdet__remain-label">{lang === 'TH' ? 'สินค้าคงเหลือ' : 'Remaining stock'}:</span> {product.remain ?? 0}</p>
                 {product.note && <p className="pdet__short-desc">{product.note.split('\n')[0]}</p>}
                 {product.shipping_duration && (
                   <div className="pdet__shipping">
@@ -221,32 +232,48 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                     <span>shipping {product.shipping_duration}</span>
                   </div>
                 )}
-                {SIZE_TAB_CONFIG[productId] && (
+                {SIZE_TAB_CONFIG[normalizeId(productId)] && (
                   <div className="pdet__size-tabs">
-                    {SIZE_TAB_CONFIG[productId].map((tab, i) => (
+                    {SIZE_TAB_CONFIG[normalizeId(productId)].map((tab, i) => (
                       <button
                         key={i}
                         className={`pdet__size-tab${tabIdx === i ? ' pdet__size-tab--active' : ''}`}
                         onClick={() => setTabIdx(i)}
-                      >{tab.label}</button>
+                      >{lang === 'ENG' && tab.labelEn ? tab.labelEn : tab.label}</button>
                     ))}
                   </div>
                 )}
                 {(() => {
-                  const tabConfig = SIZE_TAB_CONFIG[productId];
-                  const altId = tabConfig?.[tabIdx]?.altId;
+                  const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+                  const tabConfig = SIZE_TAB_CONFIG[normalizeId(productId)];
+                  const baseAltId = tabConfig?.[tabIdx]?.altId;
+                  const altId = baseAltId ? baseAltId + langSuffix : undefined;
                   const activeProduct = (altId && altProducts[altId]) ? altProducts[altId] : product;
                   return (
                     <>
                       <div className="pdet__buy-row">
-                        <div className="pdet__price">{(Number(activeProduct.price) * qty).toLocaleString()} Baht</div>
+                        <div className="pdet__price">{(Number(activeProduct.price) * qty).toLocaleString()} {lang === 'TH' ? 'บาท' : 'Baht'}</div>
                         <div className="pdet__qty-ctrl">
                           <button onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
                           <span>{qty}</span>
                           <button onClick={() => setQty(q => q + 1)}>+</button>
                         </div>
                       </div>
-                      <button className="pdet__cart-btn" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); } else { (window as any).gtag?.('event', 'add_to_cart', { item_id: activeProduct?.id, item_name: activeProduct?.name, price: activeProduct?.price, quantity: qty }); } }}>Add to cart</button>
+                      <button className="pdet__cart-btn" onClick={() => {
+                        if (!isLoggedIn) { setShowLoginModal(true); return; }
+                        (window as any).gtag?.('event', 'add_to_cart', { item_id: activeProduct?.id, item_name: activeProduct?.name, price: activeProduct?.price, quantity: qty });
+                        addToCart([{
+                          itemId: activeProduct?.id ?? '',
+                          itemType: 'product',
+                          name: activeProduct?.name ?? '',
+                          image: activeProduct?.image ?? '',
+                          price: Number(activeProduct?.price ?? 0),
+                          qty,
+                          sellerName: activeProduct?.origin ?? 'SookD',
+                          weightInfo: activeProduct?.quantity ? `${activeProduct.quantity} กรัม` : undefined,
+                        }]);
+                        onNavigate?.('cart');
+                      }}>{lang === 'TH' ? 'เพิ่มในตะกร้าสินค้า' : 'Add to cart'}</button>
                     </>
                   );
                 })()}
@@ -349,8 +376,8 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                         <span className="pdet__other-origin">{p.origin?.split(',').slice(1).join(', ') || p.origin}</span>
                       </div>
                       <div className="pdet__other-meta">
-                        <span className="pdet__other-qty">สินค้าคงเหลือ: {p.remain ?? 0}</span>
-                        <span className="pdet__other-price">{Number(p.price).toLocaleString()} Baht</span>
+                        <span className="pdet__other-qty">{lang === 'TH' ? 'สินค้าคงเหลือ' : 'Remaining stock'}: {p.remain ?? 0}</span>
+                        <span className="pdet__other-price">{Number(p.price).toLocaleString()} {lang === 'TH' ? 'บาท' : 'Baht'}</span>
                       </div>
                       <p className="pdet__other-note">{p.note?.replace(/\n/g,' ').slice(0, 60)}{p.note?.length > 60 ? '…' : ''}</p>
                     </div>
@@ -374,8 +401,8 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
         <div className="adet__modal-overlay" onClick={() => setShowLoginModal(false)}>
           <div className="adet__modal" onClick={e => e.stopPropagation()}>
             <button className="adet__modal-close" onClick={() => setShowLoginModal(false)}>✕</button>
-            <h3 className="adet__modal-title">Sign in to Continue</h3>
-            <p className="adet__modal-msg">Please log in or register an account to add items to your cart and proceed with checkout.</p>
+            <h3 className="adet__modal-title">{lang === 'TH' ? 'เข้าสู่ระบบเพื่อดำเนินการต่อ' : 'Sign in to Continue'}</h3>
+            <p className="adet__modal-msg">{lang === 'TH' ? 'โปรดเข้าสู่ระบบหรือสมัครสมาชิก เพื่อเพิ่มสินค้าลงในรถเข็นและดำเนินการชำระเงิน' : 'Please log in or register an account to add items to your cart and proceed with checkout.'}</p>
             <div className="adet__modal-actions">
               <button className="adet__modal-login" onClick={() => { setShowLoginModal(false); onNavigate?.('login'); }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -383,7 +410,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                 </svg>
                 Login/Register
               </button>
-              <button className="adet__modal-later" onClick={() => setShowLoginModal(false)}>Maybe Later</button>
+              <button className="adet__modal-later" onClick={() => setShowLoginModal(false)}>{lang === 'TH' ? 'ไว้ทีหลัง' : 'Maybe Later'}</button>
             </div>
           </div>
         </div>

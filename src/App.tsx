@@ -18,6 +18,7 @@ import AboutPage, { ABOUT_CSS } from './components/AboutPage';
 import CartPage, { CART_CSS } from './components/CartPage';
 import CheckoutPage, { CHECKOUT_CSS } from './components/CheckoutPage';
 import { SITE_CONTENT as c } from './constants/content';
+import { getCart } from './utils/cart';
 
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import { getSessionId } from './utils/session';
@@ -31,6 +32,23 @@ export default function App() {
   const [prevPage, setPrevPage] = useState<Page>('experiences');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [orderData, setOrderData] = useState<any>(null);
+  const [lang, setLang] = useState<'TH' | 'ENG'>('TH');
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const update = () => setCartCount(getCart().length);
+    update();
+    window.addEventListener('storage', update);
+    return () => window.removeEventListener('storage', update);
+  }, []);
+
+
+  useEffect(() => {
+    const newSuffix = lang === 'TH' ? '_TH' : '_EN';
+    const oldSuffix = lang === 'TH' ? '_EN' : '_TH';
+    setSelectedActivityId(id => id.endsWith(oldSuffix) ? id.slice(0, -oldSuffix.length) + newSuffix : id);
+    setSelectedProductId(id => id.endsWith(oldSuffix) ? id.slice(0, -oldSuffix.length) + newSuffix : id);
+  }, [lang]);
 
  useEffect(() => {
     // ============= sessionCheck ========//
@@ -62,6 +80,7 @@ export default function App() {
   function navigate(p: string) {
     window.history.pushState({ page: p }, '');
     setPage(p as Page);
+    setCartCount(getCart().length);
   }
 
   function openActivity(id: string) {
@@ -110,30 +129,33 @@ export default function App() {
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
         currentUser={currentUser}
         onLogout={() => { setCurrentUser(null); navigate('home'); }}
+        lang={lang} onLangChange={setLang}
+        cartCount={cartCount}
       />
 
       {page === 'profile' ? (
         <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)}
-          onSelectProduct={openProductFromOrder} onSelectActivity={openActivityFromOrder} />
+          onSelectProduct={openProductFromOrder} onSelectActivity={openActivityFromOrder} lang={lang} />
       ) : page === 'login' ? (
         <AuthPage
           onBack={() => navigate('home')}
           onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
+          lang={lang}
         />
       ) : page === 'product-detail' ? (
-        <ProductDetailPage productId={selectedProductId} onBack={() => { setOrderData(null); setPage(prevPage); }} onSelectProduct={(id) => openProduct(id, prevPage)} orderData={orderData} onNavigate={navigate} currentUser={currentUser} />
+        <ProductDetailPage productId={selectedProductId} onBack={() => { setOrderData(null); setPage(prevPage); }} onSelectProduct={(id) => openProduct(id, prevPage)} orderData={orderData} onNavigate={navigate} currentUser={currentUser} lang={lang} />
       ) : page === 'activity-detail' ? (
-        <ActivityDetailPage activityId={selectedActivityId} onBack={() => { setOrderData(null); setPage(prevPage || 'experiences'); }} orderData={orderData} currentUser={currentUser} onNavigate={navigate} />
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => { setOrderData(null); setPage(prevPage || 'experiences'); }} orderData={orderData} currentUser={currentUser} onNavigate={navigate} lang={lang} />
       ) : page === 'products' ? (
-        <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} />
+        <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} lang={lang} />
       ) : page === 'experiences' ? (
-        <ExperiencesPage onSelectActivity={openActivity} currentUser={currentUser} />
+        <ExperiencesPage onSelectActivity={openActivity} currentUser={currentUser} lang={lang} />
       ) : page === 'about' ? (
-        <AboutPage />
+        <AboutPage lang={lang} />
       ) : page === 'checkout' ? (
-        <CheckoutPage currentUser={currentUser} onNavigate={navigate} />
+        <CheckoutPage currentUser={currentUser} onNavigate={navigate} lang={lang} />
       ) : page === 'cart' ? (
-        <CartPage currentUser={currentUser} onNavigate={navigate} />
+        <CartPage currentUser={currentUser} onNavigate={navigate} lang={lang} />
       ) : (
         <main>
           <Hero heading={c.hero.heading} subheading={c.hero.subheading} />
@@ -296,6 +318,33 @@ address{font-style:normal}
 .navbar-logout-modal__btn--confirm:hover { background:#ddd; }
 .navbar-logout-modal__btn--cancel { background:#fde8e8; color:#e53935; }
 .navbar-logout-modal__btn--cancel:hover { background:#fcd0d0; }
+.navbar__lang {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  color: rgba(255,255,255,.85);
+}
+.navbar--scrolled .navbar__lang { color: var(--forest); }
+.navbar__lang svg { flex-shrink: 0; }
+.navbar__lang-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: inherit;
+  opacity: .55;
+  padding: 0 .1rem;
+  transition: opacity .2s;
+}
+.navbar__lang-btn--active { opacity: 1; font-weight: 700; }
+.navbar__lang-btn:hover { opacity: .85; }
+.navbar__lang-sep {
+  font-size: .7rem;
+  opacity: .4;
+  line-height: 1;
+}
 .navbar__cta {
   padding:.45rem 1.4rem;
   background: var(--cta-bg);

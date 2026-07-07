@@ -9,6 +9,7 @@ interface Props {
   onBack: () => void;
   onLoginSuccess?: (user: any) => void;
   initialView?: AuthView;
+  lang?: 'TH' | 'ENG';
 }
 
 const MONTHS = [
@@ -35,7 +36,8 @@ function FieldError({ msg }: { msg?: string }) {
   return <p className="auth-field__err">{msg}</p>;
 }
 
-export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login' }: Props) {
+export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login', lang = 'TH' }: Props) {
+  const isTH = lang === 'TH';
   const [view, setView] = useState<AuthView>(initialView);
 
   /* ── Login state ── */
@@ -200,7 +202,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     <>
       <div className="auth-page">
         <div className="auth-card">
-          <h1 className="auth-title">Login</h1>
+          <h1 className="auth-title">{isTH ? 'เข้าสู่ระบบ' : 'Login'}</h1>
           <form onSubmit={handleLogin} noValidate>
             <div className="auth-field">
               <label className="auth-field__label">Email</label>
@@ -212,12 +214,12 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
               <FieldError msg={loginErrs.email} />
             </div>
             <div className="auth-field">
-              <label className="auth-field__label">Password</label>
+              <label className="auth-field__label">{isTH ? 'รหัสผ่าน' : 'Password'}</label>
               <div className="auth-pw-wrap">
                 <input
                   className={`auth-input${loginErrs.password ? ' auth-input--err' : ''}`}
                   type={loginShowPw ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder={isTH ? 'กรอกรหัสผ่าน' : 'Enter your password'}
                   value={loginPass} onChange={e => setLoginPass(e.target.value)}
                 />
                 <button type="button" className="auth-pw-eye" onClick={() => setLoginShowPw(v => !v)}>
@@ -228,11 +230,11 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
             </div>
             {loginApiErr && <p className="auth-api-err">{loginApiErr}</p>}
             <button className="auth-btn auth-btn--primary auth-btn--full" type="submit" disabled={loginLoading}>
-              {loginLoading ? 'กำลังเข้าสู่ระบบ...' : 'Login'}
+              {loginLoading ? 'กำลังเข้าสู่ระบบ...' : (isTH ? 'เข้าสู่ระบบ' : 'Login')}
             </button>
           </form>
           <p className="auth-link-row">
-            Don't have an account?{' '}
+            {isTH ? 'ยังไม่มีบัญชีสมาชิก?' : "Don't have an account?"}{' '}
             <button className="auth-link" onClick={() => {
               (window as any).gtag?.('event', 'click_register_link');
               setUserType('individual');
@@ -240,7 +242,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
               setR2({ email: '', username: '', password: '', confirm: '' });
               setR1Err({}); setR2Err({}); setAgreed(false);
               setView('reg1');
-            }}>Register</button>
+            }}>{isTH ? 'สมัครสมาชิก' : 'Register'}</button>
           </p>
         </div>
       </div>
@@ -252,35 +254,36 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     <>
       <div className="auth-page">
         <div className="auth-card auth-card--wide">
-          <h1 className="auth-title">Register</h1>
+          <h1 className="auth-title">{isTH ? 'สมัครสมาชิก' : 'Register'}</h1>
 
           {/* Tabs */}
           <div className="auth-tabs">
             <button className={`auth-tab${userType === 'individual' ? ' auth-tab--active' : ''}`}
-              onClick={() => { (window as any).gtag?.('event', 'select_account_type', { type: 'individual' }); setUserType('individual'); setR1Err({}); }}>Individual</button>
+              onClick={() => { (window as any).gtag?.('event', 'select_account_type', { type: 'individual' }); setUserType('individual'); setR1Err({}); }}>{isTH ? 'บุคคลธรรมดา' : 'Individual'}</button>
             <button className={`auth-tab${userType === 'legal_entity' ? ' auth-tab--active' : ''}`}
-              onClick={() => { (window as any).gtag?.('event', 'select_account_type', { type: 'legal_entity' }); setUserType('legal_entity'); setR1Err({}); }}>Legal Entity</button>
+              onClick={() => { (window as any).gtag?.('event', 'select_account_type', { type: 'legal_entity' }); setUserType('legal_entity'); setR1Err({}); }}>{isTH ? 'นิติบุคคล' : 'Legal Entity'}</button>
           </div>
 
           {userType === 'individual' ? (
             <>
-              {field('Name', 'first_name', r1.first_name, v => setR1({ ...r1, first_name: v }), r1Err, { placeholder: 'Enter your name' })}
-              {field('Surname', 'last_name', r1.last_name, v => setR1({ ...r1, last_name: v }), r1Err, { placeholder: 'Enter your surname' })}
-              {field('Phone Number', 'phone_number', r1.phone_number, v => setR1({ ...r1, phone_number: v }), r1Err, { placeholder: 'e.g. 0123456789' })}
-              {field('Shipping Address', 'address', r1.address, v => setR1({ ...r1, address: v }), r1Err, { placeholder: 'Enter your shipping address' })}
-              {selectField('Gender', 'gender', r1.gender, v => setR1({ ...r1, gender: v }), r1Err,
-                ['Male', 'Female', 'Other'], 'Select your gender')}
+              {field(isTH ? 'ชื่อ' : 'Name', 'first_name', r1.first_name, v => setR1({ ...r1, first_name: v }), r1Err, { placeholder: isTH ? 'กรอกชื่อ' : 'Enter your name' })}
+              {field(isTH ? 'นามสกุล' : 'Surname', 'last_name', r1.last_name, v => setR1({ ...r1, last_name: v }), r1Err, { placeholder: isTH ? 'กรอกนามสกุล' : 'Enter your surname' })}
+              {field(isTH ? 'เบอร์โทรศัพท์' : 'Phone Number', 'phone_number', r1.phone_number, v => setR1({ ...r1, phone_number: v }), r1Err, { placeholder: 'e.g. 0123456789' })}
+              {field(isTH ? 'ที่อยู่จัดส่ง' : 'Shipping Address', 'address', r1.address, v => setR1({ ...r1, address: v }), r1Err, { placeholder: isTH ? 'กรอกที่อยู่จัดส่ง' : 'Enter your shipping address' })}
+              {selectField(isTH ? 'เพศ' : 'Gender', 'gender', r1.gender, v => setR1({ ...r1, gender: v }), r1Err,
+                isTH ? ['ชาย', 'หญิง', 'อื่นๆ'] : ['Male', 'Female', 'Other'],
+                isTH ? 'เลือกเพศ' : 'Select your gender')}
 
               {/* Birthdate: day / month / year */}
               <div className="auth-field">
-                <label className="auth-field__label">Birthdate</label>
+                <label className="auth-field__label">{isTH ? 'วันเกิด' : 'Birthdate'}</label>
                 <div className="auth-date-row">
                   <select
                     className={`auth-select${r1Err.bd_day ? ' auth-input--err' : ''}`}
                     value={r1.bd_day}
                     onChange={e => setR1({ ...r1, bd_day: e.target.value })}
                   >
-                    <option value="">วัน</option>
+                    <option value="">{isTH ? 'วัน' : 'Day'}</option>
                     {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map(d =>
                       <option key={d} value={d}>{d}</option>)}
                   </select>
@@ -289,7 +292,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
                     value={r1.bd_month}
                     onChange={e => setR1({ ...r1, bd_month: e.target.value })}
                   >
-                    <option value="">เดือน</option>
+                    <option value="">{isTH ? 'เดือน' : 'Month'}</option>
                     {MONTHS.map((m, i) => {
                       const val = String(i + 1).padStart(2, '0');
                       return <option key={val} value={val}>{m}</option>;
@@ -300,7 +303,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
                     value={r1.bd_year}
                     onChange={e => setR1({ ...r1, bd_year: e.target.value })}
                   >
-                    <option value="">ปี</option>
+                    <option value="">{isTH ? 'ปี' : 'Year'}</option>
                     {Array.from({ length: 100 }, (_, i) => String(new Date().getFullYear() - i)).map(y =>
                       <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -312,23 +315,23 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
             </>
           ) : (
             <>
-              {field('Legal Entity Name', 'legal_entity_name', r1.legal_entity_name, v => setR1({ ...r1, legal_entity_name: v }), r1Err, { placeholder: 'Enter your legal entity name' })}
-              {field('Business Registration Number', 'business_registration_number', r1.business_registration_number, v => setR1({ ...r1, business_registration_number: v }), r1Err, { placeholder: 'e.g. 0123456789123' })}
-              {field('Phone Number', 'phone_number', r1.phone_number, v => setR1({ ...r1, phone_number: v }), r1Err, { placeholder: 'e.g. 0123456789' })}
-              {field('Company Address', 'address', r1.address, v => setR1({ ...r1, address: v }), r1Err, { placeholder: 'Enter your company address' })}
-              {selectField('Business Type', 'business_type', r1.business_type, v => setR1({ ...r1, business_type: v }), r1Err,
-                ['Sole Proprietorship', 'Partnership', 'Company Limited', 'Public Company', 'Other'],
-                'Select your business type')}
+              {field(isTH ? 'ชื่อนิติบุคคล' : 'Legal Entity Name', 'legal_entity_name', r1.legal_entity_name, v => setR1({ ...r1, legal_entity_name: v }), r1Err, { placeholder: isTH ? 'กรอกชื่อนิติบุคคล' : 'Enter your legal entity name' })}
+              {field(isTH ? 'เลขทะเบียนธุรกิจ' : 'Business Registration Number', 'business_registration_number', r1.business_registration_number, v => setR1({ ...r1, business_registration_number: v }), r1Err, { placeholder: 'e.g. 0123456789123' })}
+              {field(isTH ? 'เบอร์โทรศัพท์' : 'Phone Number', 'phone_number', r1.phone_number, v => setR1({ ...r1, phone_number: v }), r1Err, { placeholder: 'e.g. 0123456789' })}
+              {field(isTH ? 'ที่อยู่บริษัท' : 'Company Address', 'address', r1.address, v => setR1({ ...r1, address: v }), r1Err, { placeholder: isTH ? 'กรอกที่อยู่บริษัท' : 'Enter your company address' })}
+              {selectField(isTH ? 'ประเภทธุรกิจ' : 'Business Type', 'business_type', r1.business_type, v => setR1({ ...r1, business_type: v }), r1Err,
+                isTH ? ['ร้านค้าบุคคลธรรมดา', 'ห้างหุ้นส่วน', 'บริษัทจำกัด', 'บริษัทมหาชน', 'อื่นๆ'] : ['Sole Proprietorship', 'Partnership', 'Company Limited', 'Public Company', 'Other'],
+                isTH ? 'เลือกประเภทธุรกิจ' : 'Select your business type')}
             </>
           )}
 
           <div className="auth-btn-row">
-            <button className="auth-btn auth-btn--outline" onClick={() => { (window as any).gtag?.('event', 'click_skip_registration', { step: 1 }); setView('login'); }}>Maybe later</button>
-            <button className="auth-btn auth-btn--primary" onClick={() => { if (validateR1()) { (window as any).gtag?.('event', 'sign_up_progress', { step: 1, funnel_name: 'sign_up' }); setView('reg2'); } }}>Next</button>
+            <button className="auth-btn auth-btn--outline" onClick={() => { (window as any).gtag?.('event', 'click_skip_registration', { step: 1 }); setView('login'); }}>{isTH ? 'ไว้ทีหลัง' : 'Maybe later'}</button>
+            <button className="auth-btn auth-btn--primary" onClick={() => { if (validateR1()) { (window as any).gtag?.('event', 'sign_up_progress', { step: 1, funnel_name: 'sign_up' }); setView('reg2'); } }}>{isTH ? 'ถัดไป' : 'Next'}</button>
           </div>
           <p className="auth-link-row">
-            Already have an account?{' '}
-            <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>Login</button>
+            {isTH ? 'มีบัญชีอยู่แล้ว?' : 'Already have an account?'}{' '}
+            <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>{isTH ? 'เข้าสู่ระบบ' : 'Login'}</button>
           </p>
         </div>
       </div>
@@ -341,7 +344,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     <>
       <div className="auth-page">
         <div className="auth-card">
-          <h1 className="auth-title">Register</h1>
+          <h1 className="auth-title">{isTH ? 'สมัครสมาชิก' : 'Register'}</h1>
           <form onSubmit={handleRegister} noValidate>
             <div className="auth-field">
               <label className="auth-field__label">Email</label>
@@ -351,17 +354,17 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
               <FieldError msg={r2Err.email} />
             </div>
             <div className="auth-field">
-              <label className="auth-field__label">Username</label>
+              <label className="auth-field__label">{isTH ? 'ชื่อผู้ใช้' : 'Username'}</label>
               <input className={`auth-input${r2Err.username ? ' auth-input--err' : ''}`}
-                placeholder="Enter your username"
+                placeholder={isTH ? 'กรอกชื่อผู้ใช้' : 'Enter your username'}
                 value={r2.username} onChange={e => setR2({ ...r2, username: e.target.value })} />
               <FieldError msg={r2Err.username} />
             </div>
             <div className="auth-field">
-              <label className="auth-field__label">Password</label>
+              <label className="auth-field__label">{isTH ? 'รหัสผ่าน' : 'Password'}</label>
               <div className="auth-pw-wrap">
                 <input className={`auth-input${r2Err.password ? ' auth-input--err' : ''}`}
-                  type={showPw ? 'text' : 'password'} placeholder="Enter your password"
+                  type={showPw ? 'text' : 'password'} placeholder={isTH ? 'กรอกรหัสผ่าน' : 'Enter your password'}
                   value={r2.password} onChange={e => setR2({ ...r2, password: e.target.value })} />
                 <button type="button" className="auth-pw-eye" onClick={() => setShowPw(v => !v)}>
                   <EyeIcon open={showPw} />
@@ -370,10 +373,10 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
               <FieldError msg={r2Err.password} />
             </div>
             <div className="auth-field">
-              <label className="auth-field__label">Confirm Password</label>
+              <label className="auth-field__label">{isTH ? 'ยืนยันรหัสผ่าน' : 'Confirm Password'}</label>
               <div className="auth-pw-wrap">
                 <input className={`auth-input${r2Err.confirm ? ' auth-input--err' : ''}`}
-                  type={showCfm ? 'text' : 'password'} placeholder="Confirm your password"
+                  type={showCfm ? 'text' : 'password'} placeholder={isTH ? 'กรอกรหัสผ่านอีกครั้ง' : 'Confirm your password'}
                   value={r2.confirm} onChange={e => setR2({ ...r2, confirm: e.target.value })} />
                 <button type="button" className="auth-pw-eye" onClick={() => setShowCfm(v => !v)}>
                   <EyeIcon open={showCfm} />
@@ -385,22 +388,22 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
             <div className="auth-agree">
               <input type="checkbox" id="agree" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
               <label htmlFor="agree" className={r2Err.agreed ? 'auth-agree--err' : ''}>
-                I agree to the Terms &amp; Conditions and Privacy Policy.
+                {isTH ? 'ฉันยอมรับข้อกำหนดและเงื่อนไข และนโยบายความเป็นส่วนตัว' : 'I agree to the Terms & Conditions and Privacy Policy.'}
               </label>
             </div>
             {r2Err.agreed && <p className="auth-field__err">{r2Err.agreed}</p>}
             {regApiErr && <p className="auth-api-err">{regApiErr}</p>}
 
             <div className="auth-btn-row">
-              <button type="button" className="auth-btn auth-btn--outline" onClick={() => { (window as any).gtag?.('event', 'click_skip_registration', { step: 2 }); setView('login'); }}>Maybe later</button>
+              <button type="button" className="auth-btn auth-btn--outline" onClick={() => { (window as any).gtag?.('event', 'click_skip_registration', { step: 2 }); setView('login'); }}>{isTH ? 'ไว้ทีหลัง' : 'Maybe later'}</button>
               <button type="submit" className="auth-btn auth-btn--primary" disabled={regLoading}>
-                {regLoading ? 'กำลังสมัคร...' : 'Register'}
+                {regLoading ? 'กำลังสมัคร...' : (isTH ? 'สมัครสมาชิก' : 'Register')}
               </button>
             </div>
           </form>
           <p className="auth-link-row">
-            Already have an account?{' '}
-            <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>Login</button>
+            {isTH ? 'มีบัญชีอยู่แล้ว?' : 'Already have an account?'}{' '}
+            <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>{isTH ? 'เข้าสู่ระบบ' : 'Login'}</button>
           </p>
         </div>
       </div>

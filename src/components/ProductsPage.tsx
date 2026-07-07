@@ -14,11 +14,12 @@ function driveThumb(url: string): string {
 
 interface ProductsPageProps {
   onSelectProduct: (id: string) => void;
+  lang?: 'TH' | 'ENG';
 }
 
 const VISIBLE_COUNT = 6;
 
-export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
+export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsPageProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -45,20 +46,28 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const origins = ['ทั้งหมด', ...Array.from(new Set(
-    products.flatMap(p => p.origin?.split(',').map((o: string) => o.trim()) ?? [])
+  const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+  const normalizeId = (id: string) => id.replace(/_(TH|EN)$/, '');
+  const HIDDEN_IDS = ['PRD002_A', 'PRD004_B', 'PRD004_C', 'PRD005_B', 'PRD005_C'];
+  const allLabel = 'ทั้งหมด';
+
+  useEffect(() => { setActiveOrigin(allLabel); }, [lang]);
+
+  const langProducts = products.filter(p =>
+    p.id?.endsWith(langSuffix) && !HIDDEN_IDS.includes(normalizeId(p.id))
+  );
+
+  const origins = [allLabel, ...Array.from(new Set(
+    langProducts.flatMap(p => p.origin?.split(',').map((o: string) => o.trim()) ?? [])
   ))];
 
-  const HIDDEN_IDS = ['PRD002_A', 'PRD004_B', 'PRD004_C', 'PRD005_B', 'PRD005_C'];
-
-  const filtered = products.filter(p => {
-    if (HIDDEN_IDS.includes(p.id)) return false;
+  const filtered = langProducts.filter(p => {
     const matchSearch =
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
       p.note?.toLowerCase().includes(search.toLowerCase()) ||
       p.origin?.toLowerCase().includes(search.toLowerCase());
     const matchOrigin =
-      activeOrigin === 'ทั้งหมด' ||
+      activeOrigin === allLabel ||
       p.origin?.split(',').map((o: string) => o.trim()).includes(activeOrigin);
     return matchSearch && matchOrigin;
   });
@@ -143,7 +152,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
           <>
             <div className="exp-grid">
               {visible.map(p => (
-                <ProductCard key={p.id} product={p} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Products', item_id: p.id, item_name: p.name }); onSelectProduct(p.id); }} />
+                <ProductCard key={p.id} product={p} lang={lang} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Products', item_id: p.id, item_name: p.name }); onSelectProduct(p.id); }} />
               ))}
             </div>
 
@@ -170,7 +179,7 @@ export default function ProductsPage({ onSelectProduct }: ProductsPageProps) {
   );
 }
 
-function ProductCard({ product: p, onClick }: { product: any; onClick: () => void }) {
+function ProductCard({ product: p, onClick, lang = 'TH' }: { product: any; onClick: () => void; lang?: 'TH' | 'ENG' }) {
   const tags = p.origin?.split(',').map((o: string) => o.trim()) ?? [];
   const imgSrc = driveThumb(p.image);
 
@@ -182,7 +191,7 @@ function ProductCard({ product: p, onClick }: { product: any; onClick: () => voi
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
         <div className="impact-badge">
           <span className="impact-badge__pct">10%</span>
-          <span className="impact-badge__text">รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</span>
+          <span className="impact-badge__text">{lang === 'TH' ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>
         </div>
         {tags.length > 0 && (
           <div className="exp-card__img-tags">
@@ -196,8 +205,8 @@ function ProductCard({ product: p, onClick }: { product: any; onClick: () => voi
         <h3 className="exp-card__title">{p.name}</h3>
         <div className="exp-card__divider" />
         <div className="exp-card__meta">
-          <span className="exp-card__duration">สินค้าคงเหลือ: {p.remain ?? 0}</span>
-          <span className="exp-card__price">{Number(p.price).toLocaleString()} Baht</span>
+          <span className="exp-card__duration">{lang === 'TH' ? 'สินค้าคงเหลือ' : 'Remaining stock'}: {p.remain ?? 0}</span>
+          <span className="exp-card__price">{Number(p.price).toLocaleString()} {lang === 'TH' ? 'บาท' : 'Baht'}</span>
         </div>
         <div className="exp-card__divider" />
         <p className="exp-card__desc">

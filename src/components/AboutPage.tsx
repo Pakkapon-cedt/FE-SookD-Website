@@ -2,7 +2,14 @@ import Footer from './Footer';
 import ContactIcon from './ContactIcon';
 import { SITE_CONTENT as c } from '../constants/content';
 
-export default function AboutPage() {
+const ADDRESS_EN = [
+  '68/7 Moo 3, Bangkobua Sub-district',
+  'Phra Pradaeng District',
+  'Samut Prakan 10130',
+];
+
+export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
+  const isTH = lang === 'TH';
   return (
     <>
       <style>{ABOUT_CSS}</style>
@@ -17,13 +24,26 @@ export default function AboutPage() {
       <section className="about__section about__intro">
         <h2 className="about__section-title about__section-title--center">SookD</h2>
         <p className="about__intro-text about__intro-text--center">
-          SookD ก่อตั้งเมื่อปี 2566 มุ่งเชื่อมนักเดินทางกับประสบการณ์ที่มีความหมายทุกแห่งหน
-          <br /><br />
-          ผ่านการท่องเที่ยวและวัฒนธรรมการเรียนรู้ที่เชื่อมโยงกับธรรมชาติ ผู้คน และความสุขอย่างลึกซึ้ง
-          เรามั่นใจว่าการท่องเที่ยวที่มีคุณค่าควรสร้างความสัมพันธ์อย่างแท้จริง
-          และช่วยให้ทุกคนมีส่วนในการดูแลสิ่งแวดล้อม
-          <br /><br />
-          ด้วยการคัดสรรประสบการณ์คุณภาพจากผู้ให้บริการที่ใส่ใจสิ่งชีวิตผู้คน ชุมชน และสิ่งแวดล้อม
+          {isTH ? (
+            <>
+              SookD ก่อตั้งเมื่อปี 2566 มุ่งเชื่อมนักเดินทางกับประสบการณ์ที่มีความหมายทุกแห่งหน
+              <br /><br />
+              ผ่านการท่องเที่ยวและวัฒนธรรมการเรียนรู้ที่เชื่อมโยงกับธรรมชาติ ผู้คน และความสุขอย่างลึกซึ้ง
+              เรามั่นใจว่าการท่องเที่ยวที่มีคุณค่าควรสร้างความสัมพันธ์อย่างแท้จริง
+              และช่วยให้ทุกคนมีส่วนในการดูแลสิ่งแวดล้อม
+              <br /><br />
+              ด้วยการคัดสรรประสบการณ์คุณภาพจากผู้ให้บริการที่ใส่ใจสิ่งชีวิตผู้คน ชุมชน และสิ่งแวดล้อม
+            </>
+          ) : (
+            <>
+              Founded in 2023, SookD is dedicated to connecting travelers with meaningful experiences everywhere they go.
+              <br /><br />
+              Through travel and cultural learning rooted in a deep connection with nature, people, and happiness,
+              we believe that meaningful tourism should foster genuine relationships and empower everyone to contribute to environmental preservation.
+              <br /><br />
+              By curating quality experiences from providers who care for individuals, communities, and the environment.
+            </>
+          )}
         </p>
 
         <div className="about__pillars">
@@ -48,13 +68,24 @@ export default function AboutPage() {
           <img src="/img/founder.aboutus.jpg" alt="Founder" className="about__founder-img" />
           <div className="about__founder-content">
             <blockquote className="about__founder-quote">
-              "ความสุขจากการเดินทางที่แท้จริง<br />
-              คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"
+              {isTH ? (
+                <>
+                  "ความสุขจากการเดินทางที่แท้จริง<br />
+                  คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"
+                </>
+              ) : (
+                '"The true joy of traveling is becoming a part of the world we inhabit and discovering who we are when we get there."'
+              )}
             </blockquote>
-            <p className="about__founder-name">ทวินทร์ ธรรมรักษ์ – ผู้ก่อตั้ง และ CEO SookD</p>
+            <p className="about__founder-name">
+              {isTH
+                ? 'ทวินทร์ ธรรมรักษ์ – ผู้ก่อตั้ง และ CEO SookD'
+                : 'Twin Thammarak – Founder & CEO of SookD'}
+            </p>
             <p className="about__founder-bio">
-              ด้วยความเชื่อว่าการท่องเที่ยวที่มีความหมายต้องเริ่มจากการเข้าใจธรรมชาติ SookD จึงถือกำเนิดขึ้น
-              เพื่อเชื่อมนักเดินทางกับประสบการณ์ที่เปลี่ยนมุมมองและสร้างผลดีต่อชุมชนท้องถิ่น
+              {isTH
+                ? 'ด้วยความเชื่อว่าการท่องเที่ยวที่มีความหมายต้องเริ่มจากการเข้าใจธรรมชาติ SookD จึงถือกำเนิดขึ้น เพื่อเชื่อมนักเดินทางกับประสบการณ์ที่เปลี่ยนมุมมองและสร้างผลดีต่อชุมชนท้องถิ่น'
+                : 'With the belief that meaningful travel must begin with an understanding of nature, SookD was born to connect travelers with perspective-shifting experiences that create a positive impact on local communities.'}
             </p>
           </div>
         </div>
@@ -67,7 +98,7 @@ export default function AboutPage() {
 
       {/* ── Location ── */}
       <section className="about__section about__location">
-        <h2 className="about__section-title">Location</h2>
+        <h2 className="about__section-title">{isTH ? 'ตำแหน่ง' : 'Location'}</h2>
         <div className="about__location-inner">
           <a
             href="https://maps.app.goo.gl/1R7yoLzSCkwhh7yXA"
@@ -80,16 +111,16 @@ export default function AboutPage() {
 
           <div className="about__location-info">
             <div className="about__info-block">
-              <h3 className="about__info-title">Address</h3>
+              <h3 className="about__info-title">{isTH ? 'ที่อยู่' : 'Address'}</h3>
               <address className="about__address">
-                {c.footer.address.lines.map((line, i) => (
+                {(isTH ? c.footer.address.lines : ADDRESS_EN).map((line, i) => (
                   <span key={i}>{line}<br /></span>
                 ))}
               </address>
             </div>
 
             <div className="about__info-block">
-              <h3 className="about__info-title">Contact Us</h3>
+              <h3 className="about__info-title">{isTH ? 'ติดต่อเรา' : 'Contact Us'}</h3>
               <ul className="about__contact-list">
                 {c.footer.contact.items.map(item => (
                   <li key={item.label} className="about__contact-item">

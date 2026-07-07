@@ -4,6 +4,7 @@ import { getCart, saveCart, removeFromCart, CartItem } from '../utils/cart';
 interface Props {
   currentUser?: any;
   onNavigate: (page: string) => void;
+  lang?: 'TH' | 'ENG';
 }
 
 function driveThumb(url: string, size = 'w400'): string {
@@ -15,7 +16,8 @@ function driveThumb(url: string, size = 'w400'): string {
   return url || '';
 }
 
-export default function CartPage({ currentUser: _currentUser, onNavigate }: Props) {
+export default function CartPage({ currentUser: _currentUser, onNavigate, lang = 'TH' }: Props) {
+  const isTH = lang === 'TH';
   const [items, setItems] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<{ product: boolean; activity: boolean }>({ product: true, activity: true });
@@ -80,7 +82,7 @@ export default function CartPage({ currentUser: _currentUser, onNavigate }: Prop
     <div className="cart__page">
       {/* Header */}
       <div className="cart__header">
-        <h1 className="cart__title">Cart</h1>
+        <h1 className="cart__title">{isTH ? 'ตะกร้าสินค้า' : 'Cart'}</h1>
       </div>
 
       {/* Search */}
@@ -100,11 +102,11 @@ export default function CartPage({ currentUser: _currentUser, onNavigate }: Prop
         <div className="cart__controls">
           <label className="cart__filter-label">
             <input type="checkbox" checked={filterType.product} onChange={e => setFilterType(f => ({ ...f, product: e.target.checked }))} />
-            <span>Product</span>
+            <span>{isTH ? 'สินค้า' : 'Product'}</span>
           </label>
           <label className="cart__filter-label">
             <input type="checkbox" checked={filterType.activity} onChange={e => setFilterType(f => ({ ...f, activity: e.target.checked }))} />
-            <span>Activity</span>
+            <span>{isTH ? 'กิจกรรม' : 'Activity'}</span>
           </label>
         </div>
       </div>
@@ -223,16 +225,16 @@ export default function CartPage({ currentUser: _currentUser, onNavigate }: Prop
             </svg>
           )}
         </button>
-        <span className="cart__all-label">All</span>
+        <span className="cart__all-label">{isTH ? 'ทั้งหมด' : 'All'}</span>
         <div className="cart__bottom-total">
-          Total : <strong>{total.toLocaleString()}</strong> Baht
+          {isTH ? 'รวมทั้งหมด' : 'Total'} : <strong>{total.toLocaleString()}</strong> {isTH ? 'บาท' : 'Baht'}
         </div>
         <button
           className="cart__pay-btn"
           onClick={handlePayNow}
           disabled={checkedItems.length === 0}
         >
-          Pay Now
+          {isTH ? 'ชำระเงิน' : 'Pay Now'}
         </button>
       </div>
     </div>

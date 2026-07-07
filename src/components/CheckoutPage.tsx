@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getCart, saveCart, CartItem } from '../utils/cart';
+import { api } from '../services/api';
 
 interface Props {
   currentUser?: any;
   onNavigate: (page: string) => void;
+  lang?: 'TH' | 'ENG';
 }
 
 function driveThumb(url: string, size = 'w400'): string {
@@ -15,9 +17,11 @@ function driveThumb(url: string, size = 'w400'): string {
   return url || '';
 }
 
-export default function CheckoutPage({ currentUser, onNavigate }: Props) {
+export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: Props) {
+  const isTH = lang === 'TH';
   const [items, setItems] = useState<CartItem[]>([]);
   const [placing, setPlacing] = useState(false);
+  const [orderErr, setOrderErr] = useState('');
 
   useEffect(() => {
     const all = getCart();
@@ -39,33 +43,36 @@ export default function CheckoutPage({ currentUser, onNavigate }: Props) {
   const handlePlaceOrder = async () => {
     if (placing || items.length === 0) return;
     setPlacing(true);
+    setOrderErr('');
     try {
-      await Promise.all(
+      const results = await Promise.all(
         items.map(item =>
-          fetch('http://localhost:3000/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user_id: currentUser?.user_id || '',
-              order_date: new Date().toISOString().split('T')[0],
-              item_id: item.itemId,
-              quantity: item.qty,
-              total_price: item.price * item.qty,
-              order_status: item.itemType === 'activity' ? 'completed' : 'processing',
-              shipping_address: currentUser?.address || '',
-              act_date: item.actDate || '',
-              act_time: item.actTime || '',
-              applied_promotion_id: '',
-            }),
-          }).then(r => r.json())
+          api.orders.create({
+            user_id: currentUser?.user_id || '',
+            order_date: new Date().toISOString().split('T')[0],
+            item_id: item.itemId,
+            quantity: item.qty,
+            total_price: item.price * item.qty,
+            order_status: item.itemType === 'activity' ? 'completed' : 'processing',
+            shipping_address: currentUser?.address || '',
+            act_date: item.actDate || '',
+            act_time: item.actTime || '',
+            applied_promotion_id: '',
+          })
         )
       );
+      const failed = results.filter(r => r && r.success === false);
+      if (failed.length > 0) {
+        setOrderErr(isTH ? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' : 'Order failed, please try again.');
+        return;
+      }
       const all = getCart();
       const checkedIds = new Set(items.map(i => i.id));
       saveCart(all.filter(i => !checkedIds.has(i.id)));
       onNavigate('home');
     } catch (err) {
       console.error('Order failed:', err);
+      setOrderErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่' : 'Cannot connect to server, please try again.');
     } finally {
       setPlacing(false);
     }
@@ -80,7 +87,7 @@ export default function CheckoutPage({ currentUser, onNavigate }: Props) {
   return (
     <div className="co__page">
       <div className="co__head-bar">
-        <h1 className="co__title">Checkout</h1>
+        <h1 className="co__title">{isTH ? 'ชำระเงิน' : 'Checkout'}</h1>
       </div>
 
       <div className="co__content">
@@ -155,7 +162,7 @@ export default function CheckoutPage({ currentUser, onNavigate }: Props) {
                     )}
                     x {item.qty}
                   </span>
-                  <span className="co__item-price">{(item.price * item.qty).toLocaleString()} Baht</span>
+                  <span className="co__item-price">{(item.price * item.qty).toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
                 </div>
               </div>
             ))}
@@ -165,24 +172,24 @@ export default function CheckoutPage({ currentUser, onNavigate }: Props) {
 
         {/* Payment Summary */}
         <div className="co__payment-summary">
-          <h3 className="co__summary-title">Payment Summary</h3>
+          <h3 className="co__summary-title">{isTH ? 'สรุปยอดชำระเงิน' : 'Payment Summary'}</h3>
           <div className="co__summary-rows">
             <div className="co__summary-row">
-              <span>Subtotal</span>
-              <span>{subtotal.toLocaleString()} Baht</span>
+              <span>{isTH ? 'ยอดรวม' : 'Subtotal'}</span>
+              <span>{subtotal.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
             </div>
             <div className="co__summary-row">
-              <span>Shipping Fee</span>
-              <span>{shippingFee} Baht</span>
+              <span>{isTH ? 'ค่าจัดส่ง' : 'Shipping Fee'}</span>
+              <span>{shippingFee} {isTH ? 'บาท' : 'Baht'}</span>
             </div>
             <div className="co__summary-row">
-              <span>Discount</span>
-              <span>{discount} Baht</span>
+              <span>{isTH ? 'ส่วนลด' : 'Discount'}</span>
+              <span>{discount} {isTH ? 'บาท' : 'Baht'}</span>
             </div>
             <div className="co__divider co__divider--thin" />
             <div className="co__summary-row co__summary-row--total">
-              <span>Total Amount</span>
-              <span>{totalAmount.toLocaleString()} Baht</span>
+              <span>{isTH ? 'ยอดรวมทั้งสิ้น' : 'Total Amount'}</span>
+              <span>{totalAmount.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
             </div>
           </div>
         </div>
@@ -191,12 +198,13 @@ export default function CheckoutPage({ currentUser, onNavigate }: Props) {
       </div>
 
       {/* Sticky bottom */}
+      {orderErr && <p style={{ color: '#e53935', textAlign: 'center', padding: '0.5rem 5%', fontSize: '0.88rem' }}>{orderErr}</p>}
       <div className="co__bottom">
         <div className="co__bottom-total">
-          <strong>{totalAmount.toLocaleString()} Baht</strong>
+          <strong>{totalAmount.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</strong>
         </div>
         <button className="co__place-btn" onClick={handlePlaceOrder} disabled={placing || items.length === 0}>
-          {placing ? 'Processing...' : 'Place Order'}
+          {placing ? (isTH ? 'กำลังดำเนินการ...' : 'Processing...') : (isTH ? 'ยืนยันการสั่งซื้อ' : 'Place Order')}
         </button>
       </div>
     </div>

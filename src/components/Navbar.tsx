@@ -8,9 +8,20 @@ interface NavbarProps {
   lightTop?: boolean;
   currentUser?: any;
   onLogout?: () => void;
+  lang?: 'TH' | 'ENG';
+  onLangChange?: (lang: 'TH' | 'ENG') => void;
+  cartCount?: number;
 }
 
-export default function Navbar({ links, onNavigate, currentPage = 'home', lightTop = false, currentUser, onLogout }: NavbarProps) {
+const NAV_LABELS_TH: Record<string, string> = {
+  'Experiences': 'กิจกรรม',
+  'Product': 'สินค้า',
+  'Discover': 'สำรวจ',
+  'Membership': 'ระบบสมาชิก',
+  'About': 'เกี่ยวกับเรา',
+};
+
+export default function Navbar({ links, onNavigate, currentPage = 'home', lightTop = false, currentUser, onLogout, lang = 'TH', onLangChange, cartCount = 0 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
 
@@ -55,7 +66,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
                 className={`navbar__link${link.page === currentPage ? ' navbar__link--active' : ''}`}
                 onClick={(e) => handleLink(e, link)}
               >
-                {link.label}
+                {lang === 'TH' ? (NAV_LABELS_TH[link.label] ?? link.label) : link.label}
               </a>
             </li>
           ))}
@@ -66,9 +77,28 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
           {currentUser ? (
             <>
               {/* Cart */}
-              <button className="navbar__icon-btn" aria-label="Cart" onClick={() => onNavigate?.('cart')}>
+              <button className="navbar__icon-btn" aria-label="Cart" onClick={() => onNavigate?.('cart')} style={{ position: 'relative' }}>
                 <img src="/img/cart icon.png" alt="Cart" width="26" height="26" style={{ objectFit: 'contain', borderRadius: 2 }} />
+                {cartCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -6, right: -6,
+                    background: '#e53935', color: '#fff',
+                    borderRadius: '50%', width: 18, height: 18,
+                    fontSize: '0.7rem', fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    lineHeight: 1, pointerEvents: 'none',
+                  }}>{cartCount > 99 ? '99+' : cartCount}</span>
+                )}
               </button>
+              {/* Language switcher */}
+              <div className="navbar__lang">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <button className={`navbar__lang-btn${lang === 'TH' ? ' navbar__lang-btn--active' : ''}`} onClick={() => onLangChange?.('TH')}>TH</button>
+                <span className="navbar__lang-sep">|</span>
+                <button className={`navbar__lang-btn${lang === 'ENG' ? ' navbar__lang-btn--active' : ''}`} onClick={() => onLangChange?.('ENG')}>ENG</button>
+              </div>
               <div className="navbar__divider" />
               {/* Avatar + Name */}
               <button className="navbar__user-btn" onClick={() => onNavigate?.('profile')}>
@@ -86,7 +116,17 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
             </>
           ) : (
             <>
-              <a href="#join" className="navbar__cta" onClick={e => { e.preventDefault(); (window as any).gtag?.('event', 'click_join_us'); onNavigate?.('login'); }}>Join Us</a>
+              {/* Language switcher */}
+              <div className="navbar__lang">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <button className={`navbar__lang-btn${lang === 'TH' ? ' navbar__lang-btn--active' : ''}`} onClick={() => onLangChange?.('TH')}>TH</button>
+                <span className="navbar__lang-sep">|</span>
+                <button className={`navbar__lang-btn${lang === 'ENG' ? ' navbar__lang-btn--active' : ''}`} onClick={() => onLangChange?.('ENG')}>ENG</button>
+              </div>
+              <div className="navbar__divider" />
+              <a href="#join" className="navbar__cta" onClick={e => { e.preventDefault(); (window as any).gtag?.('event', 'click_join_us'); onNavigate?.('login'); }}>{lang === 'TH' ? 'เข้าร่วมกับเรา' : 'Join Us'}</a>
             </>
           )}
         </div>
