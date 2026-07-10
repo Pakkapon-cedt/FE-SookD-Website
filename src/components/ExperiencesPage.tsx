@@ -329,6 +329,7 @@ export const EXPERIENCES_CSS = `
   outline: none;
   transition: border-color .2s;
   box-sizing: border-box;
+  font:inherit;
 }
 .exp-search:focus { border-color: var(--mint); }
 
@@ -477,6 +478,7 @@ export const EXPERIENCES_CSS = `
   background: none; border: none;
   font-size: .95rem; color: #555; cursor: pointer; font-weight: 500;
   transition: color .2s;
+  font:inherit;
 }
 .exp-more-btn:hover { color: var(--forest); }
 

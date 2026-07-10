@@ -205,7 +205,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           <h1 className="auth-title">{isTH ? 'เข้าสู่ระบบ' : 'Login'}</h1>
           <form onSubmit={handleLogin} noValidate>
             <div className="auth-field">
-              <label className="auth-field__label">Email</label>
+              <label className="auth-field__label">{isTH ? 'อีเมลล์' : 'Email'}</label>
               <input
                 className={`auth-input${loginErrs.email ? ' auth-input--err' : ''}`}
                 type="email" placeholder="example@gmail.com"
@@ -347,7 +347,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           <h1 className="auth-title">{isTH ? 'สมัครสมาชิก' : 'Register'}</h1>
           <form onSubmit={handleRegister} noValidate>
             <div className="auth-field">
-              <label className="auth-field__label">Email</label>
+              <label className="auth-field__label">{isTH ? 'อีเมลล์' : 'Email'}</label>
               <input className={`auth-input${r2Err.email ? ' auth-input--err' : ''}`}
                 type="email" placeholder="example@gmail.com"
                 value={r2.email} onChange={e => setR2({ ...r2, email: e.target.value })} />
@@ -530,5 +530,6 @@ export const AUTH_CSS = `
   background: none; border: none; cursor: pointer;
   color: var(--forest); font-weight: 600; font-size: .85rem;
   text-decoration: underline;
+  font: inherit;
 }
 `;

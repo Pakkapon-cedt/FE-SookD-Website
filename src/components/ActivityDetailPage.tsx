@@ -470,6 +470,7 @@ export const ACTIVITY_DETAIL_CSS = `
   background: none; border: none; cursor: pointer;
   font-size: .9rem; color: #666; font-weight: 500;
   transition: color .2s;
+  font: inherit;
 }
 .adet__back:hover { color: var(--forest); }
 

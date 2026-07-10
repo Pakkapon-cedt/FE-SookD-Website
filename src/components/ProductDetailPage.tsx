@@ -433,6 +433,7 @@ export const PRODUCT_DETAIL_CSS = `
   background: none; border: none; cursor: pointer;
   font-size: .9rem; color: #666; font-weight: 500;
   transition: color .2s;
+  font:inherit;
 }
 .pdet__back:hover { color: var(--forest); }
 
@@ -540,6 +541,7 @@ export const PRODUCT_DETAIL_CSS = `
   font-size: 1rem; font-weight: 600; cursor: pointer;
   transition: background .2s; width: 100%;
   margin-top: .25rem;
+  font:inherit;
 }
 .pdet__cart-btn:hover { background: #1a3d2e; }
 
