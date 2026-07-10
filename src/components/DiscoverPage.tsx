@@ -13,6 +13,16 @@ function driveThumb(url: string, size = 'w800'): string {
   if (!m) return url || '';
   return `https://res.cloudinary.com/zgor0mh6/image/fetch/q_auto,f_auto/${encodeURIComponent(`https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`)}`;
 }
+function getDriveAudioUrl(url?: string): string {
+  if (!url) return '';
+  // ดึงรหัส ID ของไฟล์ออกจากลิงก์ Google Drive
+  const m = url.match(/\/d\/([^/]+)\//);
+  if (m) {
+    // แปลงเป็นลิงก์ตรงสำหรับสตรีมเสียง
+    return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  }
+  return url; // ถ้ารูปแบบไม่ใช่ Google Drive ก็คืนค่าเดิมกลับไป
+}
 
 function embedVideoUrl(url: string): string {
   if (!url) return '';
@@ -72,6 +82,7 @@ interface PlaceData {
   activityIds: string[];
   showActivityHeader?: boolean;
   highlights?: Highlight[];
+  uncleAudioUrl?: string;
 }
 
 const DISCOVER_PLACES: PlaceData[] = [
@@ -103,7 +114,10 @@ const DISCOVER_PLACES: PlaceData[] = [
               exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675251,100.5286457,3a,75y,83.12h,84.79t/data=!3m7!1e1!3m5!1s9xkO6-bd1G2EheSck3iKhw!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D5.2147582870416755%26panoid%3D9xkO6-bd1G2EheSck3iKhw%26yaw%3D83.12037990502836!7i16384!8i8192!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
             },
           ],
+          
+          
         },
+        
       },
       { name: 'พิพิธภัณฑ์พื้นบ้านคลองบน', nameEn: 'Klong Bon Folk Museum', image: '/img/discover-museum.jpg',
         modal: {
@@ -142,6 +156,7 @@ const DISCOVER_PLACES: PlaceData[] = [
         },
       },
     ],
+    uncleAudioUrl: '/audio/uncle-bangkachao.mp3',
   },
   {
     id: 'nakhonpathom',
@@ -155,6 +170,7 @@ const DISCOVER_PLACES: PlaceData[] = [
     faq: 'Q: สิ่งที่จะได้รับจากโปรแกรมนี้มีอะไรบ้าง?\nAns: บอกเลยว่าคุ้มสุดๆ สำหรับสายทำคอนเทนต์ เพราะคุณจะได้รับ:\nไฟล์รูปภาพสวยๆ 30+ รูป (คัดมาให้เน้นๆ)\nวิดีโอสั้นสำหรับทำ Reels / TikTok คอยเก็บโมเมนต์เผลอๆ ตลอดทริป',
     activityIds: [],
     showActivityHeader: true,
+    uncleAudioUrl: '/audio/uncle-nakhonpathom.mp3',
   },
   {
     id: 'khiriwong',
@@ -171,6 +187,7 @@ const DISCOVER_PLACES: PlaceData[] = [
       { name: 'สวนสมรม', nameEn: 'Suan Somrom', image: '/img/suansomrom.jpg' },
       { name: 'ที่เที่ยวเขาหลวง', nameEn: 'Khao Luang', image: '/img/kaoluang.jpg' },
     ],
+    uncleAudioUrl: '/audio/uncle-khiriwong.mp3',
   },
   {
     id: 'moonrabbit',
@@ -187,6 +204,7 @@ const DISCOVER_PLACES: PlaceData[] = [
       { name: 'สวนมัชณิมา', nameEn: 'Suan Machhima', image: '/img/suanmachima.jpg' },
       { name: 'ทุ่งใหญ่ตะวันตก', nameEn: 'Thung Yai Naresuan (West)', image: '/img/tungyai.jpg' },
     ],
+    uncleAudioUrl: '/audio/uncle-moonrabbit.mp3',
   },
 ];
 
@@ -217,6 +235,21 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
   const tabsRef = useRef<HTMLDivElement>(null);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   const [gameUrl, setGameUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlayingUncleAudio, setIsPlayingUncleAudio] = useState(false);
+
+  // ฟังก์ชันสลับการ เล่น/หยุด เสียง
+  const toggleUncleAudio = () => {
+    if (audioRef.current) {
+      if (isPlayingUncleAudio) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlayingUncleAudio(!isPlayingUncleAudio);
+    }
+  };
+  
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
@@ -251,6 +284,21 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
   const place = DISCOVER_PLACES[activeTab];
   const langSuffix = isTH ? '_TH' : '_EN';
 
+  // สั่งให้เล่นเสียงทันทีเมื่อผู้ใช้งานเข้าหน้านี้ หรือกดเปลี่ยนแท็บมาเจอสถานที่ที่มีเสียง
+  useEffect(() => {
+    if (audioRef.current) {
+      if (place.uncleAudioUrl) {
+        // พยายามสั่งเล่นเสียงทันที
+        audioRef.current.play().catch(err => {
+          // หากบราวเซอร์บล็อก จะแสดงข้อความนี้ใน Console
+          console.log('บราวเซอร์บล็อก Autoplay ต้องคลิกที่หน้าเว็บก่อนถึงจะเล่นได้');
+        });
+      } else {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+  }, [activeTab, place.uncleAudioUrl]);
   useEffect(() => {
     setImgIdx(0);
     setOpenFaq(null);
@@ -307,7 +355,38 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
               <div className="disc-stagger__img1">
                 <img src={driveThumb(place.image2)} alt={place.name} className="disc-strip-img" />
               </div>
+              {/* 🟢 เอาโค้ดคุณลุงมาใส่แทนที่ disc-stagger__empty เดิม */}
+            {place.uncleAudioUrl ? (
+              <div className="disc-stagger__uncle">
+                <img src="/img/uncle.png" alt="Uncle Storyteller" className="disc-uncle-img" />
+                
+                <button className={`disc-uncle-btn ${isPlayingUncleAudio ? 'playing' : ''}`} onClick={toggleUncleAudio}>
+                  {isPlayingUncleAudio ? (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                      {isTH ? 'หยุดฟังเรื่องเล่า' : 'Stop Story'}
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                      {isTH ? 'ฟังเรื่องเล่าจากคุณลุง' : 'Listen to Uncle'}
+                    </>
+                  )}
+                </button>
+
+                <audio 
+                  ref={audioRef} 
+                  src={getDriveAudioUrl(place.uncleAudioUrl)} 
+                  autoPlay /* 🟢 สั่งให้เล่นอัตโนมัติ */
+                  loop     /* 🟢 สั่งให้เล่นวนซ้ำเรื่อยๆ */
+                  onPlay={() => setIsPlayingUncleAudio(true)}   /* 🟢 ซิงค์ปุ่มให้เป็นสถานะ "เล่น" */
+                  onPause={() => setIsPlayingUncleAudio(false)} /* 🟢 ซิงค์ปุ่มให้เป็นสถานะ "หยุด" */
+                />
+              </div>
+            ) : (
               <div className="disc-stagger__empty" />
+            )}
+            {/* 🟢 สิ้นสุดโค้ดคุณลุง */}
               <div className="disc-stagger__text">
                 <h2 className="disc-place-name">{isTH ? place.name : place.nameEn}</h2>
                 <div className="disc-place-detail">
@@ -558,6 +637,7 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
           </div>
         </div>
       )}
+    
     </>
   );
 }
@@ -936,5 +1016,65 @@ export const DISCOVER_CSS = `
 @media (max-width: 480px) {
   .disc-tabs { gap: .4rem; }
   .disc-tab { padding: .45rem 1rem; font-size: .82rem; }
+}
+/* ========================================================
+   Uncle Storyteller Static (แบบฝังในหน้าเว็บตาม Figma)
+   ======================================================== */
+.disc-stagger__uncle {
+  grid-column: 2; 
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  position: relative;
+  padding: 1rem;
+}
+
+.disc-uncle-img {
+  max-height: 340px; /* ปรับขนาดรูปลุงให้พอดีกับความสูงภาพซ้าย */
+  object-fit: contain;
+  margin-bottom: 1.5rem;
+}
+
+.disc-uncle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--forest);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 50px;
+  font-family: var(--font-th);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.disc-uncle-btn:hover {
+  background: #1a3d2e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.disc-uncle-btn.playing {
+  animation: unclePulse 2s infinite;
+}
+
+@keyframes unclePulse {
+  0% { box-shadow: 0 0 0 0 rgba(27, 58, 45, 0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(27, 58, 45, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(27, 58, 45, 0); }
+}
+
+/* ปรับการเรียงลำดับให้สวยงามเวลาเปิดในหน้าจอมือถือ (จอเล็ก) */
+@media (max-width: 768px) {
+  .disc-stagger__uncle { grid-column: 1; grid-row: 2; padding: 2rem 0; }
+  .disc-stagger__text  { grid-column: 1; grid-row: 3; padding: 1.5rem 5%; }
+  .disc-stagger__img2  { grid-column: 1; grid-row: 4; min-height: 280px; }
 }
 `;
