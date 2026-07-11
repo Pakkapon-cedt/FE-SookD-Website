@@ -144,6 +144,9 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(0);
 
+  /* order filter state */
+  const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | 'completed' | 'processing'>('all');
+
   /* review filter state */
   const [reviewTypeFilter, setReviewTypeFilter] = useState<'all' | 'product' | 'activity'>('all');
   const [reviewDateFilter, setReviewDateFilter] = useState('');
@@ -460,9 +463,17 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
             <div className="ud-section">
               <h2 className="ud-section__title">{isTH ? 'สถานะคำสั่งซื้อ' : 'Order Status'}</h2>
               <p className="ud-section__sub">{isTH ? 'ติดตามสินค้าของคุณ ทุกชิ้นดูแลด้วยใจใส่ใจ' : 'Monitor your recent acquisitions. Every piece is handled with care for you and nature.'}</p>
-              {loading ? <p className="ud-loading">กำลังโหลด...</p> : productOrders.length === 0
-                ? <p className="ud-empty">ยังไม่มีคำสั่งซื้อ</p>
-                : productOrders.map(o => {
+              <div className="ud-order-filterbar">
+                {(['all', 'processing', 'completed'] as const).map(s => (
+                  <button key={s} className={`ud-order-filter-btn${orderStatusFilter === s ? ' active' : ''}`} onClick={() => setOrderStatusFilter(s)}>
+                    {s === 'all' ? (isTH ? 'ทั้งหมด' : 'All') : s === 'processing' ? (isTH ? 'กำลังจัดส่ง' : 'Processing') : (isTH ? 'สำเร็จ' : 'Completed')}
+                  </button>
+                ))}
+              </div>
+              {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
+                const filtered = productOrders.filter(o => orderStatusFilter === 'all' || o.order_status?.toLowerCase() === orderStatusFilter);
+                if (filtered.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีคำสั่งซื้อในหมวดนี้' : 'No orders in this category'}</p>;
+                return <>{filtered.map(o => {
                   const p = getProduct(o.item_id);
                   return (
                     <div key={o.order_id} className="ud-card">
@@ -483,7 +494,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       </button>
                     </div>
                   );
-                })}
+                })}</>;
+              })()}
             </div>
           )}
 
@@ -494,7 +506,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <p className="ud-section__sub">{isTH ? 'จัดการการจองกิจกรรมของคุณได้ที่นี่' : 'Anticipate your upcoming eco-experiences. Seamlessly manage your mindful itineraries.'}</p>
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : activityOrders.length === 0
                 ? <p className="ud-empty">ยังไม่มีการจองกิจกรรม</p>
-                : activityOrders.map(o => {
+                : [...activityOrders].sort((a, b) => new Date(b.order_date).getTime() - new Date(a.order_date).getTime()).map(o => {
                   const a = getActivity(o.item_id);
                   return (
                     <div key={o.order_id} className="ud-card">
@@ -503,8 +515,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       <div className="ud-card__body">
                         <h3 className="ud-card__name">{a?.name ?? o.item_id}</h3>
                         <div className="ud-card__meta">
-                          <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
-                          {a?.date && <span><strong>{isTH ? 'เวลา' : 'Time'}</strong><br />{a.date}</span>}
+                          <span><strong>{isTH ? 'วันที่สั่งซื้อ' : 'ORDER DATE'}</strong><br />{fmtDate(o.order_date)}</span>
+                          {o.order_select_date && <span><strong>{isTH ? 'วันกิจกรรม' : 'ACTIVITY DATE'}</strong><br />{fmtDate(o.order_select_date)}</span>}
                           {a?.location && <span><strong>{isTH ? 'สถานที่' : 'Location'}</strong><br />{a.location}</span>}
                           <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
@@ -1041,6 +1053,18 @@ export const USER_DASHBOARD_CSS = `
   font-family: var(--font-th);
 }
 .ud-detail-btn:hover { background: #1a3d2e; }
+
+/* ── Order filter bar ───────────────────── */
+.ud-order-filterbar {
+  display: flex; gap: .5rem; margin-bottom: 1.2rem;
+}
+.ud-order-filter-btn {
+  padding: .4rem 1.1rem; border-radius: 20px; border: 1.5px solid #c8d8c4;
+  background: transparent; color: #3a3a3a; font-family: Kanit, sans-serif;
+  font-size: .85rem; cursor: pointer; transition: all .18s;
+}
+.ud-order-filter-btn:hover { border-color: #2d6a4f; color: #2d6a4f; }
+.ud-order-filter-btn.active { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
 
 /* ── Review filter bar ──────────────────── */
 .ud-review-filterbar {

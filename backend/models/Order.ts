@@ -15,6 +15,7 @@ export interface Order {
         | "cancelled";
 
     shipping_address: string;
+    order_select_date?: string;
 
     applied_promotion_id?: string;
 }

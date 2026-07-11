@@ -1,6 +1,12 @@
 const BASE_URL = 'http://localhost:3000/api';
 const _cache = new Map<string, any>();
 
+function clearCacheByPrefix(prefix: string) {
+  for (const key of _cache.keys()) {
+    if (key.startsWith(prefix)) _cache.delete(key);
+  }
+}
+
 export interface Impact {
     job_count: number;
     sum_profits: number;
@@ -85,12 +91,16 @@ export const api = {
     getOne: (id: string) => get<any>(`/orders/${id}`),
     getByUserId: (userId: string) => get<any[]>(`/orders/user/${userId}`),
     getByItemId: (itemId: string) => get<any[]>(`/orders/item/${itemId}`),
-    create: (body: object) =>
-      fetch(`${BASE_URL}/orders`, {
+    create: async (body: object) => {
+      const res = await fetch(`${BASE_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-      }).then(r => r.json()),
+      });
+      const data = await res.json();
+      clearCacheByPrefix('/orders');
+      return data;
+    },
     getImpact: () => get<Impact>('/orders/impact'),
   },
   promotions: {

@@ -106,11 +106,11 @@ const DISCOVER_PLACES: PlaceData[] = [
           exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675251,100.5286457,3a,75y,73.58h,86.74t/data=!3m8!1e1!3m6!1s9xkO6-bd1G2EheSck3iKhw!2e0!3e11!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D3.2559134984606715%26panoid%3D9xkO6-bd1G2EheSck3iKhw%26yaw%3D73.57655347349332!7i16384!8i8192!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
           subSections: [
             { title: 'พระวิหาร', description: 'เสริมดวงชะตา มงคล ๑๐๘ กับพระพุทธไสยาสน์', image: '/img/pravihan.jpg', exploreLabel: 'สำรวจพระวิหาร',
-              experienceLink: 'https://bangkachao.mxrth.co/phraviharn/index.html',
+              experienceLabel: 'ร่วมกิจกรรม', experienceLink: 'https://bangkachao.mxrth.co/phraviharn/index.html',
               exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675734,100.5288045,3a,75y,54.18h,80.29t/data=!3m8!1e1!3m6!1sCIHM0ogKEICAgICUoo2sTg!2e10!3e11!6shttps:%2F%2Flh3.googleusercontent.com%2Fgpms-cs-s%2FAFP8RcMczgHs1RIu4WeqMNQrTaNAt2yeP0-JLMEkQUSluxOkMGyHq8cWlCGh6Yy8-Kwn1B_v6kYAYy0PM-RQcYmyfqgl8xLmbZqq0y-CSaDp_YCz3u1g_G68XpGp0f-qDecrPYutkMGf%3Dw900-h600-k-no-pi9.712856614663536-ya340.17846039924973-ro0-fo100!7i7680!8i3840!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
             },
             { title: 'พระมณฑป', description: 'เลี้ยงเซียมซี กับปู่ฤาษีนาคลิทธิโคดม', image: '/img/pramontop.jpg', exploreLabel: 'สำรวจพระมณฑป',
-              experienceLink: 'https://bangkachao.mxrth.co/phramondop/index.html',
+              experienceLabel: 'ร่วมกิจกรรม', experienceLink: 'https://bangkachao.mxrth.co/phramondop/index.html',
               exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675251,100.5286457,3a,75y,83.12h,84.79t/data=!3m7!1e1!3m5!1s9xkO6-bd1G2EheSck3iKhw!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D5.2147582870416755%26panoid%3D9xkO6-bd1G2EheSck3iKhw%26yaw%3D83.12037990502836!7i16384!8i8192!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
             },
           ],
@@ -171,6 +171,15 @@ const DISCOVER_PLACES: PlaceData[] = [
     activityIds: ['ACT019'],
     showActivityHeader: true,
     uncleAudioUrl: '/audio/uncle-nakhonpathom.mp3',
+    highlights: [
+      { name: 'ทริปเที่ยว', nameEn: 'Day Trip', image: '/img/watnakhonphatom.jpg',
+        modal: {
+          description: 'ท่องเที่ยวนครปฐมในมุมใหม่ สัมผัสเสน่ห์เมืองประวัติศาสตร์ ทั้งวัด คาเฟ่ และวิถีชีวิตชุมชนที่อบอุ่น พร้อมบริการสุดพิเศษอย่าง โปรแกรมเช่าเพื่อน (Rent a Friend) ที่จะมาเป็นทั้งตากล้อง เพื่อนคุย และคนนำเที่ยวให้ตลอดทริป',
+          image: '/img/nakhonphatomview.png',
+          exploreLabel: 'สำรวจนครปฐม',
+        },
+      },
+    ],
   },
   {
     id: 'khiriwong',

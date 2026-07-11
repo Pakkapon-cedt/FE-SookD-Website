@@ -75,8 +75,7 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
             total_price: Math.round(item.price * item.qty * (1 - discountPct)),
             order_status: item.itemType === 'activity' ? 'completed' : 'processing',
             shipping_address: currentUser?.address || '',
-            act_date: item.actDate || '',
-            act_time: item.actTime || '',
+            order_select_date: item.actDate || '',
             applied_promotion_id: '',
           })
         )

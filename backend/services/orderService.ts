@@ -1,6 +1,6 @@
 import { Order } from "../models/Order";
 import { generateNextId } from "../utils/idGenerator";
-import { getSheetData } from "./googleSheetService";
+import { getSheetData, clearSheetCache } from "./googleSheetService";
 
 export async function getOrders()
     : Promise<Order[]> {
@@ -15,6 +15,7 @@ export async function getOrders()
         total_price: item.total_price,
         order_status: item.order_status,
         shipping_address: item.shipping_address,
+        order_select_date: item.order_select_date,
         applied_promotion_id: item.applied_promotion_id
     }));
 }
@@ -66,6 +67,7 @@ export async function createOrder(
         }
     );
 
+    clearSheetCache("orders");
     return newOrder;
 }
 
