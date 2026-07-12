@@ -177,6 +177,11 @@ const DISCOVER_PLACES: PlaceData[] = [
           description: 'ท่องเที่ยวนครปฐมในมุมใหม่ สัมผัสเสน่ห์เมืองประวัติศาสตร์ ทั้งวัด คาเฟ่ และวิถีชีวิตชุมชนที่อบอุ่น พร้อมบริการสุดพิเศษอย่าง โปรแกรมเช่าเพื่อน (Rent a Friend) ที่จะมาเป็นทั้งตากล้อง เพื่อนคุย และคนนำเที่ยวให้ตลอดทริป',
           image: '/img/nakhonphatomview.png',
           exploreLabel: 'สำรวจนครปฐม',
+          exploreLink: 'https://www.google.com/maps/place/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C+%E0%B8%AD%E0%B8%B3%E0%B9%80%E0%B8%A0%E0%B8%AD%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%84%E0%B8%A3%E0%B8%9B%E0%B8%90%E0%B8%A1+%E0%B8%99%E0%B8%84%E0%B8%A3%E0%B8%9B%E0%B8%90%E0%B8%A1+73000/@13.8198123,100.0613552,3a,75y,267.5h,94.72t/data=!3m7!1e1!3m5!1sq0jjCYbeGNk0u56JyP9fHA!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D-4.722235715000011%26panoid%3Dq0jjCYbeGNk0u56JyP9fHA%26yaw%3D267.495748777769!7i16384!8i8192!4m6!3m5!1s0x30e2e5ea38a1b123:0xd78d5002bf4a79ee!8m2!3d13.8203947!4d100.0555474!16s%2Fg%2F11kb_p_3sx?entry=ttu&g_ep=EgoyMDI2MDcwOC4wIKXMDSoASAFQAw%3D%3D',
+          subSections: [
+            { sectionHeader: 'กิจกรรม', title: 'Memory Jigsaw', description: 'สัมผัสประสบการณ์ต่อจิ๊กซอวพร้อมรำลึกความหลัง', image: '/img/nakornpathomhame.png',
+              experienceLabel: 'ร่วมกิจกรรม', gameLink: '/games/memory-jigsaw.html' },
+          ],
         },
       },
     ],
@@ -193,7 +198,18 @@ const DISCOVER_PLACES: PlaceData[] = [
     faq: 'Q: บริการเดินป่า "ยอดเขาหลวง" มีการจัดการอย่างไร?\nAns: เส้นทางนี้จะนำทางโดย อดีตพรานป่าท้องถิ่น และมีทีมลูกหาบชุมชนคอยดูแลสัมภาระตลอดเส้นทางครับ ความเจ๋งคือกลุ่มลูกหาบจะเข้มงวดเรื่องสิ่งแวดล้อมมาก โดยจะคอยควบคุมและขนขยะของนักท่องเที่ยวกลับลงมาทั้งหมดเพื่อไม่ให้ทำลายป่าต้นน้ำ (ราคาประมาณ 4,500 – 7,200 บาท/ท่าน รวมคนนำทาง ลูกหาบ อาหารทุกมื้อในป่า และค่าธรรมเนียมอุทยานแล้ว)',
     activityIds: ['ACT005_B2C', 'ACT006_B2C', 'ACT007_B2C', 'ACT008', 'ACT009'],
     highlights: [
-      { name: 'สวนสมรม', nameEn: 'Suan Somrom', image: '/img/suansomrom.jpg' },
+      { name: 'สวนสมรม', nameEn: 'Suan Somrom', image: '/img/suansomrom.jpg',
+        modal: {
+          description: 'ระบบวนเกษตรหรือสวนผลไม้ผสมผสานตามธรรมชาติ บนพื้นที่ลาดชันเชิงเขาหลวง ต.กำโลน อ.ลานสกา จ.นครศรีธรรมราช ผืนป่าต้นน้ำอุดมสมบูรณ์ที่มีคลองท่าดีไหลผ่าน ซึ่งไม่เพียงแต่เป็นแหล่งอาหารและรายได้ของชาวบ้านในระบบสังคมเครือญาติเท่านั้น แต่ยังเป็น ต้นแบบวิถีเกษตรกรรมยั่งยืนที่สร้างผลกระทบเชิงบวก ระดับประเทศ ด้วยการพิสูจน์ว่ามนุษย์สามารถทำมาหากินเลี้ยงชีพควบคู่ไปกับการรักษาป่าต้นน้ำดั้งเดิมได้โดยไม่ทำลายระบบนิเวศ',
+          image: '/img/suansomromm.jpg',
+          exploreLabel: 'สำรวจสวนสมรม',
+          exploreLink: 'https://www.google.com/maps/place/%E0%B8%AA%E0%B8%A7%E0%B8%99%E0%B8%AA%E0%B8%A1%E0%B8%A3%E0%B8%A1/@8.587255,99.795185,3a,75y,107.97h,90t/data=!3m8!1e1!3m6!1sCIHM0ogKEICAgIDcneu3Tg!2e10!3e11!6shttps:%2F%2Flh3.googleusercontent.com%2Fgpms-cs-s%2FAFP8RcMtipAaoyNfqQqevBWSiPp-M4sPyRuWGDwD7-5XRwO7CePqrgavx8Zt65Fc2v9TnK-52Dvl6gmBOHUgEDCFhRHtxoeJZ4VZMK-88KCYr0WhlMmhhOfVqpwsx7BXmNGo2lKrlKrK%3Dw900-h600-k-no-pi0-ya107.9697147157759-ro0-fo100!7i7200!8i3600!4m6!3m5!1s0x3053afef43398d59:0xac69adec23e32c74!8m2!3d8.5141213!4d99.7901781!16s%2Fg%2F11jdh_3xxs?entry=ttu&g_ep=EgoyMDI2MDcwOC4wIKXMDSoASAFQAw%3D%3D',
+          subSections: [
+            { sectionHeader: 'กิจกรรม', title: 'Fruit Hunt', description: 'บุกสวนสมรมจับผิดภาพ ค้นหามังคุดผลยักษ์มันวาว และทุเรียนหนามน้ำตาลทองระดับพรีเมียม', image: '/img/kiriwongfind.jpg',
+              experienceLabel: 'ร่วมกิจกรรม', gameLink: '/games/fruit-hunt.html' },
+          ],
+        },
+      },
       { name: 'ที่เที่ยวเขาหลวง', nameEn: 'Khao Luang', image: '/img/kaoluang.jpg' },
     ],
     uncleAudioUrl: '/audio/uncle-khiriwong.mp3',

@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fruit Hunt</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Kanit', 'Sarabun', sans-serif;
+  background: linear-gradient(160deg, #f3f0e6 0%, #ddd0b0 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#game-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 380px;
+  width: 100%;
+  animation: fadeUp .4s ease;
+}
+.badge {
+  background: #2d6a4f;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  padding: 4px 16px;
+  border-radius: 20px;
+}
+.game-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d6a4f;
+  text-align: center;
+}
+.game-desc {
+  font-size: .8rem;
+  color: #5a4535;
+  text-align: center;
+  line-height: 1.7;
+  margin-top: -6px;
+}
+.stage-label {
+  font-size: .72rem;
+  font-weight: 700;
+  color: #7a6650;
+  letter-spacing: .05em;
+  text-align: center;
+  padding: 4px 14px;
+  background: rgba(200,184,154,.4);
+  border-radius: 20px;
+}
+
+/* ── Card Grid ── */
+#cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 148px);
+  grid-template-rows: repeat(2, 178px);
+  gap: 12px;
+}
+.card {
+  width: 148px;
+  height: 178px;
+  perspective: 800px;
+  cursor: pointer;
+  position: relative;
+}
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+}
+.card.face-down .card-inner {
+  transform: rotateY(180deg);
+}
+.card-face, .card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  backface-visibility: hidden;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+}
+.card-face {
+  background: #fff;
+}
+.card-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.card-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #2d6a4f 0%, #52b788 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.card-back-icon { font-size: 2.8rem; opacity: .8; }
+.card-back-text { font-size: .6rem; color: rgba(255,255,255,.7); font-weight: 700; letter-spacing: .08em; }
+
+.card:not(.face-down):hover .card-face { filter: brightness(1.06); }
+
+/* wrong card red border flash */
+.card.wrong .card-face {
+  outline: 3px solid #e63946;
+  outline-offset: -3px;
+}
+
+/* card slide transition (used during shuffle) */
+.card.sliding {
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2d2010;
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 14px;
+  max-width: 310px;
+  width: calc(100% - 40px);
+  text-align: center;
+  line-height: 1.55;
+  z-index: 100;
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  transition: opacity .25s;
+}
+#toast.hidden { display: none; }
+
+/* ── Overlays ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(12,8,3,.76);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 200;
+}
+.overlay.show {
+  display: flex;
+  animation: fadeUp .3s ease;
+}
+.obox {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 22px 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.38);
+}
+.obox-icon { font-size: 2.6rem; line-height: 1; }
+.obox-title { font-size: 1rem; font-weight: 700; color: #2d6a4f; line-height: 1.45; }
+.obox-divider { width: 44px; height: 2px; background: #c8b89a; border-radius: 2px; }
+.obox-text { font-size: .82rem; color: #5a4535; line-height: 1.75; }
+.obox-btn {
+  margin-top: 2px;
+  background: #2d6a4f;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+  transition: background .2s, transform .15s;
+}
+.obox-btn:hover { background: #1a3d2e; transform: translateY(-1px); }
+.obox-btn.amber {
+  background: #e9a84c;
+}
+.obox-btn.amber:hover { background: #c88732; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div id="game-wrap">
+  <span class="badge">🍈 Fruit Hunt</span>
+  <div class="game-title">เฟ้นหาของดีคีรีวง</div>
+  <div class="game-desc">ฝึกสายตาแยกแยะ "มังคุดคีรีวง" ผลใหญ่ผิวมันวาวระดับ GI และ "ทุเรียนคีรีวง" ที่มีหนามสีน้ำตาลทองสวยเป็นเอกลักษณ์ ออกจากผลไม้ทั่วไปให้เจอ!</div>
+  <div class="stage-label" id="stage-label"></div>
+  <div id="cards-grid"></div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="hidden"></div>
+
+<!-- Stage 1 win -->
+<div class="overlay" id="ov-s1">
+  <div class="obox">
+    <div class="obox-icon">🥭</div>
+    <div class="obox-title">ยินดีด้วย! คุณหา "มังคุดคีรีวง" เจอแล้ว</div>
+    <div class="obox-divider"></div>
+    <div class="obox-text">แต่ยังไม่หมดเท่านี้หรอกนะ<br>แน่จริงก็ลองหา <strong>"ทุเรียนคีรีวง"</strong> ที่มีหนามสีน้ำตาลทอง ให้เจอด้วยสิ</div>
+    <button class="obox-btn" onclick="initStage(2)">รับความท้าทาย!</button>
+  </div>
+</div>
+
+<!-- Final win -->
+<div class="overlay" id="ov-win">
+  <div class="obox">
+    <div class="obox-icon">✨</div>
+    <div class="obox-title">ตาดีสุดๆ ที่หา 'ของดี' เจอ!</div>
+    <div class="obox-divider"></div>
+    <div class="obox-text">ในสวนสมรมที่เต็มไปด้วยผลไม้หน้าตาแปลก...<br>คุณไม่สงสัยบ้างหรอว่ารสชาติ <strong>'มังคุดเขา GI'</strong> หรือ <strong>'ทุเรียนหนามทอง'</strong> พันธุ์หายากนี้ รสชาติจะเป็นยังไง?</div>
+    <button class="obox-btn amber" onclick="goToProducts()">ลองชิม</button>
+  </div>
+</div>
+
+<script>
+const STAGES = {
+  1: {
+    label: 'ด่านที่ 1 : หา "มังคุดคีรีวง"',
+    specialImg: '/img/mangosteengi.jpg',
+    normalImg:  '/img/normalmangosteen.jpg',
+    wrongMsg:   'ยังไม่ถูก\n"มังคุดคีรีวง" ผลใหญ่ผิวมันวาว\nลองใหม่อีกทีนะ',
+    winOv: 'ov-s1',
+  },
+  2: {
+    label: 'ด่านที่ 2 : หา "ทุเรียนคีรีวง"',
+    specialImg: '/img/kiriwongdurian.jpg',
+    normalImg:  '/img/duriannormal.jpg',
+    wrongMsg:   'ยังไม่ถูก\n"ทุเรียนคีรีวง" ที่มีหนามสีน้ำตาลทอง\nลองใหม่อีกทีนะ',
+    winOv: 'ov-win',
+  },
+};
+
+let cards  = [];   // [{type,image,faceUp}] indexed by grid slot
+let stage  = null;
+let locked = false;
+
+/* ── init ── */
+function initStage(n) {
+  document.querySelectorAll('.overlay').forEach(el => el.classList.remove('show'));
+  stage = STAGES[n];
+  document.getElementById('stage-label').textContent = stage.label;
+
+  const raw = [
+    { type: 'special', image: stage.specialImg },
+    { type: 'normal',  image: stage.normalImg  },
+    { type: 'normal',  image: stage.normalImg  },
+    { type: 'normal',  image: stage.normalImg  },
+  ];
+  cards  = fisherYates(raw).map(c => ({ ...c, faceUp: true }));
+  locked = true;
+  render();
+
+  // Peek 2s then flip all down
+  setTimeout(flipAllDown, 2000);
+}
+
+function fisherYates(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ── render ── */
+function render() {
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+  cards.forEach((card, i) => {
+    const el = document.createElement('div');
+    el.className = 'card' + (card.faceUp ? '' : ' face-down');
+    el.id = `card-${i}`;
+    el.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face"><img src="${card.image}" alt="fruit" draggable="false"></div>
+        <div class="card-back">
+          <span class="card-back-icon">🌿</span>
+          <span class="card-back-text">FRUIT HUNT</span>
+        </div>
+      </div>`;
+    if (!card.faceUp) el.addEventListener('click', () => pick(i));
+    grid.appendChild(el);
+  });
+}
+
+/* ── helpers ── */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const CELL_W = 148 + 12; // card width + gap
+const CELL_H = 178 + 12; // card height + gap
+
+function cardPos(idx) {
+  return { x: (idx % 2) * CELL_W, y: Math.floor(idx / 2) * CELL_H };
+}
+
+/* ── flip all down then shuffle ── */
+function flipAllDown() {
+  cards.forEach(c => c.faceUp = false);
+  render();
+  setTimeout(animateShuffle, 640);
+}
+
+/* ── shuffle: slide cards to swapped positions ── */
+async function animateShuffle() {
+  // Generate 6 random swap pairs
+  const swaps = [];
+  for (let r = 0; r < 6; r++) {
+    const a = Math.floor(Math.random() * 4);
+    let b; do { b = Math.floor(Math.random() * 4); } while (b === a);
+    swaps.push([a, b]);
+  }
+
+  for (const [a, b] of swaps) {
+    const cardEls = [...document.querySelectorAll('.card')];
+    const elA = cardEls[a];
+    const elB = cardEls[b];
+
+    const pA = cardPos(a), pB = cardPos(b);
+    const dx = pB.x - pA.x;
+    const dy = pB.y - pA.y;
+
+    // lift swapping cards above others
+    elA.style.zIndex = '10';
+    elB.style.zIndex = '11';
+
+    // force reflow then add transition + move
+    elA.offsetWidth; // reflow
+    elA.classList.add('sliding');
+    elB.classList.add('sliding');
+    elA.style.transform = `translate(${dx}px, ${dy}px)`;
+    elB.style.transform = `translate(${-dx}px, ${-dy}px)`;
+
+    await sleep(400);
+
+    // commit swap to data then re-render (clears all inline styles/transforms)
+    [cards[a], cards[b]] = [cards[b], cards[a]];
+    render();
+
+    await sleep(100); // brief pause between swaps
+  }
+
+  locked = false;
+}
+
+/* ── pick ── */
+function pick(i) {
+  if (locked) return;
+  locked = true;
+
+  cards[i].faceUp = true;
+  render();
+
+  if (cards[i].type === 'special') {
+    // correct
+    setTimeout(() => {
+      document.getElementById(stage.winOv).classList.add('show');
+    }, 500);
+  } else {
+    // wrong — show red flash then toast
+    setTimeout(() => {
+      document.getElementById(`card-${i}`).classList.add('wrong');
+      showToast(stage.wrongMsg);
+      setTimeout(() => {
+        hideToast();
+        document.getElementById(`card-${i}`)?.classList.remove('wrong');
+        cards[i].faceUp = false;
+        render();
+        setTimeout(animateShuffle, 620);
+      }, 1600);
+    }, 400);
+  }
+}
+
+/* ── toast ── */
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.innerHTML = msg.replace(/\n/g, '<br>');
+  el.classList.remove('hidden');
+}
+function hideToast() {
+  document.getElementById('toast').classList.add('hidden');
+}
+
+/* ── navigate to products ── */
+function goToProducts() {
+  window.parent.postMessage({ action: 'shop', featured: ['PRD015_TH', 'PRD016_TH', 'PRD017_TH', 'PRD018_TH'] }, '*');
+}
+
+initStage(1);
+</script>
+</body>
+</html>

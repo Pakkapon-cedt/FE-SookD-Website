@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory Jigsaw</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Kanit', 'Sarabun', sans-serif;
+  background: linear-gradient(160deg, #f5f0e8 0%, #ddd0b8 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* ── Level Select ── */
+#screen-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  max-width: 500px;
+  width: 100%;
+  animation: fadeUp .4s ease;
+}
+.intro-badge {
+  background: #2d6a4f;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+.intro-title {
+  text-align: center;
+  color: #2d6a4f;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.intro-sub {
+  text-align: center;
+  color: #7a6650;
+  font-size: .85rem;
+  margin-top: -12px;
+}
+.level-row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.level-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140px;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,.13);
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  border: 2px solid transparent;
+}
+.level-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 28px rgba(45,106,79,.25);
+  border-color: #2d6a4f;
+}
+.level-card img {
+  width: 140px;
+  height: 105px;
+  object-fit: cover;
+  display: block;
+}
+.level-card .lbl {
+  font-size: .82rem;
+  font-weight: 700;
+  color: #3a2a1a;
+  padding: 8px 6px 10px;
+  text-align: center;
+}
+
+/* ── Game Screen ── */
+#screen-game {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: fadeUp .4s ease;
+}
+
+/* header row: text + reference image */
+.g-header-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: center;
+}
+.g-text { text-align: left; }
+.g-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d6a4f;
+}
+.g-sub {
+  font-size: .78rem;
+  color: #7a6650;
+  font-style: italic;
+}
+/* small reference image */
+.g-ref { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.g-ref-label {
+  font-size: .62rem;
+  font-weight: 700;
+  color: #7a6650;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.g-ref-img-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,.22);
+  flex-shrink: 0;
+}
+.g-ref-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.g-ref-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right,
+      transparent calc(33.3% - .6px), rgba(255,255,255,.65) calc(33.3% - .6px),
+      rgba(255,255,255,.65) calc(33.3% + .6px), transparent calc(33.3% + .6px)),
+    linear-gradient(to right,
+      transparent calc(66.6% - .6px), rgba(255,255,255,.65) calc(66.6% - .6px),
+      rgba(255,255,255,.65) calc(66.6% + .6px), transparent calc(66.6% + .6px)),
+    linear-gradient(to bottom,
+      transparent calc(33.3% - .6px), rgba(255,255,255,.65) calc(33.3% - .6px),
+      rgba(255,255,255,.65) calc(33.3% + .6px), transparent calc(33.3% + .6px)),
+    linear-gradient(to bottom,
+      transparent calc(66.6% - .6px), rgba(255,255,255,.65) calc(66.6% - .6px),
+      rgba(255,255,255,.65) calc(66.6% + .6px), transparent calc(66.6% + .6px));
+  pointer-events: none;
+}
+
+/* puzzle grid */
+#puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 108px);
+  grid-template-rows: repeat(3, 108px);
+  gap: 4px;
+  background: #c8b89a;
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.22);
+}
+.tile {
+  width: 108px;
+  height: 108px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter .12s, transform .1s, outline .1s;
+  background-color: #e8ddc8;
+  background-repeat: no-repeat;
+  position: relative;
+}
+.tile:not(.empty):hover { filter: brightness(1.08); }
+.tile.empty {
+  background-color: #b8a888;
+  cursor: default;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.18);
+}
+/* swap-mode selected tile */
+.tile.selected {
+  outline: 3px solid #e76f51;
+  outline-offset: -3px;
+  filter: brightness(1.12);
+  z-index: 2;
+  transform: scale(1.04);
+}
+
+/* swap toggle button */
+.swap-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1.5px solid #c8b89a;
+  border-radius: 22px;
+  padding: 8px 20px;
+  font-size: .84rem;
+  font-weight: 600;
+  color: #7a6650;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, border-color .2s, color .2s, box-shadow .2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.swap-btn .sw-icon { font-size: 1rem; }
+.swap-btn.active {
+  background: #e76f51;
+  border-color: #e76f51;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(231,111,81,.35);
+}
+.swap-hint {
+  font-size: .73rem;
+  color: #e76f51;
+  font-weight: 600;
+  min-height: 1.1em;
+  text-align: center;
+}
+
+/* footer */
+.game-footer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.moves-label {
+  font-size: .84rem;
+  color: #7a6650;
+  font-weight: 600;
+}
+.moves-num { color: #2d6a4f; font-weight: 700; }
+.back-btn {
+  background: none;
+  border: 1.5px solid #c8b89a;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: .82rem;
+  color: #7a6650;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+.back-btn:hover { background: #ede5d5; }
+
+/* ── Preview Lightbox ── */
+#preview-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,8,5,.82);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 300;
+  cursor: zoom-out;
+  animation: fadeUp .25s ease;
+}
+#preview-overlay img {
+  max-width: min(90vw, 600px);
+  max-height: 80vh;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  object-fit: contain;
+  pointer-events: none;
+}
+.preview-close {
+  position: absolute;
+  top: 16px; right: 20px;
+  color: #fff;
+  font-size: 1.6rem;
+  cursor: pointer;
+  line-height: 1;
+  opacity: .8;
+}
+.preview-close:hover { opacity: 1; }
+
+/* ── Win Overlay ── */
+#win-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(20,15,10,.78);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 200;
+  animation: fadeUp .35s ease;
+}
+.win-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 22px 24px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.35);
+}
+.win-icon { font-size: 2.8rem; line-height: 1; }
+.win-title { font-size: 1.05rem; font-weight: 700; color: #2d6a4f; line-height: 1.4; }
+.win-divider { width: 48px; height: 2px; background: #c8b89a; border-radius: 2px; }
+.win-text { font-size: .84rem; color: #5a4a35; line-height: 1.75; }
+.win-btn {
+  margin-top: 4px;
+  background: #2d6a4f;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: .98rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .2s, transform .15s;
+  width: 100%;
+}
+.win-btn:hover { background: #1a3d2e; transform: translateY(-1px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Level Selection ── -->
+<div id="screen-select">
+  <span class="intro-badge">🧩 Memory Jigsaw</span>
+  <p class="intro-title">ร้อยเรียงชิ้นส่วนแห่งความทรงจำ...<br>นำพาคุณกลับมาสู่นครปฐมอีกครั้ง</p>
+  <p class="intro-sub">เลือกภาพที่คุณต้องการจัดเรียง</p>
+  <div class="level-row">
+    <div class="level-card" onclick="startLevel('temple')">
+      <img src="/img/templeingame.jpg" alt="พระปฐมเจดีย์">
+      <span class="lbl">พระปฐมเจดีย์</span>
+    </div>
+    <div class="level-card" onclick="startLevel('cafe')">
+      <img src="/img/cafeingame.jpg" alt="คาเฟ่">
+      <span class="lbl">คาเฟ่</span>
+    </div>
+    <div class="level-card" onclick="startLevel('water')">
+      <img src="/img/wateringame.jpg" alt="แม่น้ำท่าจีน">
+      <span class="lbl">แม่น้ำท่าจีน</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Puzzle Screen ── -->
+<div id="screen-game">
+  <div class="g-header-row">
+    <div class="g-text">
+      <div class="g-title" id="g-title"></div>
+      <div class="g-sub" id="g-sub"></div>
+    </div>
+    <div class="g-ref" onclick="openPreview()" style="cursor:zoom-in">
+      <div class="g-ref-label">ตัวอย่าง 🔍</div>
+      <div class="g-ref-img-wrap">
+        <img id="g-ref-img" src="" alt="ตัวอย่าง">
+      </div>
+    </div>
+  </div>
+
+  <div id="puzzle-grid"></div>
+
+  <button class="swap-btn" id="swap-btn" onclick="toggleSwap()">
+    <span class="sw-icon">🔀</span> สลับชิ้นส่วน
+  </button>
+  <div class="swap-hint" id="swap-hint"></div>
+
+  <div class="game-footer">
+    <span class="moves-label">การเคลื่อนที่: <span class="moves-num" id="move-count">0</span></span>
+    <button class="back-btn" onclick="backToSelect()">‹ เปลี่ยนด่าน</button>
+  </div>
+</div>
+
+<!-- ── Preview Lightbox ── -->
+<div id="preview-overlay" onclick="closePreview()">
+  <span class="preview-close" onclick="closePreview()">✕</span>
+  <img id="preview-img" src="" alt="ตัวอย่าง">
+</div>
+
+<!-- ── Win Overlay ── -->
+<div id="win-overlay">
+  <div class="win-box">
+    <div class="win-icon">🏆</div>
+    <div class="win-title">ยินดีด้วย! ไขปริศนาได้สำเร็จแล้ว!</div>
+    <div class="win-divider"></div>
+    <div class="win-text">
+      เยี่ยมมาก! ทว่า เมื่อมองดูใกล้ๆ คุณจะสังเกตเห็นช่องว่างเล็กๆ
+      ที่ดูเหมือนจะขาดหายไป...<br><br>
+      หรือว่ารูปภาพนี้จะรออะไรบางอย่าง? ใช่แล้ว!
+      มันรอให้ <strong>คุณ</strong> ก้าวเข้ามาเติมเต็มช่องว่างนั้น!<br><br>
+      เชิญเข้ามาอยู่ในรูปเพื่อทำให้มันสมบูรณ์แบบด้วยกัน!
+    </div>
+    <button class="win-btn" onclick="acceptInvite()">ตอบรับคำเชิญ</button>
+  </div>
+</div>
+
+<script>
+const LEVELS = {
+  temple: { image: '/img/templeingame.jpg', title: 'แสงเจดีย์ยามค่ำ',     sub: '...ที่ยังคงส่องสว่างรอคุณกลับมา' },
+  cafe:   { image: '/img/cafeingame.jpg',   title: 'มุมวินเทจที่เงียบสงบ', sub: '...ร้อยชิ้นส่วนแห่งความคิดถึง'   },
+  water:  { image: '/img/wateringame.jpg',  title: 'ริมน้ำยามเย็น',        sub: '...บรรยากาศเดิมๆ ที่รอให้ค้นหา'  },
+};
+
+const N     = 3;
+const CELL  = 108;
+const EMPTY = N * N - 1; // piece index 8 = the blank
+
+let state    = [];
+let emptyPos = EMPTY;
+let moves    = 0;
+let level    = null;
+let swapMode = false;
+let swapFirst = -1; // grid position of first selected tile (-1 = none)
+
+/* ── helpers ── */
+function neighbors(pos) {
+  const r = Math.floor(pos / N), c = pos % N, nb = [];
+  if (r > 0)     nb.push(pos - N);
+  if (r < N - 1) nb.push(pos + N);
+  if (c > 0)     nb.push(pos - 1);
+  if (c < N - 1) nb.push(pos + 1);
+  return nb;
+}
+
+function shuffle() {
+  const arr = Array.from({ length: N * N }, (_, i) => i);
+  let ep = EMPTY;
+  for (let i = 0; i < 300; i++) {
+    const nb   = neighbors(ep);
+    const next = nb[Math.floor(Math.random() * nb.length)];
+    [arr[ep], arr[next]] = [arr[next], arr[ep]];
+    ep = next;
+  }
+  if (arr.every((v, i) => v === i)) return shuffle();
+  return { arr, ep };
+}
+
+function isWin() { return state.every((v, i) => v === i); }
+
+/* ── image dims (for cover crop) ── */
+function loadDims(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve({ nw: img.naturalWidth || 1, nh: img.naturalHeight || 1 }); } };
+    img.onload = finish;
+    img.src = src;
+    if (img.complete && img.naturalWidth) finish();
+  });
+}
+
+/* ── screens ── */
+async function startLevel(key) {
+  level = LEVELS[key];
+  const { arr, ep } = shuffle();
+  state     = arr;
+  emptyPos  = ep;
+  moves     = 0;
+  swapMode  = false;
+  swapFirst = -1;
+
+  document.getElementById('screen-select').style.display = 'none';
+  document.getElementById('screen-game').style.display   = 'flex';
+  document.getElementById('win-overlay').style.display   = 'none';
+  document.getElementById('g-title').textContent         = level.title;
+  document.getElementById('g-sub').textContent           = level.sub;
+  document.getElementById('g-ref-img').src               = level.image;
+  document.getElementById('move-count').textContent      = '0';
+  document.getElementById('swap-btn').classList.remove('active');
+  document.getElementById('swap-hint').textContent       = '';
+
+  if (!level.nw) {
+    const dims = await loadDims(level.image);
+    level.nw = dims.nw;
+    level.nh = dims.nh;
+  }
+  render();
+}
+
+function backToSelect() {
+  document.getElementById('screen-game').style.display   = 'none';
+  document.getElementById('screen-select').style.display = 'flex';
+  document.getElementById('win-overlay').style.display   = 'none';
+}
+
+/* ── render ── */
+function coverParams() {
+  const TOTAL = N * CELL;
+  const nw = level.nw || TOTAL;
+  const nh = level.nh || TOTAL;
+  const scale = Math.max(TOTAL / nw, TOTAL / nh);
+  return {
+    sw: nw * scale,
+    sh: nh * scale,
+    ox: (TOTAL - nw * scale) / 2,
+    oy: (TOTAL - nh * scale) / 2,
+  };
+}
+
+function render() {
+  const grid = document.getElementById('puzzle-grid');
+  grid.innerHTML = '';
+  const { sw, sh, ox, oy } = coverParams();
+
+  state.forEach((piece, pos) => {
+    const div = document.createElement('div');
+    if (piece === EMPTY) {
+      div.className = 'tile empty';
+    } else {
+      div.className = 'tile';
+      const cr = Math.floor(piece / N);
+      const cc = piece % N;
+      div.style.backgroundImage    = `url('${level.image}')`;
+      div.style.backgroundSize     = `${sw}px ${sh}px`;
+      div.style.backgroundPosition = `${ox - cc * CELL}px ${oy - cr * CELL}px`;
+
+      if (swapMode && pos === swapFirst) div.classList.add('selected');
+      div.onclick = () => onTileClick(pos);
+    }
+    grid.appendChild(div);
+  });
+}
+
+/* ── interactions ── */
+function onTileClick(pos) {
+  if (swapMode) {
+    handleSwap(pos);
+  } else {
+    handleSlide(pos);
+  }
+}
+
+function handleSlide(pos) {
+  if (!neighbors(emptyPos).includes(pos)) return;
+  [state[emptyPos], state[pos]] = [state[pos], state[emptyPos]];
+  emptyPos = pos;
+  countMove();
+}
+
+function handleSwap(pos) {
+  if (state[pos] === EMPTY) return; // don't select the blank
+  if (swapFirst === -1) {
+    swapFirst = pos;
+    document.getElementById('swap-hint').textContent = 'เลือกชิ้นที่สองเพื่อสลับ';
+    render();
+    return;
+  }
+  if (swapFirst === pos) { // tap same tile = deselect
+    swapFirst = -1;
+    document.getElementById('swap-hint').textContent = 'เลือกชิ้นแรกที่ต้องการสลับ';
+    render();
+    return;
+  }
+  // perform swap
+  [state[swapFirst], state[pos]] = [state[pos], state[swapFirst]];
+  if (swapFirst === emptyPos)    emptyPos = pos;
+  else if (pos === emptyPos)     emptyPos = swapFirst;
+  swapFirst = -1;
+  document.getElementById('swap-hint').textContent = 'เลือกชิ้นแรกที่ต้องการสลับ';
+  countMove();
+}
+
+function countMove() {
+  moves++;
+  document.getElementById('move-count').textContent = moves;
+  render();
+  if (isWin()) {
+    setTimeout(() => { document.getElementById('win-overlay').style.display = 'flex'; }, 350);
+  }
+}
+
+function toggleSwap() {
+  swapMode  = !swapMode;
+  swapFirst = -1;
+  const btn  = document.getElementById('swap-btn');
+  const hint = document.getElementById('swap-hint');
+  btn.classList.toggle('active', swapMode);
+  hint.textContent = swapMode ? 'เลือกชิ้นแรกที่ต้องการสลับ' : '';
+  render();
+}
+
+function openPreview() {
+  document.getElementById('preview-img').src = level.image;
+  document.getElementById('preview-overlay').style.display = 'flex';
+}
+function closePreview() {
+  document.getElementById('preview-overlay').style.display = 'none';
+}
+
+function acceptInvite() {
+  window.parent.postMessage({ action: 'experience', featured: ['ACT019_TH'] }, '*');
+}
+</script>
+</body>
+</html>
