@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fruit Collect</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Kanit', 'Sarabun', sans-serif;
+  background: linear-gradient(160deg, #e8f5e9 0%, #ddd0b8 100%);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 12px 16px 16px;
+  user-select: none; -webkit-user-select: none;
+}
+.badge {
+  background: #2d6a4f; color: #fff;
+  font-size: .74rem; font-weight: 700; letter-spacing: .06em;
+  padding: 4px 16px; border-radius: 20px;
+  margin-bottom: 8px; display: inline-block;
+}
+.game-title { font-size: .98rem; font-weight: 700; color: #2d6a4f; text-align: center; }
+.game-desc  { font-size: .75rem; color: #5a4535; line-height: 1.55; text-align: center; margin-top: 2px; margin-bottom: 10px; }
+
+.score-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.65); border-radius: 12px;
+  padding: 7px 16px; font-size: .85rem; font-weight: 700;
+  color: #2d6a4f; width: 100%; max-width: 360px; margin-bottom: 8px;
+}
+.score-bar .lbl  { color: #7a6650; font-weight: 400; font-size: .78rem; }
+.score-bar .spc  { flex: 1; }
+.score-bar .bad  { color: #e63946; }
+
+#game-canvas {
+  display: block; border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.18);
+  cursor: grab; touch-action: none; max-width: 100%;
+}
+#game-canvas:active { cursor: grabbing; }
+.hint { font-size: .7rem; color: #9a8878; text-align: center; margin-top: 6px; }
+
+/* Win overlay */
+#win-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(12,8,3,.76);
+  align-items: center; justify-content: center;
+  padding: 20px; z-index: 300;
+}
+.win-box {
+  background: #fff; border-radius: 20px; padding: 26px 20px 22px;
+  max-width: 360px; width: 100%; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.38);
+  animation: fadeUp .35s ease;
+}
+.win-icon  { font-size: 2.4rem; }
+.win-title { font-size: .93rem; font-weight: 700; color: #2d6a4f; line-height: 1.5; }
+.win-div   { width: 44px; height: 2px; background: #c8b89a; border-radius: 2px; }
+.win-text  { font-size: .78rem; color: #5a4535; line-height: 1.8; text-align: left; }
+.win-btn {
+  background: #2d6a4f; color: #fff; border: none;
+  border-radius: 12px; padding: 12px 24px;
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer; font-family: inherit; width: 100%;
+  transition: background .2s;
+}
+.win-btn:hover { background: #1a3d2e; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<span class="badge">🧺 Fruit Collect</span>
+<div class="game-title" id="game-title">คัดสรรผลไม้จากสวนมัชณิมา</div>
+<div class="game-desc" id="game-desc">รับผลไม้และสินค้าแปรรูป หลีกเลี่ยงหนอนและแมลงเต่าทอง!</div>
+
+<div class="score-bar">
+  <span class="lbl" id="lbl-score">เก็บได้</span>
+  <span id="score-el">0 / 10</span>
+  <span class="spc"></span>
+  <span class="bad" id="bad-el">🐛 ×0</span>
+</div>
+
+<canvas id="game-canvas"></canvas>
+<p class="hint" id="lbl-hint">คลิกค้างแล้วลากเพื่อเลื่อนตะกร้า 🧺</p>
+
+<div id="win-overlay">
+  <div class="win-box">
+    <div class="win-icon">🧺✨</div>
+    <div class="win-title" id="win-title">ภารกิจสำเร็จ! คุณคัดสรรสิ่งที่ดีที่สุดจากธรรมชาติเรียบร้อยแล้ว 🧺✨</div>
+    <div class="win-div"></div>
+    <div class="win-text" id="win-text">
+      ผลไม้ออร์แกนิกเกรดพรีเมียมจากสวนมัชณิมา สวนผึ้ง อยู่ในตะกร้าของคุณครบถ้วน ทั้งมะยงชิดลูกโต ลำไยแดงโย้หวานฉ่ำ กระท้อนปุยฝ้ายผลยักษ์ เลม่อนสด ๆ และเนื้อกระท้อนหยีรสกลมกล่อม... ทั้งหมดนี้เติบโตมาด้วยวิถีธรรมชาติที่เกื้อกูลผืนป่าอย่างแท้จริง<br><br>
+      เก็บในเกมครบแล้ว... ทีนี้อยากลองชิม 'รสชาติความบริสุทธิ์' จากผลไม้ออร์แกนิกจริง ๆ ที่คุณเพิ่งเก็บไปเมื่อกี้ดูไหมครับ? 😋🍃
+    </div>
+    <button class="win-btn" id="win-btn" onclick="goToProducts()">ลองเลย</button>
+  </div>
+</div>
+
+<script>
+const isEng = new URLSearchParams(location.search).get('lang') === 'ENG';
+if (isEng) {
+  document.getElementById('game-title').textContent = 'Sort Fruits from Suan Machhima';
+  document.getElementById('game-desc').textContent  = 'Catch fruits & products, avoid worms and ladybugs!';
+  document.getElementById('lbl-score').textContent  = 'Collected';
+  document.getElementById('lbl-hint').textContent   = 'Click & drag to move the basket 🧺';
+  document.getElementById('win-title').textContent  = 'Mission Complete! You\'ve sorted the best from nature 🧺✨';
+  document.getElementById('win-text').innerHTML     =
+    'Premium organic fruits from Suan Machhima, Suan Phueng are all in your basket — giant Mayongchid, sweet red longan, giant cotton Kratong, fresh lemon, and smooth-flavored Kratong jelly... all grown the natural way, truly nurturing the forest.<br><br>' +
+    'You\'ve collected them all in the game... now want to taste the \'flavor of purity\' from the real organic fruits you just picked? 😋🍃';
+  document.getElementById('win-btn').textContent    = 'Try Now';
+}
+
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+
+const W = Math.min(360, window.innerWidth - 32);
+const H = Math.round(W * 1.5);
+canvas.width  = W;
+canvas.height = H;
+
+// ── Per-fruit accent colors (make each type visually distinct) ──
+const FRUITS = [
+  { src: '/img/kratonyee.png',  bg: '#ff7043', fallback: '🟠' }, // กระท้อนหยี – orange
+  { src: '/img/lemongame.png',  bg: '#fdd835', fallback: '🍋' }, // เลม่อน – yellow
+  { src: '/img/kraton.png',     bg: '#66bb6a', fallback: '🍏' }, // กระท้อน – green
+  { src: '/img/lumyai.png',     bg: '#ab47bc', fallback: '🍇' }, // ลำไย – purple
+  { src: '/img/mayongchit.png', bg: '#ef5350', fallback: '🍑' }, // มะยงชิด – red
+];
+
+const fruitImgs = FRUITS.map(f => {
+  const img = new Image();
+  img.src = f.src;
+  return img;
+});
+
+// ── Bad item images ──
+const BAD_ITEMS = [
+  { src: '/img/worm.png' },
+  { src: '/img/ladybug.png' },
+];
+const badImgs = BAD_ITEMS.map(b => {
+  const img = new Image();
+  img.src = b.src;
+  return img;
+});
+
+// ── Canvas constants ──
+const R      = Math.round(W * 0.082); // item radius
+const BSKW   = Math.round(W * 0.24);  // basket width
+const BSKH   = Math.round(W * 0.17);  // basket height
+const BSKY   = H - BSKH - 14;        // basket top-y
+
+// ── Game state ──
+let basket   = { x: W / 2 };
+let targetX  = W / 2;
+let mouseHeld= false;
+let items    = [];
+let flashes  = [];
+let score    = 0;
+let badHits  = 0;
+let gameOver = false;
+let lastTs   = 0;
+let lastSpawn= 0;
+let spawnMs  = 1350;
+
+// Cache gradient
+let bgGrad = null;
+function getBG() {
+  if (!bgGrad) {
+    bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0,   '#c8e6c9');
+    bgGrad.addColorStop(0.55,'#f1f8e9');
+    bgGrad.addColorStop(1,   '#dce8c0');
+  }
+  return bgGrad;
+}
+
+// ── Spawn ──
+function spawnItem() {
+  const bad  = Math.random() < 0.28;
+  const xPos = R + Math.random() * (W - R * 2);
+  // base speed px/s at 60fps equivalent
+  const spd  = bad ? (3.0 + Math.random() * 1.8) : (2.0 + Math.random() * 1.5);
+
+  if (bad) {
+    const bi = Math.floor(Math.random() * badImgs.length);
+    items.push({ type: 'bad', img: badImgs[bi], x: xPos, y: -R * 2, spd });
+  } else {
+    const idx = Math.floor(Math.random() * FRUITS.length);
+    items.push({ type: 'good',
+      img: fruitImgs[idx], bg: FRUITS[idx].bg, fallback: FRUITS[idx].fallback,
+      x: xPos, y: -R * 2, spd });
+  }
+}
+
+// ── Draw background ──
+function drawBG() {
+  ctx.fillStyle = getBG();
+  ctx.fillRect(0, 0, W, H);
+  // Ground
+  ctx.fillStyle = 'rgba(100,60,20,.18)';
+  ctx.fillRect(0, H - 14, W, 14);
+  // Static leaves
+  ctx.globalAlpha = 0.55;
+  ctx.font = `${Math.round(W * .07)}px serif`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('🌿', 4, 50);
+  ctx.fillText('🌱', W - 38, 74);
+  ctx.fillText('🍃', 4, H - 90);
+  ctx.fillText('🌿', W - 38, H - 110);
+  ctx.globalAlpha = 1;
+}
+
+// ── Draw basket ──
+function drawBasket() {
+  const bx = basket.x - BSKW / 2;
+  const by = BSKY;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,.14)';
+  ctx.beginPath();
+  ctx.ellipse(basket.x, by + BSKH + 5, BSKW * .44, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body fill
+  ctx.fillStyle = '#b5722a';
+  ctx.beginPath();
+  ctx.moveTo(bx + 5, by + 10);
+  ctx.lineTo(bx + BSKW - 5, by + 10);
+  ctx.lineTo(bx + BSKW, by + BSKH);
+  ctx.lineTo(bx, by + BSKH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Weave (horizontal)
+  ctx.strokeStyle = '#7a4a1a';
+  ctx.lineWidth = 1.5;
+  for (let r = 1; r <= 3; r++) {
+    const fy    = by + 10 + r * (BSKH - 10) / 4;
+    const extra = (r / 3) * 4;
+    ctx.beginPath();
+    ctx.moveTo(bx + 5 - extra, fy);
+    ctx.lineTo(bx + BSKW - 5 + extra, fy);
+    ctx.stroke();
+  }
+  // Weave (vertical)
+  for (let c = 1; c < 5; c++) {
+    const fx0 = bx + 5 + c * (BSKW - 10) / 5;
+    const fx1 = bx + c * BSKW / 5;
+    ctx.beginPath();
+    ctx.moveTo(fx0, by + 10);
+    ctx.lineTo(fx1, by + BSKH);
+    ctx.stroke();
+  }
+
+  // Rim
+  ctx.fillStyle = '#d4903a';
+  ctx.fillRect(bx - 3, by + 6, BSKW + 6, 8);
+
+  // Handle
+  ctx.strokeStyle = '#b5722a';
+  ctx.lineWidth = Math.round(W * 0.014);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(basket.x, by + 6, BSKW * 0.3, Math.PI, 0);
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+}
+
+// ── Circle-clipped offscreen cache (draw with shadow, no white bg) ──
+const circleCache = new Map();
+function getCircleCanvas(img) {
+  if (!img.complete || img.naturalWidth === 0) return null;
+  if (circleCache.has(img.src)) return circleCache.get(img.src);
+  const oc  = document.createElement('canvas');
+  oc.width  = R * 2;
+  oc.height = R * 2;
+  const c   = oc.getContext('2d');
+  c.beginPath();
+  c.arc(R, R, R, 0, Math.PI * 2);
+  c.clip();
+  c.drawImage(img, 0, 0, R * 2, R * 2);
+  circleCache.set(img.src, oc);
+  return oc;
+}
+
+// ── Draw item ──
+function drawItem(item) {
+  const oc = getCircleCanvas(item.img);
+  if (!oc) return; // image not loaded yet
+
+  ctx.save();
+  ctx.shadowColor   = 'rgba(0,0,0,0.32)';
+  ctx.shadowBlur    = 14;
+  ctx.shadowOffsetY = 5;
+  ctx.drawImage(oc, item.x - R, item.y - R);
+  ctx.restore();
+}
+
+// ── Flash labels ──
+function addFlash(x, y, good) {
+  flashes.push({ x, y, good, life: 1.0, text: good ? '+1 ✓' : '-1 ✗' });
+}
+function drawFlashes() {
+  flashes = flashes.filter(f => {
+    f.life -= 0.04;
+    if (f.life <= 0) return false;
+    ctx.save();
+    ctx.globalAlpha = f.life;
+    ctx.font = `bold ${Math.round(W * .046)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = f.good ? '#2d6a4f' : '#e53935';
+    ctx.fillText(f.text, f.x, f.y - (1 - f.life) * 38);
+    ctx.restore();
+    return true;
+  });
+}
+
+// ── Progress arc ──
+function drawProgress() {
+  const pr = Math.round(W * 0.065);
+  const cx = W - pr - 10, cy = pr + 10;
+  // Track
+  ctx.strokeStyle = 'rgba(255,255,255,.5)';
+  ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(cx, cy, pr, -Math.PI/2, Math.PI * 1.5); ctx.stroke();
+  // Fill
+  ctx.strokeStyle = '#2d6a4f';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, pr, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * Math.min(score / 10, 1));
+  ctx.stroke();
+  // Number
+  ctx.fillStyle = '#2d6a4f';
+  ctx.font = `bold ${Math.round(W * .044)}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(Math.max(0, score), cx, cy);
+}
+
+// ── Collision ──
+function hits(item) {
+  const bx = basket.x - BSKW / 2;
+  const by = BSKY;
+  return (
+    item.y + R > by + 8  &&
+    item.y - R < by + BSKH &&
+    item.x + R > bx      &&
+    item.x - R < bx + BSKW
+  );
+}
+
+function updateHUD() {
+  document.getElementById('score-el').textContent = `${Math.max(0, score)} / 10`;
+  document.getElementById('bad-el').textContent   = `🐛 ×${badHits}`;
+}
+
+// ── Main loop (delta-time based) ──
+function loop(ts) {
+  if (gameOver) return;
+
+  // Delta time capped at 50ms (handles tab switch lag)
+  const dt = lastTs ? Math.min(ts - lastTs, 50) : 16.67;
+  lastTs = ts;
+  const factor = dt / 16.67; // normalise to 60fps
+
+  // Spawn
+  if (ts - lastSpawn > spawnMs) {
+    spawnItem();
+    lastSpawn = ts;
+    spawnMs = Math.max(580, spawnMs - 8);
+  }
+
+  // Move basket smoothly
+  if (mouseHeld) {
+    basket.x += (targetX - basket.x) * Math.min(0.22 * factor, 1);
+    basket.x  = Math.max(BSKW / 2, Math.min(W - BSKW / 2, basket.x));
+  }
+
+  // Draw
+  ctx.clearRect(0, 0, W, H);
+  drawBG();
+
+  // Update & draw items
+  items = items.filter(item => {
+    item.y += item.spd * factor;
+    if (hits(item)) {
+      if (item.type === 'good') {
+        score++;
+        addFlash(item.x, BSKY - 8, true);
+        updateHUD();
+        if (score >= 10) { triggerWin(); return false; }
+      } else {
+        badHits++;
+        score = Math.max(0, score - 1);
+        addFlash(item.x, BSKY - 8, false);
+        updateHUD();
+      }
+      return false;
+    }
+    if (item.y > H + R * 2) return false;
+    drawItem(item);
+    return true;
+  });
+
+  drawFlashes();
+  drawBasket();
+  drawProgress();
+
+  requestAnimationFrame(loop);
+}
+
+function triggerWin() {
+  gameOver = true;
+  setTimeout(() => {
+    document.getElementById('win-overlay').style.display = 'flex';
+  }, 480);
+}
+
+function goToProducts() {
+  const langIds = ids => isEng ? ids.map(id => id.replace(/_TH$/, '_EN')) : ids;
+  window.parent.postMessage({
+    action: 'shop',
+    featured: langIds(['PRD001_A_TH', 'PRD003_TH', 'PRD004_A_TH', 'PRD005_A_TH', 'PRD006_TH'])
+  }, '*');
+}
+
+// ── Controls ──
+function getX(e) {
+  const rect = canvas.getBoundingClientRect();
+  const cx   = e.touches ? e.touches[0].clientX : e.clientX;
+  return (cx - rect.left) * (W / rect.width);
+}
+canvas.addEventListener('mousedown',  e => { mouseHeld = true;  targetX = getX(e); });
+canvas.addEventListener('mousemove',  e => { if (mouseHeld) targetX = getX(e); });
+canvas.addEventListener('mouseup',    () => mouseHeld = false);
+canvas.addEventListener('mouseleave', () => mouseHeld = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); mouseHeld = true;  targetX = getX(e); }, { passive: false });
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); targetX = getX(e); }, { passive: false });
+canvas.addEventListener('touchend',   () => mouseHeld = false);
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

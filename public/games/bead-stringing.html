@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bead Stringing</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Kanit', 'Sarabun', sans-serif;
+  background: linear-gradient(160deg, #f5f0e8 0%, #ddd0b8 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* ── Select Screen ── */
+#screen-select {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 22px; max-width: 420px; width: 100%;
+  animation: fadeUp .4s ease;
+}
+.badge {
+  background: #2d6a4f; color: #fff;
+  font-size: .75rem; font-weight: 700; letter-spacing: .06em;
+  padding: 4px 16px; border-radius: 20px;
+}
+.sel-title { font-size: 1.05rem; font-weight: 700; color: #2d6a4f; text-align: center; }
+.sel-sub   { font-size: .82rem; color: #7a6650; text-align: center; margin-top: -10px; }
+.type-row  { display: flex; gap: 16px; justify-content: center; }
+.type-card {
+  display: flex; flex-direction: column; align-items: center;
+  width: 150px; background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,.12); cursor: pointer;
+  border: 2px solid transparent; transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.type-card:hover { transform: translateY(-5px); border-color: #2d6a4f; box-shadow: 0 10px 28px rgba(45,106,79,.25); }
+.type-card .img-wrap { width: 150px; height: 140px; background: #f5f0e8; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.type-card .img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.type-card .tlbl { font-size: .85rem; font-weight: 700; color: #3a2a1a; padding: 9px 6px 11px; text-align: center; }
+
+/* ── Design Screen ── */
+#screen-design {
+  display: none; flex-direction: column; align-items: center;
+  gap: 14px; width: 100%; max-width: 400px;
+  animation: fadeUp .4s ease;
+}
+.design-title { font-size: .95rem; font-weight: 700; color: #2d6a4f; text-align: center; }
+.design-sub   { font-size: .75rem; color: #7a6650; text-align: center; }
+
+/* SVG preview */
+.preview-wrap {
+  width: 100%; background: rgba(255,255,255,.55);
+  border-radius: 16px; padding: 12px 8px 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+#bead-svg { width: 100%; display: block; }
+.bead-count { font-size: .7rem; color: #9a8878; text-align: right; margin-top: 2px; }
+
+/* Section label */
+.sec-label {
+  font-size: .68rem; font-weight: 700; color: #7a6650;
+  letter-spacing: .05em; text-transform: uppercase;
+  align-self: flex-start; margin-bottom: -6px;
+}
+
+/* Color picker */
+.color-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.color-dot {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; transition: transform .15s, border-color .15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.18);
+}
+.color-dot:hover { transform: scale(1.15); }
+.color-dot.active { border-color: #2d6a4f; transform: scale(1.18); }
+
+/* Letter input */
+.letter-row { display: flex; gap: 8px; width: 100%; }
+.letter-input {
+  flex: 1; border: 1.5px solid #c8b89a; border-radius: 12px;
+  padding: 10px 14px; font-size: .9rem; font-family: inherit;
+  background: #fff; color: #3a2a1a; outline: none; transition: border-color .2s;
+}
+.letter-input:focus { border-color: #2d6a4f; }
+.add-btn {
+  background: #2d6a4f; color: #fff; border: none;
+  border-radius: 12px; padding: 10px 16px;
+  font-size: .85rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; white-space: nowrap; transition: background .15s;
+}
+.add-btn:hover { background: #1a3d2e; }
+
+/* Shape buttons — icon only */
+.shape-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.shape-btn {
+  width: 50px; height: 50px; border-radius: 12px;
+  border: 1.5px solid #c8b89a; background: #fff;
+  font-size: 1.55rem; cursor: pointer;
+  transition: background .15s, border-color .15s, transform .12s;
+  display: flex; align-items: center; justify-content: center;
+}
+.shape-btn:hover { background: #f0e8d8; border-color: #2d6a4f; transform: scale(1.1); }
+
+/* Actions */
+.action-row { display: flex; gap: 10px; width: 100%; }
+.undo-btn {
+  flex: 1; background: #fff; border: 1.5px solid #c8b89a;
+  border-radius: 12px; padding: 11px; font-size: .85rem; color: #7a6650;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.undo-btn:hover { background: #ede5d5; }
+.done-btn {
+  flex: 2; background: #2d6a4f; color: #fff; border: none;
+  border-radius: 12px; padding: 11px; font-size: .9rem; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background .2s, opacity .2s;
+}
+.done-btn:hover { background: #1a3d2e; }
+.done-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Win Overlay ── */
+#win-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(12,8,3,.76);
+  align-items: center; justify-content: center;
+  padding: 20px; z-index: 300;
+}
+.win-box {
+  background: #fff; border-radius: 20px; padding: 28px 22px 24px;
+  max-width: 360px; width: 100%; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.38); animation: fadeUp .35s ease;
+}
+.win-icon  { font-size: 2.6rem; line-height: 1; }
+.win-title { font-size: .98rem; font-weight: 700; color: #2d6a4f; line-height: 1.5; }
+.win-divider { width: 44px; height: 2px; background: #c8b89a; border-radius: 2px; }
+.win-text  { font-size: .82rem; color: #5a4535; line-height: 1.8; }
+.win-btn {
+  margin-top: 4px; background: #2d6a4f; color: #fff; border: none;
+  border-radius: 12px; padding: 12px 24px; font-size: .92rem; font-weight: 700;
+  cursor: pointer; font-family: inherit; width: 100%;
+  transition: background .2s, transform .15s;
+}
+.win-btn:hover { background: #1a3d2e; transform: translateY(-1px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Type Selection ── -->
+<div id="screen-select">
+  <span class="badge">📿 Bead Stringing</span>
+  <p class="sel-title" id="sel-title">สร้อยของคุณ ดีไซน์โดยคุณ</p>
+  <p class="sel-sub" id="sel-sub">เลือกประเภทสร้อยที่อยากออกแบบ</p>
+  <div class="type-row">
+    <div class="type-card" onclick="chooseType('bracelet', isEng ? 'Bracelet' : 'สร้อยข้อมือ')">
+      <div class="img-wrap"><img src="/img/soykormeu.jpg" alt="สร้อยข้อมือ"></div>
+      <span class="tlbl" id="tlbl-bracelet">สร้อยข้อมือ</span>
+    </div>
+    <div class="type-card" onclick="chooseType('necklace', isEng ? 'Necklace' : 'สร้อยคอ')">
+      <div class="img-wrap"><img src="/img/soykor.jpg" alt="สร้อยคอ"></div>
+      <span class="tlbl" id="tlbl-necklace">สร้อยคอ</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Design Screen ── -->
+<div id="screen-design">
+  <div>
+    <div class="design-title" id="design-title"></div>
+    <div class="design-sub" id="design-sub">เพิ่มลูกปัดเพื่อออกแบบสร้อยของคุณ</div>
+  </div>
+
+  <div class="preview-wrap">
+    <svg id="bead-svg" viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="bead-count" id="bead-count">0 ลูก</div>
+  </div>
+
+  <div class="sec-label" id="lbl-color">สีลูกปัด</div>
+  <div class="color-row" id="bead-colors"></div>
+
+  <div class="sec-label" id="lbl-letter">เพิ่มตัวอักษร</div>
+  <div class="letter-row">
+    <input class="letter-input" id="letter-input" type="text" maxlength="20" placeholder="พิมพ์ตัวอักษร...">
+    <button class="add-btn" id="lbl-add-btn" onclick="addFromInput()">+ เพิ่ม</button>
+  </div>
+
+  <div class="sec-label" id="lbl-shape">เพิ่มรูปทรง</div>
+  <div class="shape-row" id="shape-row"></div>
+
+  <div class="action-row">
+    <button class="undo-btn" id="lbl-undo-btn" onclick="undoLast()">← ลบล่าสุด</button>
+    <button class="done-btn" id="done-btn" onclick="finish()" disabled>เสร็จสิ้น ✓</button>
+  </div>
+</div>
+
+<!-- ── Win Overlay ── -->
+<div id="win-overlay">
+  <div class="win-box">
+    <div class="win-icon">📿</div>
+    <div class="win-title" id="win-title">สร้อยเส้นนี้สวยมากเลย! สัมผัสได้ถึงความตั้งใจและสไตล์ที่ไม่ซ้ำใครของคุณเลยล่ะ 😉</div>
+    <div class="win-divider"></div>
+    <div class="win-text" id="win-text">
+      แต่รู้ไหมว่า... การร้อยลูกปัดโบราณนี้ เป็นเพียงแค่ส่วนหนึ่งของความสุขที่บ้านคีรีวงเท่านั้นนะ!<br><br>
+      ที่นี่... คุณยังสามารถออกไปสูดอากาศบริสุทธิ์ เดินป่าสัมผัสธรรมชาติ หรือลองลงมือทำผ้ามัดย้อมสีธรรมชาติด้วยตัวเองได้อีกด้วย แหล่งรวมกิจกรรมฮีลใจและวิถีชีวิตเครือญาติที่อบอุ่นกำลังรอให้คุณมาสัมผัสด้วยตัวเองอยู่นะครับ 🏡🌿
+    </div>
+    <button class="win-btn" id="win-btn" onclick="goToExperiences()">ออกเดินทางไปสัมผัสของจริง</button>
+  </div>
+</div>
+
+<script>
+const isEng = new URLSearchParams(location.search).get('lang') === 'ENG';
+if (isEng) {
+  document.getElementById('sel-title').textContent = 'Your Jewelry, Your Design';
+  document.getElementById('sel-sub').textContent = 'Choose the type of jewelry you want to design';
+  document.getElementById('tlbl-bracelet').textContent = 'Bracelet';
+  document.getElementById('tlbl-necklace').textContent = 'Necklace';
+  document.getElementById('design-sub').textContent = 'Add beads to design your jewelry';
+  document.getElementById('lbl-color').textContent = 'Bead Color';
+  document.getElementById('lbl-letter').textContent = 'Add Letter';
+  document.getElementById('letter-input').placeholder = 'Type a letter...';
+  document.getElementById('lbl-add-btn').textContent = '+ Add';
+  document.getElementById('lbl-shape').textContent = 'Add Shape';
+  document.getElementById('lbl-undo-btn').textContent = '← Remove Last';
+  document.getElementById('done-btn').textContent = 'Finish ✓';
+  document.getElementById('win-title').textContent = "This jewelry looks stunning! Your dedication and unique style really shine through 😉";
+  document.getElementById('win-text').innerHTML =
+    "But did you know... this ancient bead-stringing craft is just one part of the joy waiting for you at Ban Kiriwong!<br><br>" +
+    "Here you can also breathe the fresh mountain air, hike through nature, or try your hand at natural-dye tie-dye. A haven of healing activities and warm community life is waiting for you to experience in person 🏡🌿";
+  document.getElementById('win-btn').textContent = 'Set Off to Experience the Real Thing';
+}
+
+const BEAD_COLORS = ['#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d','#9b5de5','#f15bb5','#f0ece4'];
+const SHAPES = [
+  { key: 'star',     icon: '★' },
+  { key: 'circle',   icon: '●' },
+  { key: 'triangle', icon: '▲' },
+  { key: 'square',   icon: '■' },
+  { key: 'clover',   icon: '♣' },
+  { key: 'cloud',    icon: '☁' },
+];
+
+let beads = [];
+let currentColor = BEAD_COLORS[0];
+
+// ── SVG helpers ──
+const NS = 'http://www.w3.org/2000/svg';
+const mk = tag => document.createElementNS(NS, tag);
+
+const VW = 300, VH = 190, CX = 150, CY = 95;
+
+// Ellipse radii: bracelet = vertical oval, necklace = horizontal oval
+let RX = 118, RY = 64;
+const BR = 13; // bead half-size
+
+function ellipsePoint(i, n) {
+  const a = (2 * Math.PI * i / n) - Math.PI / 2;
+  return { x: CX + RX * Math.cos(a), y: CY + RY * Math.sin(a) };
+}
+
+function starPts(cx, cy, ro, ri, n = 5) {
+  const pts = [];
+  for (let i = 0; i < n * 2; i++) {
+    const a = (Math.PI * i / n) - Math.PI / 2;
+    const r = i % 2 === 0 ? ro : ri;
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
+  }
+  return pts.join(' ');
+}
+
+function cloudPath(cx, cy, r) {
+  const s = r / 13;
+  const ar = +(6 * s).toFixed(2);
+  const p = (nx, ny) => `${+(cx + nx * s).toFixed(2)},${+(cy + ny * s).toFixed(2)}`;
+  return [
+    `M ${p(-13, 5)}`,
+    `A ${ar},${ar} 0 0,1 ${p(-8, -5)}`,
+    `A ${ar},${ar} 0 0,1 ${p(0, -10)}`,
+    `A ${ar},${ar} 0 0,1 ${p(8, -5)}`,
+    `A ${ar},${ar} 0 0,1 ${p(13, 5)}`,
+    'Z'
+  ].join(' ');
+}
+
+function renderSVG() {
+  const svg = document.getElementById('bead-svg');
+  svg.innerHTML = '';
+
+  // Defs
+  const defs = mk('defs');
+  defs.innerHTML = `
+    <filter id="bs" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.8" flood-color="#00000038"/>
+    </filter>
+    <radialGradient id="gshine" cx="35%" cy="28%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.52)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>`;
+  svg.appendChild(defs);
+
+  // String
+  const el = mk('ellipse');
+  el.setAttribute('cx', CX); el.setAttribute('cy', CY);
+  el.setAttribute('rx', RX); el.setAttribute('ry', RY);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', '#8B5A2B');
+  el.setAttribute('stroke-width', '3.5');
+  svg.appendChild(el);
+
+  const N = beads.length;
+  document.getElementById('bead-count').textContent = isEng ? `${N} bead${N !== 1 ? 's' : ''}` : `${N} ลูก`;
+  document.getElementById('done-btn').disabled = N === 0;
+
+  if (N === 0) {
+    const t = mk('text');
+    t.setAttribute('x', CX); t.setAttribute('y', CY);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'central');
+    t.setAttribute('fill', '#b8a888');
+    t.setAttribute('font-size', '11');
+    t.setAttribute('font-family', 'sans-serif');
+    t.textContent = isEng ? 'Add beads to start designing...' : 'เพิ่มลูกปัดเพื่อเริ่มออกแบบ...';
+    svg.appendChild(t);
+    return;
+  }
+
+  beads.forEach((bead, i) => {
+    const { x, y } = ellipsePoint(i, N);
+    drawBead(svg, x, y, bead);
+  });
+}
+
+function drawBead(svg, x, y, bead) {
+  const c = bead.color;
+  const r = BR;
+  const g = mk('g');
+  g.setAttribute('filter', 'url(#bs)');
+
+  // Main shape
+  let mainEl, shineEl;
+
+  switch (bead.shape) {
+    case 'star': {
+      const pts = starPts(x, y, r, r * 0.42);
+      mainEl  = mk('polygon'); mainEl.setAttribute('points', pts);
+      shineEl = mk('polygon'); shineEl.setAttribute('points', pts);
+      break;
+    }
+    case 'triangle': {
+      const h = r * 1.05, yb = r * 0.7;
+      const pts = `${x.toFixed(1)},${(y - h).toFixed(1)} ${(x + h).toFixed(1)},${(y + yb).toFixed(1)} ${(x - h).toFixed(1)},${(y + yb).toFixed(1)}`;
+      mainEl  = mk('polygon'); mainEl.setAttribute('points', pts);
+      shineEl = mk('polygon'); shineEl.setAttribute('points', pts);
+      break;
+    }
+    case 'square': {
+      mainEl  = mk('rect'); shineEl = mk('rect');
+      for (const el of [mainEl, shineEl]) {
+        el.setAttribute('x', x - r); el.setAttribute('y', y - r);
+        el.setAttribute('width', r * 2); el.setAttribute('height', r * 2);
+        el.setAttribute('rx', '3');
+      }
+      break;
+    }
+    case 'clover': {
+      const pr = r * 0.54;
+      [[0,-r*.5],[r*.5,0],[0,r*.5],[-r*.5,0]].forEach(([dx,dy]) => {
+        const c2 = mk('circle');
+        c2.setAttribute('cx', x + dx); c2.setAttribute('cy', y + dy);
+        c2.setAttribute('r', pr); c2.setAttribute('fill', c);
+        g.appendChild(c2);
+      });
+      const mid = mk('circle');
+      mid.setAttribute('cx', x); mid.setAttribute('cy', y);
+      mid.setAttribute('r', r * 0.3); mid.setAttribute('fill', c);
+      g.appendChild(mid);
+      // Shine
+      const sc = mk('circle');
+      sc.setAttribute('cx', x - r*.12); sc.setAttribute('cy', y - r*.42);
+      sc.setAttribute('r', r * .55); sc.setAttribute('fill', 'url(#gshine)');
+      g.appendChild(sc);
+      svg.appendChild(g);
+      addText(g, x, y, r, bead);
+      return;
+    }
+    case 'cloud': {
+      const d = cloudPath(x, y, r);
+      mainEl  = mk('path'); mainEl.setAttribute('d', d);
+      shineEl = mk('path'); shineEl.setAttribute('d', d);
+      break;
+    }
+    case 'circle':
+    default: {
+      mainEl  = mk('circle'); shineEl = mk('circle');
+      for (const el of [mainEl, shineEl]) {
+        el.setAttribute('cx', x); el.setAttribute('cy', y);
+        el.setAttribute('r', r);
+      }
+      break;
+    }
+  }
+
+  mainEl.setAttribute('fill', c);
+  shineEl.setAttribute('fill', 'url(#gshine)');
+  g.appendChild(mainEl);
+  g.appendChild(shineEl);
+  addText(g, x, y, r, bead);
+  svg.appendChild(g);
+}
+
+function addText(g, x, y, r, bead) {
+  if (!bead.content) return;
+  const t = mk('text');
+  t.setAttribute('x', x); t.setAttribute('y', y);
+  t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('dominant-baseline', 'central');
+  t.setAttribute('font-size', r * 0.95);
+  t.setAttribute('font-weight', 'bold');
+  t.setAttribute('font-family', 'sans-serif');
+  t.setAttribute('fill', bead.color === '#f0ece4' ? '#555' : 'white');
+  t.setAttribute('pointer-events', 'none');
+  t.textContent = bead.content;
+  g.appendChild(t);
+}
+
+// ── UI ──
+function chooseType(type, label) {
+  RX = type === 'bracelet' ? 120 : 58;
+  RY = type === 'bracelet' ? 56  : 85;
+  document.getElementById('screen-select').style.display = 'none';
+  const d = document.getElementById('screen-design');
+  d.style.display = 'flex';
+  document.getElementById('design-title').textContent = isEng ? `Design Your ${label}` : `ออกแบบ${label}ของคุณ`;
+  buildColors();
+  buildShapes();
+  renderSVG();
+}
+
+function buildColors() {
+  const wrap = document.getElementById('bead-colors');
+  wrap.innerHTML = '';
+  BEAD_COLORS.forEach(c => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot' + (c === currentColor ? ' active' : '');
+    dot.style.background = c;
+    if (c === '#f0ece4') dot.style.boxShadow = '0 2px 6px rgba(0,0,0,.15), inset 0 0 0 1px #ccc';
+    dot.onclick = () => {
+      currentColor = c;
+      wrap.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+    };
+    wrap.appendChild(dot);
+  });
+}
+
+function buildShapes() {
+  const row = document.getElementById('shape-row');
+  row.innerHTML = '';
+  SHAPES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'shape-btn';
+    btn.textContent = s.icon;
+    btn.title = s.key;
+    btn.onclick = () => addShapeBead(s.key);
+    row.appendChild(btn);
+  });
+}
+
+function addFromInput() {
+  const inp = document.getElementById('letter-input');
+  const val = inp.value.trim().toUpperCase();
+  if (!val) return;
+  [...val].forEach(ch => beads.push({ shape: 'circle', content: ch, color: currentColor }));
+  inp.value = '';
+  renderSVG();
+}
+
+function addShapeBead(shape) {
+  beads.push({ shape, content: null, color: currentColor });
+  renderSVG();
+}
+
+function undoLast() {
+  if (beads.length) { beads.pop(); renderSVG(); }
+}
+
+function finish() {
+  document.getElementById('win-overlay').style.display = 'flex';
+}
+
+function goToExperiences() {
+  const langIds = ids => isEng ? ids.map(id => id.replace(/_TH$/, '_EN')) : ids;
+  window.parent.postMessage({
+    action: 'experience',
+    featured: langIds(['ACT005_B2C_TH','ACT006_B2C_TH','ACT007_B2C_TH','ACT008_TH','ACT009_TH'])
+  }, '*');
+}
+
+// Enter key in letter input
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('letter-input')
+    .addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addFromInput(); } });
+});
+</script>
+</body>
+</html>

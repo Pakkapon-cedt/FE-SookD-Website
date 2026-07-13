@@ -208,8 +208,8 @@ body {
 
 <div id="game-wrap">
   <span class="badge">🍈 Fruit Hunt</span>
-  <div class="game-title">เฟ้นหาของดีคีรีวง</div>
-  <div class="game-desc">ฝึกสายตาแยกแยะ "มังคุดคีรีวง" ผลใหญ่ผิวมันวาวระดับ GI และ "ทุเรียนคีรีวง" ที่มีหนามสีน้ำตาลทองสวยเป็นเอกลักษณ์ ออกจากผลไม้ทั่วไปให้เจอ!</div>
+  <div class="game-title" id="game-title">เฟ้นหาของดีคีรีวง</div>
+  <div class="game-desc" id="game-desc">ฝึกสายตาแยกแยะ "มังคุดคีรีวง" ผลใหญ่ผิวมันวาวระดับ GI และ "ทุเรียนคีรีวง" ที่มีหนามสีน้ำตาลทองสวยเป็นเอกลักษณ์ ออกจากผลไม้ทั่วไปให้เจอ!</div>
   <div class="stage-label" id="stage-label"></div>
   <div id="cards-grid"></div>
 </div>
@@ -221,10 +221,10 @@ body {
 <div class="overlay" id="ov-s1">
   <div class="obox">
     <div class="obox-icon">🥭</div>
-    <div class="obox-title">ยินดีด้วย! คุณหา "มังคุดคีรีวง" เจอแล้ว</div>
+    <div class="obox-title" id="s1-title">ยินดีด้วย! คุณหา "มังคุดคีรีวง" เจอแล้ว</div>
     <div class="obox-divider"></div>
-    <div class="obox-text">แต่ยังไม่หมดเท่านี้หรอกนะ<br>แน่จริงก็ลองหา <strong>"ทุเรียนคีรีวง"</strong> ที่มีหนามสีน้ำตาลทอง ให้เจอด้วยสิ</div>
-    <button class="obox-btn" onclick="initStage(2)">รับความท้าทาย!</button>
+    <div class="obox-text" id="s1-text">แต่ยังไม่หมดเท่านี้หรอกนะ<br>แน่จริงก็ลองหา <strong>"ทุเรียนคีรีวง"</strong> ที่มีหนามสีน้ำตาลทอง ให้เจอด้วยสิ</div>
+    <button class="obox-btn" id="s1-btn" onclick="initStage(2)">รับความท้าทาย!</button>
   </div>
 </div>
 
@@ -232,27 +232,43 @@ body {
 <div class="overlay" id="ov-win">
   <div class="obox">
     <div class="obox-icon">✨</div>
-    <div class="obox-title">ตาดีสุดๆ ที่หา 'ของดี' เจอ!</div>
+    <div class="obox-title" id="win-title">ตาดีสุดๆ ที่หา 'ของดี' เจอ!</div>
     <div class="obox-divider"></div>
-    <div class="obox-text">ในสวนสมรมที่เต็มไปด้วยผลไม้หน้าตาแปลก...<br>คุณไม่สงสัยบ้างหรอว่ารสชาติ <strong>'มังคุดเขา GI'</strong> หรือ <strong>'ทุเรียนหนามทอง'</strong> พันธุ์หายากนี้ รสชาติจะเป็นยังไง?</div>
-    <button class="obox-btn amber" onclick="goToProducts()">ลองชิม</button>
+    <div class="obox-text" id="win-text">ในสวนสมรมที่เต็มไปด้วยผลไม้หน้าตาแปลก...<br>คุณไม่สงสัยบ้างหรอว่ารสชาติ <strong>'มังคุดเขา GI'</strong> หรือ <strong>'ทุเรียนหนามทอง'</strong> พันธุ์หายากนี้ รสชาติจะเป็นยังไง?</div>
+    <button class="obox-btn amber" id="win-btn" onclick="goToProducts()">ลองชิม</button>
   </div>
 </div>
 
 <script>
+const isEng = new URLSearchParams(location.search).get('lang') === 'ENG';
+if (isEng) {
+  document.getElementById('game-title').textContent = 'Hunt for the Best of Kiriwong';
+  document.getElementById('game-desc').textContent = 'Train your eyes to spot the GI-certified "Kiriwong Mangosteen" with its large, glossy skin, and the "Kiriwong Durian" with its distinctive golden-brown spines — among ordinary fruit!';
+  document.getElementById('s1-title').textContent = 'You found the "Kiriwong Mangosteen"!';
+  document.getElementById('s1-text').innerHTML = "But that's not all...<br>Think you can also find the <strong>\"Kiriwong Durian\"</strong> with its golden-brown spines?";
+  document.getElementById('s1-btn').textContent = 'Accept the Challenge!';
+  document.getElementById('win-title').textContent = "Sharp eyes — you spotted the 'finest'!";
+  document.getElementById('win-text').innerHTML = "In an orchard full of unusual-looking fruit...<br>Aren't you curious what a <strong>'GI Mangosteen'</strong> or a <strong>'Golden-Spine Durian'</strong> actually tastes like?";
+  document.getElementById('win-btn').textContent = 'Taste for Yourself';
+}
+
 const STAGES = {
   1: {
-    label: 'ด่านที่ 1 : หา "มังคุดคีรีวง"',
+    label:    'ด่านที่ 1 : หา "มังคุดคีรีวง"',
+    labelEn:  'Stage 1 : Find the "Kiriwong Mangosteen"',
     specialImg: '/img/mangosteengi.jpg',
     normalImg:  '/img/normalmangosteen.jpg',
     wrongMsg:   'ยังไม่ถูก\n"มังคุดคีรีวง" ผลใหญ่ผิวมันวาว\nลองใหม่อีกทีนะ',
+    wrongMsgEn: 'Not quite!\n"Kiriwong Mangosteen" has a large, glossy skin\nTry again!',
     winOv: 'ov-s1',
   },
   2: {
-    label: 'ด่านที่ 2 : หา "ทุเรียนคีรีวง"',
+    label:    'ด่านที่ 2 : หา "ทุเรียนคีรีวง"',
+    labelEn:  'Stage 2 : Find the "Kiriwong Durian"',
     specialImg: '/img/kiriwongdurian.jpg',
     normalImg:  '/img/duriannormal.jpg',
     wrongMsg:   'ยังไม่ถูก\n"ทุเรียนคีรีวง" ที่มีหนามสีน้ำตาลทอง\nลองใหม่อีกทีนะ',
+    wrongMsgEn: 'Not quite!\n"Kiriwong Durian" has distinctive golden-brown spines\nTry again!',
     winOv: 'ov-win',
   },
 };
@@ -265,7 +281,7 @@ let locked = false;
 function initStage(n) {
   document.querySelectorAll('.overlay').forEach(el => el.classList.remove('show'));
   stage = STAGES[n];
-  document.getElementById('stage-label').textContent = stage.label;
+  document.getElementById('stage-label').textContent = isEng ? (stage.labelEn || stage.label) : stage.label;
 
   const raw = [
     { type: 'special', image: stage.specialImg },
@@ -386,7 +402,7 @@ function pick(i) {
     // wrong — show red flash then toast
     setTimeout(() => {
       document.getElementById(`card-${i}`).classList.add('wrong');
-      showToast(stage.wrongMsg);
+      showToast(isEng ? (stage.wrongMsgEn || stage.wrongMsg) : stage.wrongMsg);
       setTimeout(() => {
         hideToast();
         document.getElementById(`card-${i}`)?.classList.remove('wrong');
@@ -410,7 +426,8 @@ function hideToast() {
 
 /* ── navigate to products ── */
 function goToProducts() {
-  window.parent.postMessage({ action: 'shop', featured: ['PRD015_TH', 'PRD016_TH', 'PRD017_TH', 'PRD018_TH'] }, '*');
+  const langIds = ids => isEng ? ids.map(id => id.replace(/_TH$/, '_EN')) : ids;
+  window.parent.postMessage({ action: 'shop', featured: langIds(['PRD015_TH', 'PRD016_TH', 'PRD017_TH', 'PRD018_TH']) }, '*');
 }
 
 initStage(1);

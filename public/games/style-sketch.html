@@ -85,22 +85,22 @@ body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100
 <div id="welcome" class="screen active">
   <span class="title-emoji">🎨</span>
   <h1 class="game-title">Style Sketch</h1>
-  <p class="game-desc">ปลดปล่อยจินตนาการบนผืนผ้า! เลือกไอเทมโปรดของคุณ ไม่ว่าจะเป็น เสื้อยืดสุดชิค หรือ กระเป๋าพกพาสุดเก๋ แล้วสะบัดพู่กันครีเอทลายสไตล์คุณ จะวาดเองตามใจคิด หรือลอกลายตามแบบสุดเป๊ะก็สนุกได้ไม่ซ้ำใคร!</p>
-  <p class="sec-label">เลือกไอเทม</p>
+  <p class="game-desc" id="game-desc">ปลดปล่อยจินตนาการบนผืนผ้า! เลือกไอเทมโปรดของคุณ ไม่ว่าจะเป็น เสื้อยืดสุดชิค หรือ กระเป๋าพกพาสุดเก๋ แล้วสะบัดพู่กันครีเอทลายสไตล์คุณ จะวาดเองตามใจคิด หรือลอกลายตามแบบสุดเป๊ะก็สนุกได้ไม่ซ้ำใคร!</p>
+  <p class="sec-label" id="lbl-pick-item">เลือกไอเทม</p>
   <div class="item-cards">
     <div class="item-card" onclick="pickItem('tshirt')">
       <svg viewBox="0 0 100 92" fill="none">
         <path d="M28 3L4 20L1 35L21 40L21 89L79 89L79 40L99 35L96 20L72 3Q60 14 50 14Q40 14 28 3Z"
           fill="#FFE8CC" stroke="#E65100" stroke-width="2.5" stroke-linejoin="round"/>
       </svg>
-      <span class="item-card-name">เสื้อยืด</span>
+      <span class="item-card-name" id="lbl-tshirt">เสื้อยืด</span>
     </div>
     <div class="item-card" onclick="pickItem('bag')">
       <svg viewBox="0 0 100 108" fill="none">
         <path d="M34 32Q34 10 50 10Q66 10 66 32" stroke="#E65100" stroke-width="3" stroke-linecap="round" fill="none"/>
         <rect x="6" y="32" width="88" height="68" rx="10" fill="#FFE8CC" stroke="#E65100" stroke-width="2.5"/>
       </svg>
-      <span class="item-card-name">กระเป๋าพกพา</span>
+      <span class="item-card-name" id="lbl-bag">กระเป๋าพกพา</span>
     </div>
   </div>
 </div>
@@ -109,7 +109,7 @@ body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100
 <div id="mode" class="screen">
   <div class="scr-header">
     <button class="hdr-back" onclick="go('welcome')">‹</button>
-    <span class="hdr-title">เลือกโหมดการวาด</span>
+    <span class="hdr-title" id="lbl-mode-title">เลือกโหมดการวาด</span>
     <span style="width:38px"></span>
   </div>
   <div class="mode-body">
@@ -117,17 +117,17 @@ body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100
     <div class="mode-cards">
       <div class="mode-card" id="mc0" onclick="pickMode('custom')">
         <span class="mode-icon">✏️</span>
-        <div class="mode-name">วาดเอง</div>
-        <div class="mode-hint">อิสระตามจินตนาการ<br>ไม่มีขีดจำกัด!</div>
+        <div class="mode-name" id="lbl-mode-custom">วาดเอง</div>
+        <div class="mode-hint" id="lbl-mode-custom-hint">อิสระตามจินตนาการ<br>ไม่มีขีดจำกัด!</div>
       </div>
       <div class="mode-card" id="mc1" onclick="pickMode('trace')">
         <span class="mode-icon">🖼️</span>
-        <div class="mode-name">ลอกลาย</div>
-        <div class="mode-hint">มีแบบให้ตาม<br>เป๊ะได้ไม่ยาก!</div>
+        <div class="mode-name" id="lbl-mode-trace">ลอกลาย</div>
+        <div class="mode-hint" id="lbl-mode-trace-hint">มีแบบให้ตาม<br>เป๊ะได้ไม่ยาก!</div>
       </div>
     </div>
     <div id="pat-sec" class="pat-sec" style="display:none">
-      <p class="sec-label" style="margin:0">เลือกลาย</p>
+      <p class="sec-label" style="margin:0" id="lbl-pick-pat">เลือกลาย</p>
       <div class="pat-row" id="pat-row"></div>
     </div>
     <button class="pri-btn" id="start-btn" disabled onclick="startDraw()">เริ่มวาด! 🎨</button>
@@ -137,9 +137,9 @@ body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100
 <!-- DRAWING -->
 <div id="drawing" class="screen">
   <div class="draw-hdr">
-    <button class="drw-back" onclick="go('mode')">‹ กลับ</button>
+    <button class="drw-back" id="lbl-back-btn" onclick="go('mode')">‹ กลับ</button>
     <span class="drw-title" id="drw-title">วาดลาย</span>
-    <button class="done-btn" onclick="finish()">เสร็จแล้ว ✨</button>
+    <button class="done-btn" id="lbl-done-btn" onclick="finish()">เสร็จแล้ว ✨</button>
   </div>
   <div class="cv-area">
     <canvas id="main-canvas"></canvas>
@@ -148,9 +148,9 @@ body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100
     <div class="t-row" id="color-row"></div>
     <div class="t-row">
       <div id="brush-row" style="display:flex;gap:.38rem;align-items:center"></div>
-      <button class="t-btn" id="era-btn" onclick="toggleEra()">🧹 ยางลบ</button>
-      <button class="t-btn" onclick="undo()">↩ ย้อน</button>
-      <button class="t-btn" onclick="clr()">🗑️ ล้าง</button>
+      <button class="t-btn" id="era-btn" onclick="toggleEra()"><span id="lbl-eraser">🧹 ยางลบ</span></button>
+      <button class="t-btn" id="lbl-undo-btn" onclick="undo()">↩ ย้อน</button>
+      <button class="t-btn" id="lbl-clear-btn" onclick="clr()">🗑️ ล้าง</button>
     </div>
   </div>
 </div>
@@ -158,20 +158,48 @@ body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100
 <!-- RESULT -->
 <div id="result" class="screen">
   <span class="res-emoji">🎉</span>
-  <h2 class="res-title">ว้าว ผลงานสวยมากครับ!</h2>
-  <p class="res-sub" style="max-width:300px;line-height:1.7;font-size:.85rem">
+  <h2 class="res-title" id="res-title">ว้าว ผลงานสวยมากครับ!</h2>
+  <p class="res-sub" id="res-sub" style="max-width:300px;line-height:1.7;font-size:.85rem">
     งานดีไซน์สุดยูนีคชิ้นนี้ จะปล่อยให้อยู่แค่ในรูปก็น่าเสียดายแย่เลยใช่ไหมล่ะครับ?<br>
     จะดีกว่าไหมถ้าคุณสามารถ <strong>ทำเสื้อแมตช์ลายนี้ใส่เองได้จริงๆ</strong> ผ่านกิจกรรมผ้ามัดย้อมสนุกๆ ของเรา!<br><br>
     สะดวกแบบไหนก็เลือกได้เลย:
   </p>
   <div class="res-frame"><canvas id="result-canvas"></canvas></div>
   <div class="res-acts">
-    <button class="r-btn r-sec" onclick="goActivity()">🎨 ร่วมกิจกรรมผ้ามัดย้อม</button>
-    <button class="r-btn r-pri" onclick="goShop()">🛍️ ช้อปสินค้าลายสำเร็จรูป</button>
+    <button class="r-btn r-sec" id="res-btn-act" onclick="goActivity()">🎨 ร่วมกิจกรรมผ้ามัดย้อม</button>
+    <button class="r-btn r-pri" id="res-btn-shop" onclick="goShop()">🛍️ ช้อปสินค้าลายสำเร็จรูป</button>
   </div>
 </div>
 
 <script>
+// ── LANG ───────────────────────────────────────────────
+const isEng = new URLSearchParams(location.search).get('lang') === 'ENG';
+if (isEng) {
+  document.getElementById('game-desc').textContent = 'Unleash your imagination on fabric! Pick your favourite item — a trendy T-shirt or a stylish tote bag — then create your own unique pattern. Draw freely or trace a template, the fun never repeats!';
+  document.getElementById('lbl-pick-item').textContent = 'Choose Item';
+  document.getElementById('lbl-tshirt').textContent = 'T-Shirt';
+  document.getElementById('lbl-bag').textContent = 'Tote Bag';
+  document.getElementById('lbl-mode-title').textContent = 'Choose Drawing Mode';
+  document.getElementById('lbl-mode-custom').textContent = 'Free Draw';
+  document.getElementById('lbl-mode-custom-hint').innerHTML = 'Totally free-form<br>No limits!';
+  document.getElementById('lbl-mode-trace').textContent = 'Trace';
+  document.getElementById('lbl-mode-trace-hint').innerHTML = 'Follow a template<br>Easy & precise!';
+  document.getElementById('lbl-pick-pat').textContent = 'Choose Pattern';
+  document.getElementById('start-btn').textContent = 'Start Drawing! 🎨';
+  document.getElementById('lbl-back-btn').textContent = '‹ Back';
+  document.getElementById('lbl-done-btn').textContent = 'Done ✨';
+  document.getElementById('lbl-eraser').textContent = '🧹 Eraser';
+  document.getElementById('lbl-undo-btn').textContent = '↩ Undo';
+  document.getElementById('lbl-clear-btn').textContent = '🗑️ Clear';
+  document.getElementById('res-title').textContent = 'Wow, what a masterpiece!';
+  document.getElementById('res-sub').innerHTML =
+    'This unique design is too good to just stay on screen, don\'t you think?<br>' +
+    'How about <strong>wearing this exact pattern for real</strong> through our tie-dye activity!<br><br>' +
+    'Pick what suits you:';
+  document.getElementById('res-btn-act').textContent = '🎨 Join the Tie-Dye Activity';
+  document.getElementById('res-btn-shop').textContent = '🛍️ Shop Ready-Made Designs';
+}
+
 // ── STATE ──────────────────────────────────────────────
 const G={item:null,mode:null,pat:null,color:'#E65100',size:7,era:false};
 let strokes=[],cur=null,pressing=false;
@@ -181,7 +209,7 @@ let CV,CX,CW,CH,IX,IY,IW,IH;
 const COLORS=['#E91E63','#E65100','#FF9800','#FFD600','#4CAF50','#2196F3','#9C27B0','#00BCD4','#795548','#607D8B','#FFFFFF','#111111'];
 
 // ── PATTERNS ───────────────────────────────────────────
-const PATS=[{id:'tiedye',name:'มัดย้อม'},{id:'flower',name:'ดอกไม้'},{id:'wave',name:'คลื่น'},{id:'geo',name:'เพชร'}];
+const PATS=[{id:'tiedye',name:'มัดย้อม',nameEn:'Tie-Dye'},{id:'flower',name:'ดอกไม้',nameEn:'Floral'},{id:'wave',name:'คลื่น',nameEn:'Wave'},{id:'geo',name:'เพชร',nameEn:'Diamond'}];
 
 function drawPat(ctx,id,x,y,w,h,alpha){
   ctx.save();ctx.globalAlpha=alpha??0.22;
@@ -351,7 +379,7 @@ function buildPatThumbs(){
     const d=document.createElement('div');d.className='p-thumb';
     const mc=document.createElement('canvas');mc.width=52;mc.height=52;
     const mx=mc.getContext('2d');mx.fillStyle='#fff';mx.fillRect(0,0,52,52);drawPat(mx,p.id,0,0,52,52,0.7);
-    const nm=document.createElement('div');nm.className='p-thumb-name';nm.textContent=p.name;
+    const nm=document.createElement('div');nm.className='p-thumb-name';nm.textContent=isEng?(p.nameEn||p.name):p.name;
     d.appendChild(mc);d.appendChild(nm);
     d.onclick=()=>{G.pat=p.id;document.querySelectorAll('.p-thumb').forEach(t=>t.classList.remove('sel'));d.classList.add('sel');document.getElementById('start-btn').disabled=false;};
     row.appendChild(d);
@@ -359,7 +387,9 @@ function buildPatThumbs(){
 }
 function startDraw(){
   strokes=[];cur=null;G.era=false;bound=false;
-  document.getElementById('drw-title').textContent=(G.item==='tshirt'?'วาดลายเสื้อยืด':'วาดลายกระเป๋า')+' 🎨';
+  document.getElementById('drw-title').textContent = isEng
+    ? (G.item==='tshirt'?'Draw T-Shirt Pattern':'Draw Bag Pattern')+' 🎨'
+    : (G.item==='tshirt'?'วาดลายเสื้อยืด':'วาดลายกระเป๋า')+' 🎨';
   go('drawing');
   requestAnimationFrame(()=>{setupCanvas();buildTools();bindCanvas();redraw();});
 }
@@ -377,8 +407,9 @@ function finish(){
 }
 const FEAT_ACT=['ACT014_TH','ACT010_TH','ACT011_TH','ACT012_TH','ACT015_TH','ACT016_TH','ACT017_TH','ACT018_TH'];
 const FEAT_PRD=['PRD024_TH','PRD025_TH','PRD026_TH','PRD027_TH','PRD028_TH'];
-function goActivity(){window.parent.postMessage({action:'experience',featured:FEAT_ACT},'*');}
-function goShop(){window.parent.postMessage({action:'shop',featured:FEAT_PRD},'*');}
+const langIds = ids => isEng ? ids.map(id => id.replace(/_TH$/, '_EN')) : ids;
+function goActivity(){window.parent.postMessage({action:'experience',featured:langIds(FEAT_ACT)},'*');}
+function goShop(){window.parent.postMessage({action:'shop',featured:langIds(FEAT_PRD)},'*');}
 </script>
 </body>
 </html>

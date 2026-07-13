@@ -211,7 +211,7 @@ function ProductCard({ product: p, onClick, lang = 'TH', isFeatured = false }: {
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
         {isFeatured && (
           <div style={{ position:'absolute', top:8, left:8, background:'linear-gradient(95deg,#E65100,#FF8F00)', color:'white', fontSize:'.7rem', fontWeight:700, padding:'3px 9px', borderRadius:20, boxShadow:'0 2px 8px #E6510055', zIndex:3 }}>
-            🍯 แนะนำพิเศษ
+            {lang === 'TH' ? '🍯 แนะนำพิเศษ' : '🍯 Recommended'}
           </div>
         )}
         <div className="impact-badge">

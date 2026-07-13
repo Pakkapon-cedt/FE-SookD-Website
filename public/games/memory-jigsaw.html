@@ -339,20 +339,20 @@ body {
 <!-- ── Level Selection ── -->
 <div id="screen-select">
   <span class="intro-badge">🧩 Memory Jigsaw</span>
-  <p class="intro-title">ร้อยเรียงชิ้นส่วนแห่งความทรงจำ...<br>นำพาคุณกลับมาสู่นครปฐมอีกครั้ง</p>
-  <p class="intro-sub">เลือกภาพที่คุณต้องการจัดเรียง</p>
+  <p class="intro-title" id="intro-title">ร้อยเรียงชิ้นส่วนแห่งความทรงจำ...<br>นำพาคุณกลับมาสู่นครปฐมอีกครั้ง</p>
+  <p class="intro-sub" id="intro-sub">เลือกภาพที่คุณต้องการจัดเรียง</p>
   <div class="level-row">
     <div class="level-card" onclick="startLevel('temple')">
       <img src="/img/templeingame.jpg" alt="พระปฐมเจดีย์">
-      <span class="lbl">พระปฐมเจดีย์</span>
+      <span class="lbl" id="lbl-temple">พระปฐมเจดีย์</span>
     </div>
     <div class="level-card" onclick="startLevel('cafe')">
       <img src="/img/cafeingame.jpg" alt="คาเฟ่">
-      <span class="lbl">คาเฟ่</span>
+      <span class="lbl" id="lbl-cafe">คาเฟ่</span>
     </div>
     <div class="level-card" onclick="startLevel('water')">
       <img src="/img/wateringame.jpg" alt="แม่น้ำท่าจีน">
-      <span class="lbl">แม่น้ำท่าจีน</span>
+      <span class="lbl" id="lbl-water">แม่น้ำท่าจีน</span>
     </div>
   </div>
 </div>
@@ -365,7 +365,7 @@ body {
       <div class="g-sub" id="g-sub"></div>
     </div>
     <div class="g-ref" onclick="openPreview()" style="cursor:zoom-in">
-      <div class="g-ref-label">ตัวอย่าง 🔍</div>
+      <div class="g-ref-label" id="lbl-preview">ตัวอย่าง 🔍</div>
       <div class="g-ref-img-wrap">
         <img id="g-ref-img" src="" alt="ตัวอย่าง">
       </div>
@@ -375,13 +375,13 @@ body {
   <div id="puzzle-grid"></div>
 
   <button class="swap-btn" id="swap-btn" onclick="toggleSwap()">
-    <span class="sw-icon">🔀</span> สลับชิ้นส่วน
+    <span class="sw-icon">🔀</span> <span id="lbl-swap-btn">สลับชิ้นส่วน</span>
   </button>
   <div class="swap-hint" id="swap-hint"></div>
 
   <div class="game-footer">
-    <span class="moves-label">การเคลื่อนที่: <span class="moves-num" id="move-count">0</span></span>
-    <button class="back-btn" onclick="backToSelect()">‹ เปลี่ยนด่าน</button>
+    <span class="moves-label" id="lbl-moves">การเคลื่อนที่: <span class="moves-num" id="move-count">0</span></span>
+    <button class="back-btn" id="lbl-back-btn" onclick="backToSelect()">‹ เปลี่ยนด่าน</button>
   </div>
 </div>
 
@@ -395,24 +395,44 @@ body {
 <div id="win-overlay">
   <div class="win-box">
     <div class="win-icon">🏆</div>
-    <div class="win-title">ยินดีด้วย! ไขปริศนาได้สำเร็จแล้ว!</div>
+    <div class="win-title" id="win-title">ยินดีด้วย! ไขปริศนาได้สำเร็จแล้ว!</div>
     <div class="win-divider"></div>
-    <div class="win-text">
+    <div class="win-text" id="win-text">
       เยี่ยมมาก! ทว่า เมื่อมองดูใกล้ๆ คุณจะสังเกตเห็นช่องว่างเล็กๆ
       ที่ดูเหมือนจะขาดหายไป...<br><br>
       หรือว่ารูปภาพนี้จะรออะไรบางอย่าง? ใช่แล้ว!
       มันรอให้ <strong>คุณ</strong> ก้าวเข้ามาเติมเต็มช่องว่างนั้น!<br><br>
       เชิญเข้ามาอยู่ในรูปเพื่อทำให้มันสมบูรณ์แบบด้วยกัน!
     </div>
-    <button class="win-btn" onclick="acceptInvite()">ตอบรับคำเชิญ</button>
+    <button class="win-btn" id="win-btn" onclick="acceptInvite()">ตอบรับคำเชิญ</button>
   </div>
 </div>
 
 <script>
+const isEng = new URLSearchParams(location.search).get('lang') === 'ENG';
+if (isEng) {
+  document.getElementById('intro-title').innerHTML = 'Piece together memories...<br>and return to Nakhon Pathom once more';
+  document.getElementById('intro-sub').textContent = 'Choose an image to arrange';
+  document.getElementById('lbl-temple').textContent = 'Phra Pathom Chedi';
+  document.getElementById('lbl-cafe').textContent = 'Café';
+  document.getElementById('lbl-water').textContent = 'Tha Chin River';
+  document.getElementById('lbl-preview').textContent = 'Preview 🔍';
+  document.getElementById('lbl-swap-btn').textContent = 'Swap Pieces';
+  document.getElementById('lbl-moves').innerHTML = 'Moves: <span class="moves-num" id="move-count">0</span>';
+  document.getElementById('lbl-back-btn').textContent = '‹ Change Level';
+  document.getElementById('win-title').textContent = 'Congratulations! Puzzle solved!';
+  document.getElementById('win-text').innerHTML =
+    'Amazing! But look closely — you\'ll notice a small gap that seems to be missing...<br><br>' +
+    'Could this picture be waiting for something? Yes!<br>' +
+    'It\'s waiting for <strong>you</strong> to step in and complete it!<br><br>' +
+    'Come join the picture and make it perfect together!';
+  document.getElementById('win-btn').textContent = 'Accept the Invitation';
+}
+
 const LEVELS = {
-  temple: { image: '/img/templeingame.jpg', title: 'แสงเจดีย์ยามค่ำ',     sub: '...ที่ยังคงส่องสว่างรอคุณกลับมา' },
-  cafe:   { image: '/img/cafeingame.jpg',   title: 'มุมวินเทจที่เงียบสงบ', sub: '...ร้อยชิ้นส่วนแห่งความคิดถึง'   },
-  water:  { image: '/img/wateringame.jpg',  title: 'ริมน้ำยามเย็น',        sub: '...บรรยากาศเดิมๆ ที่รอให้ค้นหา'  },
+  temple: { image: '/img/templeingame.jpg', title: 'แสงเจดีย์ยามค่ำ',     titleEn: 'The Chedi at Dusk',        sub: '...ที่ยังคงส่องสว่างรอคุณกลับมา', subEn: '...still glowing, waiting for your return' },
+  cafe:   { image: '/img/cafeingame.jpg',   title: 'มุมวินเทจที่เงียบสงบ', titleEn: 'A Quiet Vintage Corner',   sub: '...ร้อยชิ้นส่วนแห่งความคิดถึง',   subEn: '...piecing together cherished memories'   },
+  water:  { image: '/img/wateringame.jpg',  title: 'ริมน้ำยามเย็น',        titleEn: 'By the River at Twilight', sub: '...บรรยากาศเดิมๆ ที่รอให้ค้นหา',  subEn: '...the same old scene, waiting to be rediscovered'  },
 };
 
 const N     = 3;
@@ -476,8 +496,8 @@ async function startLevel(key) {
   document.getElementById('screen-select').style.display = 'none';
   document.getElementById('screen-game').style.display   = 'flex';
   document.getElementById('win-overlay').style.display   = 'none';
-  document.getElementById('g-title').textContent         = level.title;
-  document.getElementById('g-sub').textContent           = level.sub;
+  document.getElementById('g-title').textContent         = isEng ? (level.titleEn || level.title) : level.title;
+  document.getElementById('g-sub').textContent           = isEng ? (level.subEn   || level.sub)   : level.sub;
   document.getElementById('g-ref-img').src               = level.image;
   document.getElementById('move-count').textContent      = '0';
   document.getElementById('swap-btn').classList.remove('active');
@@ -555,13 +575,13 @@ function handleSwap(pos) {
   if (state[pos] === EMPTY) return; // don't select the blank
   if (swapFirst === -1) {
     swapFirst = pos;
-    document.getElementById('swap-hint').textContent = 'เลือกชิ้นที่สองเพื่อสลับ';
+    document.getElementById('swap-hint').textContent = isEng ? 'Select the second piece to swap' : 'เลือกชิ้นที่สองเพื่อสลับ';
     render();
     return;
   }
   if (swapFirst === pos) { // tap same tile = deselect
     swapFirst = -1;
-    document.getElementById('swap-hint').textContent = 'เลือกชิ้นแรกที่ต้องการสลับ';
+    document.getElementById('swap-hint').textContent = isEng ? 'Select the first piece to swap' : 'เลือกชิ้นแรกที่ต้องการสลับ';
     render();
     return;
   }
@@ -570,7 +590,7 @@ function handleSwap(pos) {
   if (swapFirst === emptyPos)    emptyPos = pos;
   else if (pos === emptyPos)     emptyPos = swapFirst;
   swapFirst = -1;
-  document.getElementById('swap-hint').textContent = 'เลือกชิ้นแรกที่ต้องการสลับ';
+  document.getElementById('swap-hint').textContent = isEng ? 'Select the first piece to swap' : 'เลือกชิ้นแรกที่ต้องการสลับ';
   countMove();
 }
 
@@ -589,7 +609,7 @@ function toggleSwap() {
   const btn  = document.getElementById('swap-btn');
   const hint = document.getElementById('swap-hint');
   btn.classList.toggle('active', swapMode);
-  hint.textContent = swapMode ? 'เลือกชิ้นแรกที่ต้องการสลับ' : '';
+  hint.textContent = swapMode ? (isEng ? 'Select the first piece to swap' : 'เลือกชิ้นแรกที่ต้องการสลับ') : '';
   render();
 }
 
@@ -602,7 +622,8 @@ function closePreview() {
 }
 
 function acceptInvite() {
-  window.parent.postMessage({ action: 'experience', featured: ['ACT019_TH'] }, '*');
+  const langIds = ids => isEng ? ids.map(id => id.replace(/_TH$/, '_EN')) : ids;
+  window.parent.postMessage({ action: 'experience', featured: langIds(['ACT019_TH']) }, '*');
 }
 </script>
 </body>

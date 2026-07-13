@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Find Item — ทุ่งใหญ่ตะวันตก</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Kanit', 'Sarabun', sans-serif;
+  background: #050f05;
+  user-select: none; -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* ── Game area ── */
+#game {
+  position: relative;
+  width: calc(100% - 76px);
+  height: 100vh;
+  overflow: hidden;
+  float: left;
+}
+#bg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+/* Subtle vignette to deepen jungle feel */
+#vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,10,0,0.55) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Hidden items ── */
+.item {
+  position: absolute;
+  cursor: pointer;
+  z-index: 2;
+  transform-origin: center center;
+  transition: filter 0.35s, opacity 0.35s;
+}
+.item img {
+  display: block;
+  width: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Lightly blended — still visible but feels "hidden in the jungle" */
+.item:not(.found):not(.hinting) {
+  opacity: 0.82;
+  mix-blend-mode: normal;
+  filter: brightness(0.88) saturate(0.85);
+}
+/* Brief hint glow */
+.item.hinting {
+  opacity: 0.9 !important;
+  mix-blend-mode: normal !important;
+  filter: drop-shadow(0 0 10px #ffe066) drop-shadow(0 0 22px #ffe066) brightness(1.2) !important;
+  animation: hintBounce 0.55s ease-in-out infinite alternate;
+}
+/* Found state */
+.item.found {
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 0 6px rgba(80,200,80,0.8));
+  cursor: default;
+  pointer-events: none;
+  animation: foundPop 0.45s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes hintBounce {
+  from { transform: scale(1)    rotate(var(--rot,0deg)); }
+  to   { transform: scale(1.12) rotate(var(--rot,0deg)); }
+}
+@keyframes foundPop {
+  0%   { transform: scale(1)    rotate(var(--rot,0deg)); }
+  45%  { transform: scale(1.35) rotate(var(--rot,0deg)); }
+  100% { transform: scale(1)    rotate(var(--rot,0deg)); }
+}
+
+/* Found badge on item */
+.item .badge {
+  display: none;
+  position: absolute;
+  top: -9px; right: -9px;
+  width: 22px; height: 22px;
+  background: #2d9e50;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+.item.found .badge { display: flex; }
+
+/* ── Right sidebar ── */
+#panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: 76px;
+  height: 100vh;
+  background: rgba(4,16,4,0.82);
+  backdrop-filter: blur(6px);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 5px 10px;
+  gap: 6px;
+  z-index: 200;
+}
+
+.panel-lbl {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.58rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.p-item {
+  width: 58px; height: 58px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  position: relative;
+  overflow: visible;
+  transition: border-color 0.3s, background 0.3s;
+  flex-shrink: 0;
+}
+.p-item img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 5px;
+  opacity: 0.45;
+  transition: opacity 0.3s;
+}
+.p-item.done {
+  border-color: #3d9e50;
+  background: rgba(61,158,80,0.18);
+}
+.p-item.done img { opacity: 1; }
+.p-item .p-check {
+  display: none;
+  position: absolute;
+  top: -7px; right: -7px;
+  width: 18px; height: 18px;
+  background: #2d9e50;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+}
+.p-item.done .p-check { display: flex; }
+
+#score {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  margin-top: auto;
+  line-height: 1.5;
+}
+#score span { font-size: 1.05rem; color: #7ee89a; }
+
+#hint-btn {
+  width: 100%;
+  background: rgba(255,220,60,0.88);
+  border: none; border-radius: 8px;
+  padding: 7px 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #1a1500;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.4;
+  text-align: center;
+  transition: background 0.2s, opacity 0.2s;
+}
+#hint-btn:hover:not(:disabled) { background: rgba(255,230,80,1); }
+#hint-btn:disabled { opacity: 0.32; cursor: default; }
+
+/* ── Win overlay ── */
+#win-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,8,0,0.88);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.win-box {
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px 20px 22px;
+  max-width: 340px; width: 100%;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+  animation: winPop 0.42s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes winPop {
+  from { transform: scale(0.65); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.win-icon  { font-size: 2.2rem; line-height: 1; }
+.win-title { font-size: .92rem; font-weight: 800; color: #1a3d1e; line-height: 1.55; }
+.win-rule  { width: 40px; height: 2px; background: #c8b89a; border-radius: 2px; }
+.win-text  { font-size: .74rem; color: #4a4a4a; line-height: 1.85; text-align: left; }
+.win-btn {
+  background: #2d6a4f; color: #fff;
+  border: none; border-radius: 12px;
+  padding: 13px 20px; font-size: .9rem;
+  font-weight: 700; cursor: pointer;
+  font-family: inherit; width: 100%;
+  transition: background .2s;
+}
+.win-btn:hover { background: #1a3d2e; }
+</style>
+</head>
+<body>
+
+<!-- ── Game area ── -->
+<div id="game">
+  <img id="bg" src="/img/jungle.jpg" alt="jungle">
+  <div id="vignette"></div>
+
+  <!--
+    Items hidden in the jungle.
+    Positions chosen to sit inside dense foliage / shadows.
+    Adjust left/top/width if your jungle.jpg has different focal areas.
+  -->
+
+  <!-- pepper — upper-left, tucked into leaves -->
+  <div class="item" id="item-pepper"
+       style="left:7%;top:19%;width:9%;--rot:-11deg;transform:rotate(-11deg)"
+       onclick="findItem('pepper')">
+    <img src="/img/pepper.png" alt="">
+    <div class="badge">✓</div>
+  </div>
+
+  <!-- sesame — center-left, near ground roots -->
+  <div class="item" id="item-sesame"
+       style="left:24%;top:63%;width:8%;--rot:8deg;transform:rotate(8deg)"
+       onclick="findItem('sesame')">
+    <img src="/img/sesame.png" alt="">
+    <div class="badge">✓</div>
+  </div>
+
+  <!-- coffee — upper-center, behind branch -->
+  <div class="item" id="item-coffee"
+       style="left:48%;top:15%;width:10%;--rot:-5deg;transform:rotate(-5deg)"
+       onclick="findItem('coffee')">
+    <img src="/img/coffee.png" alt="">
+    <div class="badge">✓</div>
+  </div>
+
+  <!-- kamin (turmeric) — center-right, under canopy shadow -->
+  <div class="item" id="item-kamin"
+       style="left:62%;top:48%;width:9%;--rot:13deg;transform:rotate(13deg)"
+       onclick="findItem('kamin')">
+    <img src="/img/kamin.png" alt="">
+    <div class="badge">✓</div>
+  </div>
+
+  <!-- mark — lower-right, partially behind root -->
+  <div class="item" id="item-mark"
+       style="left:74%;top:67%;width:8%;--rot:-7deg;transform:rotate(-7deg)"
+       onclick="findItem('mark')">
+    <img src="/img/mark.png" alt="">
+    <div class="badge">✓</div>
+  </div>
+</div>
+
+<!-- ── Right sidebar ── -->
+<div id="panel">
+  <div class="panel-lbl" id="lbl-panel">หาให้เจอ</div>
+
+  <div class="p-item" id="p-pepper">
+    <img src="/img/pepper.png" alt="pepper">
+    <span class="p-check">✓</span>
+  </div>
+  <div class="p-item" id="p-sesame">
+    <img src="/img/sesame.png" alt="sesame">
+    <span class="p-check">✓</span>
+  </div>
+  <div class="p-item" id="p-coffee">
+    <img src="/img/coffee.png" alt="coffee">
+    <span class="p-check">✓</span>
+  </div>
+  <div class="p-item" id="p-kamin">
+    <img src="/img/kamin.png" alt="kamin">
+    <span class="p-check">✓</span>
+  </div>
+  <div class="p-item" id="p-mark">
+    <img src="/img/mark.png" alt="mark">
+    <span class="p-check">✓</span>
+  </div>
+
+  <div id="score"><span id="found-count">0</span>/5<br><span id="lbl-found">พบแล้ว</span></div>
+
+  <button id="hint-btn" onclick="useHint()">💡<br><span id="lbl-hint">ตัวช่วย</span></button>
+</div>
+
+<!-- ── Win overlay ── -->
+<div id="win-overlay">
+  <div class="win-box">
+    <div class="win-icon">🔐💚</div>
+    <div class="win-title" id="win-title">ความลับของผืนป่า...<br>ถูกคุณปลดล็อกแล้ว 🔐💚</div>
+    <div class="win-rule"></div>
+    <div class="win-text" id="win-text">
+      ไม่ใช่ทุกคนจะมองเห็น... ของดีที่ธรรมชาติซ่อนไว้อย่างพิถีพิถัน บัดนี้มาอยู่ต่อหน้าคุณแล้ว ผลผลิตออร์แกนิกแท้ 100% ที่เติบโตด้วยน้ำและดินบริสุทธิ์ท่ามกลางป่าดงดิบ<br><br>
+      ในเกมคุณอาจจะต้องเพ่งจนตาแทบหลุดเพื่อตามหาพวกมัน... แต่ในโลกจริง คุณแค่นั่งรอสบาย ๆ แล้วปล่อยให้เราส่งตรงความสดใหม่และคุณค่าจากป่าลึกนี้ไปถึงมือคุณ<br><br>
+      🌿 ลิ้มลองความบริสุทธิ์ที่ธรรมชาติอยากให้คุณเจอ ช้อปเซ็ตสินค้าป่าออร์แกนิกได้แล้วตอนนี้
+    </div>
+    <button class="win-btn" id="win-btn" onclick="goToShop()">ซื้อเลย</button>
+  </div>
+</div>
+
+<script>
+const isEng = new URLSearchParams(location.search).get('lang') === 'ENG';
+if (isEng) {
+  document.getElementById('lbl-panel').textContent = 'Find It';
+  document.getElementById('lbl-found').textContent = 'Found';
+  document.getElementById('lbl-hint').textContent  = 'Hint';
+  document.getElementById('win-title').innerHTML   = 'The Forest\'s Secret...<br>Unlocked by You 🔐💚';
+  document.getElementById('win-text').innerHTML    =
+    'Not everyone can see them... the treasures nature hides with such care. Now they stand before you — 100% authentic organic products grown by pure water and soil deep in the wilderness.<br><br>' +
+    'In the game you had to squint to find them... but in real life, just sit back and let us deliver freshness and value straight from this deep forest to your door.<br><br>' +
+    '🌿 Taste the purity nature wants you to discover. Shop the organic forest collection now.';
+  document.getElementById('win-btn').textContent = 'Shop Now';
+}
+
+const ITEMS    = ['pepper','sesame','coffee','kamin','mark'];
+const foundSet = new Set();
+let   hinting  = false;
+let   hintTimer = null;
+
+function findItem(name) {
+  if (foundSet.has(name)) return;
+  foundSet.add(name);
+
+  document.getElementById('item-' + name).classList.add('found');
+  document.getElementById('p-' + name).classList.add('done');
+  document.getElementById('found-count').textContent = foundSet.size;
+
+  if (foundSet.size === ITEMS.length) {
+    setTimeout(() => {
+      document.getElementById('win-overlay').style.display = 'flex';
+    }, 700);
+  }
+}
+
+function useHint() {
+  if (hinting) return;
+  const unfound = ITEMS.filter(n => !foundSet.has(n));
+  if (!unfound.length) return;
+
+  hinting = true;
+  const btn = document.getElementById('hint-btn');
+  btn.disabled = true;
+
+  const target = unfound[Math.floor(Math.random() * unfound.length)];
+  const el     = document.getElementById('item-' + target);
+
+  el.classList.add('hinting');
+
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => {
+    el.classList.remove('hinting');
+    hinting = false;
+    // 5s cooldown before next hint
+    setTimeout(() => { btn.disabled = false; }, 5000);
+  }, 1800);
+}
+
+function goToShop() {
+  const langIds = ids => isEng ? ids.map(id => id.replace(/_TH$/, '_EN')) : ids;
+  window.parent.postMessage({
+    action: 'shop',
+    featured: langIds(['PRD007_TH','PRD008_TH','PRD009_TH','PRD010_TH','PRD011_TH'])
+  }, '*');
+}
+</script>
+</body>
+</html>

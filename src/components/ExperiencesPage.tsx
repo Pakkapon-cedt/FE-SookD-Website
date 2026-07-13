@@ -238,7 +238,7 @@ function ActivityCard({ activity: a, onClick, lang = 'TH', isFeatured = false }:
       <div className="exp-card__img-wrap">
         {isFeatured && (
           <div style={{position:'absolute',top:'8px',left:'8px',zIndex:2,background:'#E65100',color:'#fff',fontSize:'.72rem',fontWeight:700,padding:'.2rem .6rem',borderRadius:'50px',lineHeight:1.3}}>
-            🎨 แนะนำพิเศษ
+            {lang === 'TH' ? '🎨 แนะนำพิเศษ' : '🎨 Recommended'}
           </div>
         )}
         <img
