@@ -83,6 +83,7 @@ interface PlaceData {
   showActivityHeader?: boolean;
   highlights?: Highlight[];
   uncleAudioUrl?: string;
+  uncleAudioUrlEn?: string;
 }
 
 const DISCOVER_PLACES: PlaceData[] = [
@@ -157,6 +158,7 @@ const DISCOVER_PLACES: PlaceData[] = [
       },
     ],
     uncleAudioUrl: '/audio/uncle-bangkachao.mp3',
+    uncleAudioUrlEn: '/audio/uncle-bangkachaoEN.mp3',
   },
   {
     id: 'nakhonpathom',
@@ -171,6 +173,7 @@ const DISCOVER_PLACES: PlaceData[] = [
     activityIds: ['ACT019'],
     showActivityHeader: true,
     uncleAudioUrl: '/audio/uncle-nakhonpathom.mp3',
+    uncleAudioUrlEn: '/audio/uncle-nakhonpathomEN.mp3',
     highlights: [
       { name: 'ทริปเที่ยว', nameEn: 'Day Trip', image: '/img/watnakhonphatom.jpg',
         modal: {
@@ -213,6 +216,7 @@ const DISCOVER_PLACES: PlaceData[] = [
       { name: 'ที่เที่ยวเขาหลวง', nameEn: 'Khao Luang', image: '/img/kaoluang.jpg' },
     ],
     uncleAudioUrl: '/audio/uncle-khiriwong.mp3',
+    uncleAudioUrlEn: '/audio/uncle-khiriwongEN.mp3',
   },
   {
     id: 'moonrabbit',
@@ -230,6 +234,7 @@ const DISCOVER_PLACES: PlaceData[] = [
       { name: 'ทุ่งใหญ่ตะวันตก', nameEn: 'Thung Yai Naresuan (West)', image: '/img/tungyai.jpg' },
     ],
     uncleAudioUrl: '/audio/uncle-moonrabbit.mp3',
+    uncleAudioUrlEn: '/audio/uncle-moonrabbitEN.mp3',
   },
 ];
 
@@ -308,11 +313,12 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
   const isTH = lang === 'TH';
   const place = DISCOVER_PLACES[activeTab];
   const langSuffix = isTH ? '_TH' : '_EN';
+  const activeUncleAudio = isTH ? place.uncleAudioUrl : (place.uncleAudioUrlEn || place.uncleAudioUrl);
 
   // สั่งให้เล่นเสียงทันทีเมื่อผู้ใช้งานเข้าหน้านี้ หรือกดเปลี่ยนแท็บมาเจอสถานที่ที่มีเสียง
   useEffect(() => {
     if (audioRef.current) {
-      if (place.uncleAudioUrl) {
+      if (activeUncleAudio) {
         // พยายามสั่งเล่นเสียงทันที
         audioRef.current.play().catch(err => {
           // หากบราวเซอร์บล็อก จะแสดงข้อความนี้ใน Console
@@ -323,7 +329,7 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
         audioRef.current.currentTime = 0;
       }
     }
-  }, [activeTab, place.uncleAudioUrl]);
+  }, [activeTab, activeUncleAudio]);
   useEffect(() => {
     setImgIdx(0);
     setOpenFaq(null);
@@ -401,7 +407,7 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
 
                 <audio 
                   ref={audioRef} 
-                  src={getDriveAudioUrl(place.uncleAudioUrl)} 
+                  src={getDriveAudioUrl(activeUncleAudio)} 
                   autoPlay /* 🟢 สั่งให้เล่นอัตโนมัติ */
                   loop     /* 🟢 สั่งให้เล่นวนซ้ำเรื่อยๆ */
                   onPlay={() => setIsPlayingUncleAudio(true)}   /* 🟢 ซิงค์ปุ่มให้เป็นสถานะ "เล่น" */
