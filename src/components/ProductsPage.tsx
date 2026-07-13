@@ -102,7 +102,7 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
           <div className="exp-hero__overlay" />
           <div className="exp-hero__content">
             <h1 className="exp-hero__heading">Local Products</h1>
-            <p className="exp-hero__sub">สินค้าท้องถิ่นคุณภาพจากชุมชน</p>
+            <p className="exp-hero__sub">{lang==="TH"? "สินค้าท้องถิ่นคุณภาพจากชุมชน":"Authentic local products crafted by communities"}</p>
           </div>
         </section>
 

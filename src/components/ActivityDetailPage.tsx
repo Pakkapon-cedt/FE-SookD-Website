@@ -564,6 +564,7 @@ export const ACTIVITY_DETAIL_CSS = `
   font-size: 1rem; font-weight: 600; cursor: pointer;
   transition: background .2s;
   width: 100%;
+  font:inherit;
 }
 .adet__reserve:hover { background: #1a3d2e; }
 

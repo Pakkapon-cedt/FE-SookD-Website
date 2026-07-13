@@ -8,8 +8,8 @@ function clearCacheByPrefix(prefix: string) {
 }
 
 export interface Impact {
-    job_count: number;
-    sum_profits: number;
+  job_count: number;
+  sum_profits: number;
 }
 
 async function get<T>(path: string): Promise<T> {
@@ -24,20 +24,20 @@ async function get<T>(path: string): Promise<T> {
 export const api = {
   auth: {
     login: async (body: { email: string; password: string }) => {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+      const res = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-    }
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
 
-    return data;
-  },
+      return data;
+    },
     register: (body: object) =>
       fetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
@@ -89,7 +89,15 @@ export const api = {
   orders: {
     getAll: () => get<any[]>('/orders'),
     getOne: (id: string) => get<any>(`/orders/${id}`),
-    getByUserId: (userId: string) => get<any[]>(`/orders/user/${userId}`),
+    getByUserId: async (userId: string) => {
+      const result = await get<any[]>(
+        `/orders/user/${userId}`
+      );
+
+      clearCacheByPrefix('/orders');
+
+      return result;
+    },
     getByItemId: (itemId: string) => get<any[]>(`/orders/item/${itemId}`),
     create: async (body: object) => {
       const res = await fetch(`${BASE_URL}/orders`, {
@@ -106,5 +114,18 @@ export const api = {
   promotions: {
     getAll: () => get<any[]>('/promotions'),
     getOne: (id: string) => get<any>(`/promotions/${id}`),
+  },
+  line: {
+    payment: async (data: { order_id: string }) => {
+      const res = await fetch(`${BASE_URL}/line/payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      return await res.json();
+    }
   },
 };

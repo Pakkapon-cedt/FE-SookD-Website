@@ -42,6 +42,34 @@ export async function getOrderById(
         });
     }
 }
+
+export async function getOrdersById(
+    req: Request,
+    res: Response
+) {
+    try {
+        const id = String(req.params.id);
+
+        // console.log("ID:",id);
+
+        const orders =
+            await orderService.getOrdersById(id);
+
+        if (orders.length === 0) {
+            return res.status(404).json({
+                message: "Order not found"
+            });
+        }
+
+        res.status(200).json(orders);
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to get orders"
+        });
+    }
+}
+
 export async function getOrdersByItemId(
     req: Request,
     res: Response
@@ -153,7 +181,7 @@ export async function deleteOrder(
 export async function getImpactData(
     req: Request,
     res: Response) {
-     try {
+    try {
         const Impact =
             await orderService.getImpactData();
         res.status(200).json(Impact);

@@ -31,6 +31,15 @@ export async function getOrderById(
     );
 }
 
+export async function getOrdersById(id: string) {
+    // console.log("service", id);
+
+    const orders = await getOrders();
+
+    // console.log(orders.length);
+
+    return orders.filter(o => o.order_id === id);
+}
 
 export async function createOrder(
     orderData: Omit<Order, "order_id">

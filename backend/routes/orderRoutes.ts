@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import {
     getOrders,getOrderById,getOrdersByItemId,getOrdersByUserId,
-    createOrder,deleteOrder,updateOrder,getImpactData
+    createOrder,deleteOrder,updateOrder,getImpactData,getOrdersById
 } from "../controllers/orderController";
 
 import { verifyToken } from "../middlewares/authMiddleware";
@@ -12,7 +12,9 @@ const router = Router();
 
 router.get("/", getOrders);
 router.get("/impact", getImpactData);
+router.get("/group/:id", getOrdersById);
 router.get("/:id", getOrderById);
+
 
 router.get( "/item/:itemId",getOrdersByItemId);
 

@@ -111,8 +111,14 @@ export const SITE_CONTENT: SiteContent = {
   },
   // ====================================================//
   natureQuote: {
-    heading: 'The best stories begin in nature',
-    subtext: 'เรื่องราวที่ดีที่สุด เริ่มต้นจากธรรมชาติ',
+    TH: {
+      heading: 'เรื่องราวที่ดีที่สุด เริ่มต้นจากธรรมชาติ',
+      subtext: 'พร้อมให้คุณได้สัมผัสแล้วที่นี่',
+    },
+    ENG: {
+      heading: 'The best stories begin in nature',
+      subtext: 'ready for you to experience today',
+    },
   },
 
   pursuit: {

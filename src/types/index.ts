@@ -97,8 +97,14 @@ export interface SiteContent {
     cards: JourneyCard[];
   };
   natureQuote: {
-    heading: string;
-    subtext: string;
+    TH: {
+      heading: string;
+      subtext: string;
+    };
+    ENG: {
+      heading: string;
+      subtext: string;
+    },
   };
   pursuit: {
     TH: {

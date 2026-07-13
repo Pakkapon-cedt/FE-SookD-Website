@@ -518,6 +518,7 @@ export const CART_CSS = `
   justify-content: center;
   flex-shrink: 0;
   transition: all .2s;
+  margin-left: 150px;
 }
 .cart__all-check--on {
   background: #2d6a4f;
@@ -553,6 +554,7 @@ export const CART_CSS = `
   transition: background .2s;
   flex-shrink: 0;
   white-space: nowrap;
+  margin-right: 150px;
 }
 .cart__pay-btn:hover:not(:disabled) { background: #1b4332; }
 .cart__pay-btn:disabled { opacity: .55; cursor: default; }

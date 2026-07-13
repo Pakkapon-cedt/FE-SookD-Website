@@ -182,7 +182,7 @@ export default function App() {
           <StartJourney heading={c.journey.heading} cards={c.journey.cards} onNavigate={navigate} />
           <div className="section-gap" />
 
-          <NatureQuote heading={c.natureQuote.heading} subtext={c.natureQuote.subtext} />
+          <NatureQuote heading={c.natureQuote[lang].heading} subtext={c.natureQuote[lang].subtext} />
           <PursuitFeeling
             heading={c.pursuit[lang].heading}
             body={c.pursuit[lang].body}
