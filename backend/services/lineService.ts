@@ -52,15 +52,15 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                                 },
                                 {
                                     type: "text",
-                                    text: "ธนาคาร กรุงแตก"
+                                    text: "ธนาคารกสิกรไทย"
                                 },
                                 {
                                     type: "text",
-                                    text: "ชื่อบัญชี SOOD.ltd"
+                                    text: "ชื่อบัญชี บริษัท เลิร์นดู วิสาหกิจเพื่อสังคม จำกัด"
                                 },
                                 {
                                     type: "text",
-                                    text: "เลขบัญชี 123-456-789"
+                                    text: "เลขบัญชี 1512814456"
                                 },
                                 {
                                     type: "text",
@@ -75,6 +75,7 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                             contents: [
                                 {
                                     type: "button",
+                                    style: "primary",
                                     action: {
                                         type: "postback",
                                         label: "📎 ส่งสลิป",
@@ -82,8 +83,13 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                                     }
                                 }
                             ]
-                        }
+                        },
                     }
+                },
+                {
+                    type: "image",
+                    originalContentUrl: `${process.env.BASE_URL}/uploads/QR.jpg`,
+                    previewImageUrl: `${process.env.BASE_URL}/uploads/QR.jpg`
                 }
             ]
         }),
@@ -95,7 +101,7 @@ export async function createPaymentLineUrl(orderId: string) {
 
     const orders = await getOrdersById(orderId);
 
-    console.log("control",orders);
+    console.log("control", orders);
     if (orders.length === 0) {
         throw new Error("Order not found");
     }
@@ -301,21 +307,21 @@ export async function pushMessage(
     await fetch(
         "https://api.line.me/v2/bot/message/push",
         {
-            method:"POST",
+            method: "POST",
 
-            headers:{
-                "Content-Type":"application/json",
+            headers: {
+                "Content-Type": "application/json",
                 Authorization:
-                `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
+                    `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
             },
 
-            body:JSON.stringify({
+            body: JSON.stringify({
 
-                to:userId,
+                to: userId,
 
-                messages:[
+                messages: [
                     {
-                        type:"text",
+                        type: "text",
                         text
                     }
                 ]
