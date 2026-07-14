@@ -1,5 +1,5 @@
 const cache = new Map<string, { data: any; exp: number }>();
-const TTL = 5 * 60 * 1000;
+const TTL = 5 * 1000;
 
 export function clearSheetCache(sheetName: string) {
     const spreadsheetId = process.env.SPREADSHEET_ID;
