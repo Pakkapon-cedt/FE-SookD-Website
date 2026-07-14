@@ -441,7 +441,7 @@ export default function ChatWidget({
                     />
 
                     <button className="send"
-                        onClick={sendMessage}
+                        onClick={() => sendMessage()}
                     >
                         {TEXT[language].send}
 
