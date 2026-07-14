@@ -1,5 +1,5 @@
 import { Review } from "../models/Review";
-import { getSheetData } from "./googleSheetService";
+import { getSheetData, clearSheetCache } from "./googleSheetService";
 
 import { getProducts } from "./productService";
 import { getActivities } from "./activityService";
@@ -154,6 +154,7 @@ export async function createReview(
         );
     }
 
+    clearSheetCache("Reviews");
 
     return newReview;
 }
