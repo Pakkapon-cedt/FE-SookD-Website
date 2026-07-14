@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./ChatWidget.css";
 import { getSessionId } from "../../utils/session";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
 interface ChatbotProps {
     lang: "TH" | "ENG";
 }
@@ -87,7 +89,7 @@ export default function ChatWidget({
         // console.log("useEffect run");
         // console.log("language 11 =", language);
 
-        fetch(`http://localhost:3000/chat/suggestions?language=${language}`)
+        fetch(`${API_BASE}/chat/suggestions?language=${language}`)
             .then(r => r.json())
             .then(data => {
                 // console.log("suggestion", data);
@@ -209,7 +211,7 @@ export default function ChatWidget({
             // console.log("language12 =", language);
 
             // console.log(localStorage.getItem("token"));
-            const res = await fetch("http://localhost:3000/chat", {
+            const res = await fetch(`${API_BASE}/chat`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

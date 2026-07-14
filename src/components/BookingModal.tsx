@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { addToCart } from '../utils/cart';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? '${API_BASE}';
+
 const DEFAULT_OPTIONAL_IDS = ['ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018'];
 const DEFAULT_OFFER_IDS = ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'];
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -116,7 +118,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/activities')
+    fetch(`${API_BASE}/api/activities`)
       .then(r => r.json())
       .then((acts: any[]) => {
         const opts = acts
@@ -134,7 +136,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/products')
+    fetch(`${API_BASE}/api/products`)
       .then(r => r.json())
       .then((prds: any[]) => {
         const filtered = prds.filter((p: any) => offerIds.includes(p.id));
