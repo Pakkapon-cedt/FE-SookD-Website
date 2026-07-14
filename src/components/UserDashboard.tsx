@@ -242,6 +242,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     try {
       const res = await api.reviews.create({
         user_id: user.user_id,
+        user_name: displayName,
         item_id: itemId,
         rating: editRating,
         comment: editText,
