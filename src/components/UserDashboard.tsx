@@ -137,6 +137,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [reviewsReady, setReviewsReady] = useState(false);
 
   /* review edit/delete/create state */
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -201,11 +202,12 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     }
     if (tab === 'reviews') {
       setLoading(true);
+      setReviewsReady(false);
       Promise.all([
         api.orders.getByUserId(user.user_id),
         api.reviews.getByUserId(user.user_id),
       ]).then(([ords, revs]) => { setOrders(ords); setReviews(revs); })
-        .catch(() => {}).finally(() => setLoading(false));
+        .catch(() => {}).finally(() => { setLoading(false); setReviewsReady(true); });
     }
   }, [tab, user?.user_id]);
 
@@ -228,19 +230,17 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   async function doDelete() {
     if (!deleteId) return;
     try { await api.reviews.delete(deleteId); } catch { }
-    setReviews(rs => rs.filter(r => r.review_id !== deleteId));
-    setDeleteId(null);
+    window.location.reload();
   }
 
   async function doSave(reviewId: string) {
     try { await api.reviews.update(reviewId, { rating: editRating, comment: editText }); } catch { }
-    setReviews(rs => rs.map(r => r.review_id === reviewId ? { ...r, rating: editRating, comment: editText } : r));
-    setEditId(null);
+    window.location.reload();
   }
 
   async function doCreate(itemId: string) {
     try {
-      const res = await api.reviews.create({
+      await api.reviews.create({
         user_id: user.user_id,
         user_name: displayName,
         item_id: itemId,
@@ -248,11 +248,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
         comment: editText,
         review_date: new Date().toISOString().slice(0, 10),
       });
-      if (res?.review_id) setReviews(rs => [...rs, res]);
     } catch { }
-    setNewItemId(null);
-    setEditText('');
-    setEditRating(0);
+    window.location.reload();
   }
 
   async function handleSaveInfo() {
@@ -586,7 +583,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 </div>
               </div>
 
-              {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
+              {(!reviewsReady || loading) ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
                   // Build unique completed-order items merged with existing reviews
                   const seenItemIds = new Set<string>();
                   const mergedItems = orders

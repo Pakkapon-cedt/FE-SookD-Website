@@ -1,5 +1,5 @@
 const cache = new Map<string, { data: any; exp: number }>();
-const TTL = 5 * 1000;
+const TTL = 5 * 60 * 1000;
 
 export function clearSheetCache(sheetName: string) {
     const spreadsheetId = process.env.SPREADSHEET_ID;
@@ -19,20 +19,43 @@ export function patchSheetCache(sheetName: string, idField: string, idValue: str
     cache.set(key, { data: patched, exp: cached.exp });
 }
 
-export async function getSheetData(sheetName: string, noCache = false) {
+export function removeFromSheetCache(sheetName: string, idField: string, idValue: string) {
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    if (!spreadsheetId) return;
+    const key = `${spreadsheetId}:${sheetName}`;
+    const cached = cache.get(key);
+    if (!cached) return;
+    const filtered = (cached.data as any[]).filter(
+        (item: any) => String(item[idField]) !== String(idValue)
+    );
+    cache.set(key, { data: filtered, exp: cached.exp });
+}
+
+export function appendToSheetCache(sheetName: string, item: any) {
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    if (!spreadsheetId) return;
+    const key = `${spreadsheetId}:${sheetName}`;
+    const cached = cache.get(key);
+    if (!cached) return;
+    cache.set(key, { data: [...cached.data, item], exp: cached.exp });
+}
+
+export async function getSheetData(sheetName: string) {
     const spreadsheetId = process.env.SPREADSHEET_ID;
     if (!spreadsheetId) throw new Error("SPREADSHEET_ID not found");
 
     const key = `${spreadsheetId}:${sheetName}`;
-    if (!noCache) {
-        const cached = cache.get(key);
-        if (cached && Date.now() < cached.exp) return cached.data;
-    }
+    const cached = cache.get(key);
+    if (cached && Date.now() < cached.exp) return cached.data;
 
     const url = `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}?raw=true`;
     const response = await fetch(url);
     const data = await response.json();
-    if (!Array.isArray(data)) throw new Error(`getSheetData: invalid response for sheet "${sheetName}"`);
-    if (!noCache) cache.set(key, { data, exp: Date.now() + TTL });
+    if (!Array.isArray(data)) {
+        console.error(`getSheetData: invalid response for sheet "${sheetName}"`, data);
+        const stale = cache.get(key);
+        return stale ? stale.data : [];
+    }
+    cache.set(key, { data, exp: Date.now() + TTL });
     return data;
 }
