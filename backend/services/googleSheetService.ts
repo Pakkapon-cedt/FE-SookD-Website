@@ -19,18 +19,21 @@ export function patchSheetCache(sheetName: string, idField: string, idValue: str
     cache.set(key, { data: patched, exp: cached.exp });
 }
 
-export async function getSheetData(sheetName: string) {
+export async function getSheetData(sheetName: string, noCache = false) {
     const spreadsheetId = process.env.SPREADSHEET_ID;
     if (!spreadsheetId) throw new Error("SPREADSHEET_ID not found");
 
     const key = `${spreadsheetId}:${sheetName}`;
-    const cached = cache.get(key);
-    if (cached && Date.now() < cached.exp) return cached.data;
+    if (!noCache) {
+        const cached = cache.get(key);
+        if (cached && Date.now() < cached.exp) return cached.data;
+    }
 
-    const url = `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}?raw=true`;
+    const bust = noCache ? `&t=${Date.now()}` : "";
+    const url = `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}?raw=true${bust}`;
     const response = await fetch(url);
     const data = await response.json();
     if (!Array.isArray(data)) throw new Error(`getSheetData: invalid response for sheet "${sheetName}"`);
-    cache.set(key, { data, exp: Date.now() + TTL });
+    if (!noCache) cache.set(key, { data, exp: Date.now() + TTL });
     return data;
 }

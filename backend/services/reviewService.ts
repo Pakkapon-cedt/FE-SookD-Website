@@ -8,7 +8,7 @@ import { generateNextId } from "../utils/idGenerator";
 
 export async function getReviews(): Promise<Review[]> {
 
-    const data = await getSheetData("Reviews");
+    const data = await getSheetData("Reviews", true);
 
     return data.map((item: any): Review => ({
         review_id: item.review_id,
