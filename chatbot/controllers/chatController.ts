@@ -270,12 +270,13 @@ export async function chatController(
         };
 
         try {
-            // Gemini 2.5 Flash sometimes wraps JSON in markdown code fences — strip them
-            const cleaned = answer.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-            ai = JSON.parse(cleaned);
+            // Gemini sometimes wraps JSON in markdown fences or adds leading text — extract the first { } block
+            const jsonMatch = answer.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error("no JSON found");
+            ai = JSON.parse(jsonMatch[0]);
 
         } catch {
-
+            console.error("Gemini parse fail, raw answer:", answer);
             return res.json({
                 answer:
                     language === "en"
