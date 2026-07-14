@@ -270,8 +270,9 @@ export async function chatController(
         };
 
         try {
-
-            ai = JSON.parse(answer);
+            // Gemini 2.5 Flash sometimes wraps JSON in markdown code fences — strip them
+            const cleaned = answer.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+            ai = JSON.parse(cleaned);
 
         } catch {
 
