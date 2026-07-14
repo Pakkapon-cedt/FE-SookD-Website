@@ -1,5 +1,5 @@
 import { Review } from "../models/Review";
-import { getSheetData } from "./googleSheetService";
+import { getSheetData, clearSheetCache, removeFromSheetCache, appendToSheetCache, patchSheetCache } from "./googleSheetService";
 
 import { getProducts } from "./productService";
 import { getActivities } from "./activityService";
@@ -74,6 +74,9 @@ export async function deleteReview(
     );
 
     const result = await response.json();
+    console.log("deleteReview GAS response:", JSON.stringify(result));
+
+    if (result.success) removeFromSheetCache("Reviews", "review_id", id);
 
     return result.success;
 }
@@ -103,8 +106,12 @@ export async function updateReview(
 
     if (!result.success) {
         throw new Error("Update failed");
-        console.log(result);
     }
+
+    patchSheetCache("Reviews", "review_id", id, {
+        rating: String(review.rating),
+        comment: review.comment,
+    });
 
     return result.review;
 }
@@ -154,6 +161,15 @@ export async function createReview(
         );
     }
 
+    appendToSheetCache("Reviews", {
+        review_id: reviewId,
+        user_id: (reviewData as any).user_id,
+        user_name: (reviewData as any).user_name ?? '',
+        item_id: (reviewData as any).item_id,
+        rating: String((reviewData as any).rating),
+        comment: (reviewData as any).comment ?? '',
+        review_date: (reviewData as any).review_date ?? '',
+    });
 
     return newReview;
 }

@@ -281,7 +281,7 @@ export async function chatController(
             ai = JSON.parse(answer);
 
         } catch {
-
+            console.error("Gemini JSON parse fail, raw:", answer);
             return res.json({
                 answer:
                     language === "en"
@@ -292,6 +292,27 @@ export async function chatController(
         }
 
         const selected = result[ai.selected - 1];
+
+        // Guard: if selected index is out of range, return answer text only
+        if (!selected) {
+            updateHistory(sessionId, question, ai.answer);
+            return res.json({
+                answer: ai.answer,
+                showAdmin: session.questionCount >= 5
+            });
+        }
+
+
+        if (!selected) {
+            updateHistory(sessionId, question, answer);
+
+            return res.json({
+                answer: ai.answer,
+                showAdmin: session.questionCount >= 5
+            });
+        }
+
+        sessionSet(sessionId, selected.item);
 
 
         if (!selected) {
