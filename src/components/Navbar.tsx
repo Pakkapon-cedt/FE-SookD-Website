@@ -206,8 +206,8 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
         <div className="navbar-logout-overlay" onClick={() => setShowLogout(false)}>
           <div className="navbar-logout-modal" onClick={e => e.stopPropagation()}>
             <button className="navbar-logout-modal__x" onClick={() => setShowLogout(false)}>×</button>
-            <h3 className="navbar-logout-modal__title">Are you sure?</h3>
-            <p className="navbar-logout-modal__body">Do you really want to delete the comment/rating? This action cannot be done.</p>
+            <h3 className="navbar-logout-modal__title">{lang === 'TH' ? 'ออกจากระบบ?' : 'Are you sure?'}</h3>
+            <p className="navbar-logout-modal__body">{lang === 'TH' ? 'คุณต้องการออกจากระบบใช่ไหม?' : 'Do you really want to log out?'}</p>
             <div className="navbar-logout-modal__btns">
               <button className="navbar-logout-modal__btn navbar-logout-modal__btn--confirm"
                 onClick={() => { setShowLogout(false); onLogout?.(); }}>
@@ -217,7 +217,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
                   <path d="M10 11v6M14 11v6"/>
                   <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                 </svg>
-                Confirm
+                {lang === 'TH' ? 'ยืนยัน' : 'Confirm'}
               </button>
               <button className="navbar-logout-modal__btn navbar-logout-modal__btn--cancel"
                 onClick={() => setShowLogout(false)}>
@@ -225,7 +225,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
                   <line x1="18" y1="6" x2="6" y2="18"/>
                   <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
-                Cancel
+                {lang === 'TH' ? 'ยกเลิก' : 'Cancel'}
               </button>
             </div>
           </div>
