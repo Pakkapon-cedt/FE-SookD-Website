@@ -259,7 +259,10 @@ address{font-style:normal}
 
 .navbar__links {
   display:flex; gap:3rem;
-  position:absolute; left:50%; transform:translateX(-50%);
+  position:absolute; 
+  left: clamp(35%, 45vw, 50%);
+  transform:translateX(-50%);
+
 }
 .navbar__link {
   font-size:.95rem; font-weight:500;
@@ -304,9 +307,17 @@ address{font-style:normal}
   font-size:.85rem; font-weight:700; flex-shrink:0;
 }
 .navbar__username {
-  font-size:.9rem; font-weight:600;
-  color:rgba(255,255,255,.95); white-space:nowrap;
+    font-size: .9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, .95);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    max-width: 150px;
 }
+
 .navbar--scrolled .navbar__username { color: var(--forest); }
 /* Logout modal */
 .navbar-logout-overlay {
@@ -677,13 +688,6 @@ white-space: pre-line;
   font-family: var(--font-th); line-height: 1.45;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
-@media(max-width:1024px){
-  .navbar__links{gap:2rem}
-  .journey__cards{gap:1rem}
-  .footer__inner{grid-template-columns:1fr 1fr}
-  :root{--section-gap:60px}
-}
 /* ── Hamburger button ─────────────────────────────────────────── */
 .navbar__hamburger {
   display: none;
@@ -751,6 +755,22 @@ white-space: pre-line;
   display: block; text-align: center;
   padding: .7rem 1.4rem;
 }
+/* ── Responsive ──────────────────────────────────────────────── */
+@media(max-width:1048px){
+  .navbar__links {
+    display: none;
+  }
+
+  .navbar__hamburger {
+    display: flex;
+  }
+}
+
+@media(max-width:1024px){
+  .journey__cards{gap:1rem}
+  .footer__inner{grid-template-columns:1fr 1fr}
+  :root{--section-gap:60px}
+}
 
 @media(max-width:768px){
   .navbar__links{display:none}
@@ -765,6 +785,8 @@ white-space: pre-line;
   .footer__inner{grid-template-columns:1fr 1fr}
   .footer__logo-col{display:none}
   :root{--section-gap:48px}
+  .navbar__username {max-width: 80px; font-size: .8rem;}
+  .navbar {padding: 0 0.5rem;}
 }
 @media(max-width:480px){
   .footer__inner{grid-template-columns:1fr}

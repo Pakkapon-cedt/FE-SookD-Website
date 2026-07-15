@@ -79,7 +79,13 @@ export interface FooterData {
 export interface SiteContent {
   navLinks: NavLink[];
   experiences: {
-    hero: { heading: string; subheading: string };
+    hero: {
+      heading: string;
+      subheading: {
+        TH: string;
+        ENG: string;
+      }
+    };
     cards: ExperienceCard[];
   };
   hero: {

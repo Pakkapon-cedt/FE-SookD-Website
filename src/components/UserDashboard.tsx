@@ -1261,12 +1261,287 @@ export const USER_DASHBOARD_CSS = `
 .ud-form-err { color: #e53935; font-size: .82rem; margin-top: .6rem; font-family: var(--font-th); }
 .ud-form-divider { border: none; border-top: 1px solid #eee; margin: .4rem 0; }
 
-@media(max-width: 768px) {
-  .ud-sidebar { width: 120px; }
-  .ud-main { padding: 1.5rem 1rem; }
-  .ud-review-grid { grid-template-columns: 1fr; }
-  .ud-card__meta { gap: 1rem; }
-  .ud-impact-card { width: 120px; height: 120px; }
-  .ud-form-row { flex-direction: column; }
+
+/* ─────────────────────────────
+   Responsive
+───────────────────────────── */
+
+@media (max-width: 1024px) {
+
+  .ud-sidebar {
+    width: 140px;
+  }
+
+  .ud-nav-item {
+    padding: .75rem .8rem;
+    font-size: .78rem;
+  }
+
+  .ud-main {
+    padding: 2rem 1.5rem;
+  }
+
+  .ud-profile-col {
+    max-width: 520px;
+  }
+
+  .ud-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ud-card {
+    gap: .8rem;
+  }
+
+  .ud-card__meta {
+    gap: 1rem;
+  }
+
+  .ud-profile-btns {
+    margin-left: 0;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 768px) {
+
+  .ud-page {
+    flex-direction: column;
+    padding-top: 64px;
+  }
+
+  /* sidebar เปลี่ยนเป็นแนวนอน */
+  .ud-sidebar {
+    width: 100%;
+    height: auto;
+    position: sticky;
+    top: 64px;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: .5rem;
+    border-right: none;
+    border-bottom: 1px solid #c4cccc;
+    z-index: 50;
+  }
+
+  .ud-nav-item {
+    flex-shrink: 0;
+    width: auto;
+    padding: .6rem 1rem;
+    border-radius: 8px;
+    justify-content: center;
+  }
+
+  .ud-main {
+    padding: 1.2rem .8rem;
+  }
+
+
+  .ud-section__title {
+    font-size: 1.3rem;
+  }
+
+
+  .ud-member-card {
+    max-width: 320px;
+  }
+
+
+  .ud-avatar-lg {
+    width: 75px;
+    height: 75px;
+    font-size: 1.8rem;
+  }
+
+
+  .ud-info-table {
+    width: 100%;
+  }
+
+  .ud-info-key {
+    width: 70px;
+    padding-right: .5rem;
+    font-size: .78rem;
+  }
+
+  .ud-info-sep {
+    padding: .5rem;
+  }
+
+  .ud-info-val {
+    min-width: 0;
+    font-size: .8rem;
+    word-break: break-word;
+  }
+
+
+  .ud-profile-btns {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ud-edit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .ud-impact-grid {
+    gap: .8rem;
+  }
+
+  .ud-impact-card {
+    width: 105px;
+    height: 105px;
+  }
+
+  .ud-impact-val {
+    font-size: 1.3rem;
+  }
+
+
+  .ud-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ud-card__img {
+    width: 100%;
+    height: 160px;
+  }
+
+  .ud-detail-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .ud-order-filterbar {
+    overflow-x: auto;
+    padding-bottom: .3rem;
+  }
+
+
+  .ud-review-filterbar {
+    justify-content: flex-start;
+    flex-direction: column;
+  }
+
+  .ud-review-filter-select,
+  .ud-review-filter-date {
+    width: 100%;
+  }
+
+
+  .ud-review-card__top {
+    flex-direction: column;
+  }
+
+  .ud-review-card__img {
+    width: 100%;
+    height: 180px;
+  }
+
+
+  .ud-modal {
+    padding: 1.5rem;
+  }
+
+  .ud-modal--form {
+    max-height: 85vh;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .ud-main {
+    padding: 1rem .6rem;
+  }
+
+
+  .ud-sidebar {
+    top: 56px;
+  }
+
+
+  .ud-nav-item {
+    font-size: .72rem;
+    padding: .55rem .8rem;
+  }
+
+
+  .ud-section__title {
+    font-size: 1.15rem;
+  }
+
+  .ud-section__sub {
+    font-size: .75rem;
+  }
+
+
+  .ud-points-label {
+    font-size: .8rem;
+  }
+
+  .ud-points-count {
+    font-size: .72rem;
+  }
+
+
+  .ud-impact-card {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+  }
+
+  .ud-impact-val {
+    font-size: 1.1rem;
+  }
+
+  .ud-impact-label {
+    font-size: .65rem;
+  }
+
+
+  .ud-card {
+    padding: .8rem;
+  }
+
+  .ud-card__name {
+    font-size: .85rem;
+  }
+
+
+  .ud-review-card {
+    padding: .9rem;
+  }
+
+  .ud-review-actions {
+    flex-direction: column;
+  }
+
+  .ud-review-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .ud-modal__btns {
+    flex-direction: column;
+  }
+
+  .ud-modal__btn {
+    width: 100%;
+  }
+
+
+  .ud-form-row {
+    flex-direction: column;
+  }
+
 }
 `;

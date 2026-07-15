@@ -831,8 +831,14 @@ export const BOOKING_MODAL_CSS = `
 .bk__next-btn:hover { background: #1a3d2e; }
 
 @media(max-width: 640px) {
-  .bk__top { grid-template-columns: 1fr; }
+  .bk__top {         
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;}
   .bk__opt-item { grid-template-columns: 28px 90px 1fr; gap: .6rem; }
+  .bk__cal {
+    margin-left: 0cm;
+}
 }
 
 /* ── Step 2: Reservation Summary ── */

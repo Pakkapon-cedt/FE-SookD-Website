@@ -525,6 +525,7 @@ export const CHECKOUT_CSS = `
   justify-content: flex-end;
   gap: 1.5rem;
   padding: 1rem 5%;
+  
 }
 .co__bottom-total { font-size: 1.25rem; font-weight: 700; color: #111; }
 .co__place-btn {
@@ -548,7 +549,21 @@ export const CHECKOUT_CSS = `
   .co__item-img-wrap { width: 85px; height: 85px; }
   .co__addr-row { flex-wrap: wrap; }
   .co__edit-addr-btn { margin-top: .5rem; }
+    .co__place-btn {
+    padding: .6rem 1.2rem;
+    font-size: 0; /* ซ่อน text เดิม */
+  }
+
+  .co__place-btn::after {
+    content: "ยืนยัน";
+    font-size: .85rem;
+  }
+
+  .co__bottom-total {
+    font-size: .9rem;
+  }
 }
+
 
 
 .payment-popup {

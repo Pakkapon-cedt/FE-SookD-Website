@@ -174,8 +174,8 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
     }).finally(() => setLoading(false));
   }, [activityId, lang]);
 
-  if (loading) return <div className="adet__loading">กำลังโหลด...</div>;
-  if (!activity) return <div className="adet__loading">ไม่พบกิจกรรม</div>;
+  if (loading) return <div className="adet__loading">{lang==='ENG'?"loading...":"กำลังโหลดกิจกรรม..."}</div>;
+  if (!activity) return <div className="adet__loading">{lang==='ENG'?"activity not found":"ไม่พบกิจกรรม"}</div>;
 
   const tags = activity.type?.split(',').map((t: string) => t.trim()) ?? [];
   const descLines = activity.description?.split('\n').filter((l: string) => l.trim()) ?? [];

@@ -121,7 +121,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
           <div className="exp-hero__overlay" />
           <div className="exp-hero__content">
             <h1 className="exp-hero__heading">{c.experiences.hero.heading}</h1>
-            <p className="exp-hero__sub">{c.experiences.hero.subheading}</p>
+            <p className="exp-hero__sub">{c.experiences.hero.subheading[lang]}</p>
           </div>
         </section>
 
@@ -193,7 +193,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
         </div>
 
         {/* States */}
-        {loading && <p className="exp-state">กำลังโหลดกิจกรรม...</p>}
+        {loading && <p className="exp-state">{lang==='ENG'?"loading...":"กำลังโหลดกิจกรรม..."}</p>}
         {error && <p className="exp-state exp-state--error">{error}</p>}
 
         {/* Grid */}
@@ -206,7 +206,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
             </div>
 
             {filtered.length === 0 && (
-              <p className="exp-state">ไม่พบกิจกรรมที่ตรงกับการค้นหา</p>
+              <p className="exp-state">{lang==='ENG'?"activity not found":"ไม่พบกิจกรรมที่ตรงกับการค้นหา"}</p>
             )}
 
             {filtered.length > VISIBLE_COUNT && (

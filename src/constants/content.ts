@@ -12,7 +12,11 @@ export const SITE_CONTENT: SiteContent = {
   experiences: {
     hero: {
       heading: 'Double the Thrill',
-      subheading: 'Exclusive Privileges for Couples.',
+      subheading: {
+        TH:"เอกสิทธิ์พิเศษเพื่อช่วงเวลาแห่งความประทับใจ",
+        ENG:'Exclusive Privileges for Couples.',
+      }
+      ,
     },
     cards: [
       {
