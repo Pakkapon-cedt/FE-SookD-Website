@@ -33,6 +33,7 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
   const [userPoints, setUserPoints] = useState(0);
   const [paymentUrl, setPaymentUrl] = useState("");
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const [orderID, setOrderID] = useState("");
 
   useEffect(() => {
     const all = getCart();
@@ -115,6 +116,8 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
 
 
       setPaymentUrl(payment);
+
+      setOrderID(orderId);
 
       setLoadingPayment(false);
 
@@ -282,18 +285,20 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
 
               <p>
                 {isTH
-                  ? "กดปุ่มด้านล่างเพื่อแจ้งโอนผ่าน LINE"
-                  : "Click below to continue with LINE payment"}
+                  ? "ส่งรหัส order ด้านล่างผ่าน LINE  @313nqlpt เพื่อแจ้งชำระเงินผ่าน LINE หรือกดปุ่มด้านล่าง"
+                  : "Send the Order ID below via LINE (@313nqlpt) to confirm your payment, or simply tap the button below."}
               </p>
 
               <div className="linkBox">
-                <div className="linkBox__text">
+                {/* <div className="linkBox__text">
                   {paymentUrl}
+                </div> */}
+                <div className="linkBox__text">
+                  {orderID}
                 </div>
-
                 <button
                   className="linkBox__copy"
-                  onClick={() => navigator.clipboard.writeText(paymentUrl)}
+                  onClick={() => navigator.clipboard.writeText(orderID)}
                   title={isTH ? "คัดลอกลิงก์" : "Copy link"}
                 >
                   <FaRegCopy />
@@ -317,12 +322,12 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
                   <span>{isTH ? "ชำระเงิน" : "Pay here"}</span>
                 </button>
 
-                <button
+                {/* <button
                   className="payment-actions__cancel"
                   onClick={() => setPaymentUrl("")}
                 >
                   {isTH ? "ยกเลิก" : "Cancel"}
-                </button>
+                </button> */}
               </div>
 
             </div>
@@ -600,7 +605,8 @@ export const CHECKOUT_CSS = `
   overflow-y: auto;
 
   color: #444;
-  font-size: 14px;
+  font-size: 1.7rem;
+  font-weight: bold;
   line-height: 1.6;
 
   overflow-wrap: anywhere;
@@ -608,6 +614,7 @@ export const CHECKOUT_CSS = `
     /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: #bdbdbd transparent;
+  
 }
 
 /* Chrome / Edge / Safari */
@@ -701,7 +708,8 @@ export const CHECKOUT_CSS = `
   justify-content: center;
   gap: 8px;
 
-  min-width: 140px;
+  width: 90%;
+  max-width: 200px;
   padding: 12px 20px;
 
   border: none;

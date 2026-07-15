@@ -100,13 +100,13 @@ export async function webhook(
                 if (!match){
                     await replyMessage(
                         event.replyToken,
-                        "สามารถพิมพ์รหัสorderเพื่อชำระเงินได้เลย\nหากข้อความอัตโนมัติไม่ขึ้นสามารถส่งยืนยันการชำระเงินได้โดย\nOrder ID: (รหัสorderของคุณ)\nเช่น\nOrder ID: ORD000\nขอบคุณที่ใช้บริการของเรา"
+                        "💸 สามารถพิมพ์รหัสorderเพื่อชำระเงินได้ที่นี่\n\nหากข้อความอัตโนมัติไม่ขึ้นสามารถส่งยืนยันการชำระเงินได้โดย\nOrder ID: (รหัสorderของคุณ)\nเช่น\nOrder ID: ORD000\nขอบคุณที่ใช้บริการของเรา"
                     );
                     continue;
                 }
 
 
-                const orderId = match[1];
+                const orderId = match?.[0];
 
 
                 const orders =
