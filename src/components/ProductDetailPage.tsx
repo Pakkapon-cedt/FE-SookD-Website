@@ -285,7 +285,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
         {/* Description */}
         {descLines.length > 0 && (
           <section className="pdet__section">
-            <h2 className="pdet__section-title">Description</h2>
+            <h2 className="pdet__section-title">{lang === 'TH' ? 'รายละเอียด' : 'Description'}</h2>
             <ul className="pdet__desc-list">
               {descLines.map((line: string, i: number) => (
                 <li key={i}>{line}</li>
@@ -342,8 +342,8 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
         {!orderData && (<div className="pdet__promo">
           <div className="pdet__promo-overlay" />
           <div className="pdet__promo-content">
-            <p className="pdet__promo-heading">Equip with Elegance</p>
-            <p className="pdet__promo-sub"><strong>15% Off</strong> Your Second Item.</p>
+            <p className="pdet__promo-heading">{lang === 'TH' ? 'รับสิทธิ์พิเศษก่อนใคร!' : 'Be the First to Get Exclusive Perks!'}</p>
+            <p className="pdet__promo-sub">{lang === 'TH' ? 'สมัครสมาชิกวันนี้ เพื่อเข้าถึงดีลสุดเอกซ์คลูซีฟที่คุณปฏิเสธไม่ลง' : 'Sign up today for irresistible exclusive deals.'}</p>
           </div>
         </div>)}
 

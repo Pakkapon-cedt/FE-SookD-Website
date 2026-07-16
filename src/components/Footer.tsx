@@ -12,7 +12,7 @@ export default function Footer({ data }: FooterProps) {
         {/* Logo col */}
         <div className="footer__logo-col">
           {/* logo circle image: /img/logo-circle.png  (วงกลมสีเขียว + ใบไม้/ภูเขา) */}
-          <img src="/img/logo.png" alt="SookD" className="footer__logo-img" />
+          <img src="/img/tranomyrmbg.png" alt="Tramony" className="footer__logo-img" />
         </div>
 
         {/* Brand description col */}

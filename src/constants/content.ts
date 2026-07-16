@@ -96,11 +96,11 @@ export const SITE_CONTENT: SiteContent = {
 
   hero: {
     TH: {
-      heading: 'SookD',
+      heading: 'Tramony',
       subheading: 'ท่องเที่ยวและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้',
     },
     ENG: {
-      heading: 'SookD',
+      heading: 'Tramony',
       subheading: 'Travel and become part of a more sustainable world.',
     }
   },
@@ -211,7 +211,7 @@ export const SITE_CONTENT: SiteContent = {
   footer: {
     TH: {
       brand: {
-        name: 'SookD',
+        name: 'Tramony',
         tagline:
           'มุ่งเชื่อมโยงนักเดินทางเข้ากับประสบการณ์ที่มีความหมาย การเดินทางไม่ควรเป็นเพียงการพักผ่อน แต่ควรเป็นโอกาสในการเรียนรู้ สร้างความสัมพันธ์กับธรรมชาติและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้ ด้วยการคัดสรรประสบการณ์คุณภาพจากผู้ให้บริการที่ใส่ใจ ทั้งผู้คน ชุมชน และสิ่งแวดล้อม',
       },
@@ -230,7 +230,7 @@ export const SITE_CONTENT: SiteContent = {
     },
     ENG: {
       brand: {
-        name: "SookD",
+        name: "Tramony",
         tagline:
           "We connect travelers with meaningful experiences. Travel should be more than just a getaway—it should be an opportunity to learn, build meaningful connections with nature, and become part of protecting our planet. We carefully curate high-quality experiences from providers who genuinely care about people, local communities, and the environment.",
       },

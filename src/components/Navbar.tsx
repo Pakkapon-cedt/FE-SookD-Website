@@ -64,8 +64,8 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
         </button>
 
         {/* Logo */}
-        <a href="/" className="navbar__logo" aria-label="SookD Home" onClick={handleLogo}>
-          <img src="/img/logo.png" alt="SookD logo" className="navbar__logo-img" />
+        <a href="/" className="navbar__logo" aria-label="Tramony Home" onClick={handleLogo}>
+          <img src="/img/tranomyrmbg.png" alt="Tramony logo" className="navbar__logo-img" />
         </a>
 
         {/* Center links */}
@@ -153,7 +153,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
         <button className="navbar__drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close menu">✕</button>
 
         <a href="/" className="navbar__logo navbar__drawer-logo" onClick={e => { handleLogo(e); setDrawerOpen(false); }}>
-          <img src="/img/logo.png" alt="SookD logo" className="navbar__logo-img" />
+          <img src="/img/tranomyrmbg.png" alt="Tramony logo" className="navbar__logo-img" />
         </a>
 
         <ul className="navbar__drawer-links">

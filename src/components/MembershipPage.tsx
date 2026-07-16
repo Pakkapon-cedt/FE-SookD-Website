@@ -8,20 +8,20 @@ interface MembershipPageProps {
 const TIERS = [
   {
     name: 'Nature',
-    img: '/img/sookd card.png',
+    img: '/img/naturecard.png',
     points: '0–199',
     benefits: [
-      { th: 'สะสม SookD Point ทุกการเดินทาง', en: 'Earn SookD Points every trip' },
+      { th: 'สะสม Tramony Point ทุกการเดินทาง', en: 'Earn Tramony Points every trip' },
       { th: 'รับ Welcome Gift จากคุณชุมชนท้องถิ่น', en: 'Receive a Welcome Gift from local communities' },
       { th: 'บันทึกและติดตามผลกระทบเชิงบวกต่อธรรมชาติและชุมชน', en: 'Track your positive impact on nature & communities' },
     ],
   },
   {
     name: 'Silver',
-    img: '/img/silver-removebg-preview.png',
+    img: '/img/silvercard.png',
     points: '200–499',
     benefits: [
-      { th: 'สะสม SookD Point ทุกการเดินทาง', en: 'Earn SookD Points every trip' },
+      { th: 'สะสม Tramony Point ทุกการเดินทาง', en: 'Earn Tramony Points every trip' },
       { th: 'รับส่วนลดพิเศษ 5% ทุกการสั่งซื้อ', en: '5% special discount on every order', bold: true },
       { th: 'รับ Welcome Gift จากคุณชุมชนท้องถิ่น', en: 'Receive a Welcome Gift from local communities' },
       { th: 'รับ Signature Drink จากชุมชนท้องถิ่น', en: 'Signature Drink from local communities', bold: true },
@@ -30,10 +30,10 @@ const TIERS = [
   },
   {
     name: 'Gold',
-    img: '/img/gold-removebg-preview.png',
+    img: '/img/goldcard.png',
     points: '500–999',
     benefits: [
-      { th: 'สะสม SookD Point ทุกการเดินทาง', en: 'Earn SookD Points every trip' },
+      { th: 'สะสม Tramony Point ทุกการเดินทาง', en: 'Earn Tramony Points every trip' },
       { th: 'รับส่วนลดพิเศษ 10% ทุกการสั่งซื้อ', en: '10% special discount on every order', bold: true },
       { th: 'รับ Welcome Gift จากคุณชุมชนท้องถิ่น', en: 'Receive a Welcome Gift from local communities' },
       { th: 'รับ Signature Drink จากชุมชนท้องถิ่น', en: 'Signature Drink from local communities' },
@@ -42,10 +42,10 @@ const TIERS = [
   },
   {
     name: 'Legend',
-    img: '/img/legend-removebg-preview.png',
+    img: '/img/legendcard.png',
     points: '1,000+',
     benefits: [
-      { th: 'สะสม SookD Point ทุกการเดินทาง', en: 'Earn SookD Points every trip' },
+      { th: 'สะสม Tramony Point ทุกการเดินทาง', en: 'Earn Tramony Points every trip' },
       { th: 'รับส่วนลดพิเศษ 20% ทุกการสั่งซื้อ', en: '20% special discount on every order', bold: true },
       { th: 'รับ Welcome Gift จากคุณชุมชนท้องถิ่น', en: 'Receive a Welcome Gift from local communities' },
       { th: 'รับ Signature Drink จากชุมชนท้องถิ่น', en: 'Signature Drink from local communities' },
@@ -56,18 +56,18 @@ const TIERS = [
 ];
 
 const RULES_TH = [
-  'บัญชีนิติบุคคลไม่สามารถสะสม SookD Point ได้',
-  'ทุกการใช้จ่าย 100 บาท รับ 1 SookD Point',
-  'SookD Point จะคำนวณจากยอดใช้จ่ายสุทธิหลังหักส่วนลด',
-  'SookD Point ไม่สามารถแลกเปลี่ยนหรือทอนเป็นเงินสดได้',
+  'บัญชีนิติบุคคลไม่สามารถสะสม Tramony Point ได้',
+  'ทุกการใช้จ่าย 100 บาท รับ 1 Tramony Point',
+  'Tramony Point จะคำนวณจากยอดใช้จ่ายสุทธิหลังหักส่วนลด',
+  'Tramony Point ไม่สามารถแลกเปลี่ยนหรือทอนเป็นเงินสดได้',
   'บริษัทขอสงวนสิทธิ์ในการเปลี่ยนแปลงเงื่อนไขและสิทธิประโยชน์ โดยไม่ต้องแจ้งให้ทราบล่วงหน้า',
 ];
 
 const RULES_EN = [
-  'Corporate accounts are not eligible to accumulate SookD Points.',
-  'Every 100 THB spent earns 1 SookD Point.',
-  'SookD Points are calculated from the net amount paid after discounts.',
-  'SookD Points cannot be exchanged for or redeemed as cash.',
+  'Corporate accounts are not eligible to accumulate Tramony Points.',
+  'Every 100 THB spent earns 1 Tramony Point.',
+  'Tramony Points are calculated from the net amount paid after discounts.',
+  'Tramony Points cannot be exchanged for or redeemed as cash.',
   'The company reserves the right to change conditions and benefits without prior notice.',
 ];
 
@@ -89,13 +89,13 @@ export default function MembershipPage({ lang = 'TH' }: MembershipPageProps) {
             <>
               ยิ่งคุณออกเดินทางมากขึ้น คุณยิ่งได้รับสิทธิพิเศษที่มากขึ้น<br />
               พร้อมร่วมเป็นส่วนหนึ่งในการสร้างผลกระทบเชิงบวกต่อธรรมชาติ<br />
-              SookD Membership มอบสิทธิประโยชน์พิเศษมากมาย และรางวัลสำหรับทุกก้าวของการเดินทางของคุณอย่างยั่งยืน
+              Tramony Membership มอบสิทธิประโยชน์พิเศษมากมาย และรางวัลสำหรับทุกก้าวของการเดินทางของคุณอย่างยั่งยืน
             </>
           ) : (
             <>
               The more you travel, the more exclusive benefits you receive.<br />
               Join us in creating a positive impact on nature and communities.<br />
-              SookD Membership offers special privileges and rewards for every step of your sustainable journey.
+              Tramony Membership offers special privileges and rewards for every step of your sustainable journey.
             </>
           )}
         </p>
@@ -107,7 +107,7 @@ export default function MembershipPage({ lang = 'TH' }: MembershipPageProps) {
               <tr>
                 <th>{isTH ? 'สมาชิก' : 'Membership'}</th>
                 <th>{isTH ? 'สิทธิประโยชน์' : 'Benefits'}</th>
-                <th>SookD Points</th>
+                <th>Tramony Points</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +155,7 @@ export const MEMBERSHIP_CSS = `
 .mem-hero {
   position: relative;
   height: 420px;
-  background: url('/img/memberhead.jpg') center/cover no-repeat;
+  background: url('/img/memberhead.png') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,9 +176,7 @@ export const MEMBERSHIP_CSS = `
 .mem-card {
   position: absolute;
   width: 210px;
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
-  object-fit: cover;
+  object-fit: contain;
 }
 .mem-card--nature { top: 20px;  left: 30px;   transform: rotate(-12deg); }
 .mem-card--silver { top: 10px;  right: 20px;  transform: rotate(8deg); }

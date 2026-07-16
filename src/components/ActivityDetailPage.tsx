@@ -402,8 +402,8 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
         {!orderData && (<div className="adet__promo">
           <div className="adet__promo-overlay" />
           <div className="adet__promo-content">
-            <p className="adet__promo-heading">An Exclusive Journey Awaits</p>
-            <p className="adet__promo-sub">Enjoy <strong>10% Off</strong> for Parties of Four.</p>
+            <p className="adet__promo-heading">{lang === 'TH' ? 'รับสิทธิ์พิเศษก่อนใคร!' : 'Be the First to Get Exclusive Perks!'}</p>
+            <p className="adet__promo-sub">{lang === 'TH' ? 'สมัครสมาชิกวันนี้ เพื่อเข้าถึงดีลสุดเอกซ์คลูซีฟที่คุณปฏิเสธไม่ลง' : 'Sign up today for irresistible exclusive deals.'}</p>
           </div>
         </div>)}
 

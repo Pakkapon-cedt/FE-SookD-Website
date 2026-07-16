@@ -642,7 +642,7 @@ white-space: pre-line;
   gap:2.5rem 3rem; align-items:start;
   margin-bottom:2.5rem;
 }
-.footer__logo-img { width:110px; height:auto; object-fit:contain; filter:brightness(0) invert(1); }
+.footer__logo-img { width:110px; height:auto; object-fit:contain; }
 .footer__brand-name { font-size:1.35rem; font-weight:700; color:var(--white); margin-bottom:.75rem; }
 .footer__brand-desc { font-size:.83rem; line-height:1.75; color:rgba(255,255,255,.75); font-family:var(--font-th); }
 .footer__col-title { font-size:1rem; font-weight:700; color:var(--white); margin-bottom:.9rem; }

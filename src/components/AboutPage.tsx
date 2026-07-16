@@ -17,16 +17,16 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
       {/* ── Hero ── */}
       <section className="about__hero">
         <div className="about__hero-overlay" />
-        <h1 className="about__hero-title">SookD</h1>
+        <h1 className="about__hero-title">Tramony</h1>
       </section>
 
       {/* ── About ── */}
       <section className="about__section about__intro">
-        <h2 className="about__section-title about__section-title--center">SookD</h2>
+        <h2 className="about__section-title about__section-title--center">Tramony</h2>
         <p className="about__intro-text about__intro-text--center">
           {isTH ? (
             <>
-              SookD ก่อตั้งเมื่อปี 2566 มุ่งเชื่อมนักเดินทางกับประสบการณ์ที่มีความหมายทุกแห่งหน
+              Tramony ก่อตั้งเมื่อปี 2566 มุ่งเชื่อมนักเดินทางกับประสบการณ์ที่มีความหมายทุกแห่งหน
               <br /><br />
               ผ่านการท่องเที่ยวและวัฒนธรรมการเรียนรู้ที่เชื่อมโยงกับธรรมชาติ ผู้คน และความสุขอย่างลึกซึ้ง
               เรามั่นใจว่าการท่องเที่ยวที่มีคุณค่าควรสร้างความสัมพันธ์อย่างแท้จริง
@@ -36,7 +36,7 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
             </>
           ) : (
             <>
-              Founded in 2023, SookD is dedicated to connecting travelers with meaningful experiences everywhere they go.
+              Founded in 2023, Tramony is dedicated to connecting travelers with meaningful experiences everywhere they go.
               <br /><br />
               Through travel and cultural learning rooted in a deep connection with nature, people, and happiness,
               we believe that meaningful tourism should foster genuine relationships and empower everyone to contribute to environmental preservation.
@@ -63,30 +63,30 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
 
       {/* ── Founder ── */}
       <section className="about__section about__founder">
-        <h2 className="about__section-title">Founder</h2>
+        <h2 className="about__section-title">{isTH ? 'ผู้ก่อตั้ง' : 'Founder'}</h2>
         <div className="about__founder-inner">
-          <img src="/img/founder.aboutus.jpg" alt="Founder" className="about__founder-img" />
+          <img src="/img/pfang.jpg" alt="Founder" className="about__founder-img" />
           <div className="about__founder-content">
-            <blockquote className="about__founder-quote">
-              {isTH ? (
-                <>
-                  "ความสุขจากการเดินทางที่แท้จริง<br />
-                  คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"
-                </>
-              ) : (
-                '"The true joy of traveling is becoming a part of the world we inhabit and discovering who we are when we get there."'
-              )}
-            </blockquote>
-            <p className="about__founder-name">
-              {isTH
-                ? 'ทวินทร์ ธรรมรักษ์ – ผู้ก่อตั้ง และ CEO SookD'
-                : 'Twin Thammarak – Founder & CEO of SookD'}
-            </p>
-            <p className="about__founder-bio">
-              {isTH
-                ? 'ด้วยความเชื่อว่าการท่องเที่ยวที่มีความหมายต้องเริ่มจากการเข้าใจธรรมชาติ SookD จึงถือกำเนิดขึ้น เพื่อเชื่อมนักเดินทางกับประสบการณ์ที่เปลี่ยนมุมมองและสร้างผลดีต่อชุมชนท้องถิ่น'
-                : 'With the belief that meaningful travel must begin with an understanding of nature, SookD was born to connect travelers with perspective-shifting experiences that create a positive impact on local communities.'}
-            </p>
+            <div className="about__founder-cv">
+              <h3 className="about__cv-title">{isTH ? 'ประวัติการศึกษา' : 'Education'}</h3>
+              <ul className="about__cv-list">
+                <li>BE, Electrical Engineering — Chulalongkorn University</li>
+                <li>Executive MBA — Sasin School of Management, Chulalongkorn University</li>
+                <li>Doing Business in China — Fudan University, Shanghai, China</li>
+                <li>Finance — Westminster Business School, London, England</li>
+                <li>Digital Business Transformation — Northwestern University, Kellogg School of Management, Chicago, USA</li>
+              </ul>
+
+              <h3 className="about__cv-title">{isTH ? 'ประวัติการทำงาน' : 'Work Experience'}</h3>
+              <ul className="about__cv-list">
+                <li>Process Engineer Manager — Procter and Gamble</li>
+                <li>Material Supply Manager — Procter and Gamble</li>
+                <li>Marketing Director — Hiveground</li>
+                <li>Founder and CEO — Mixberry Co., Ltd</li>
+                <li>Founder and CEO — Mixstep Co., Ltd</li>
+                <li>Founder and CTO — Bearmix Co., Ltd</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -106,7 +106,7 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
             rel="noopener noreferrer"
             className="about__map-wrap"
           >
-            <img src="/img/learndomap.jpg" alt="SookD Location" className="about__map-img" />
+            <img src="/img/learndomap.jpg" alt="Tramony Location" className="about__map-img" />
           </a>
 
           <div className="about__location-info">
@@ -271,6 +271,32 @@ export const ABOUT_CSS = `
   font-size: .9rem;
   color: #555;
   line-height: 1.75;
+  font-family: var(--font-th);
+}
+.about__founder-cv {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: -1.5rem;
+}
+.about__cv-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--forest, #2d6a4f);
+  margin: .6rem 0 .2rem;
+  font-family: var(--font-th);
+}
+.about__cv-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+.about__cv-list li {
+  font-size: .85rem;
+  color: #555;
+  line-height: 1.6;
   font-family: var(--font-th);
 }
 

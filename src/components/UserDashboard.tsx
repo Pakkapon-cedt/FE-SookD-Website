@@ -331,10 +331,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       <div className="ud-member-card">
                         <img
                           src={
-                            tierInfo.tier === 'Silver' ? '/img/silver-removebg-preview.png'
-                            : tierInfo.tier === 'Gold' ? '/img/gold-removebg-preview.png'
-                            : tierInfo.tier === 'Legend' ? '/img/legend-removebg-preview.png'
-                            : '/img/sookd card.png'
+                            tierInfo.tier === 'Silver' ? '/img/silvercard.png'
+                            : tierInfo.tier === 'Gold' ? '/img/goldcard.png'
+                            : tierInfo.tier === 'Legend' ? '/img/legendcard.png'
+                            : '/img/naturecard.png'
                           }
                           alt={tierInfo.tier}
                         />
@@ -345,15 +345,15 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                         <div className="ud-points-top">
                           <span className="ud-points-label">
                             {tierInfo.maxPts !== null
-                              ? `${tierInfo.relPts}/${tierInfo.maxPts} SookD Points`
-                              : `${calculatedPoints} SookD Points`}
+                              ? `${tierInfo.relPts}/${tierInfo.maxPts} Tramony Points`
+                              : `${calculatedPoints} Tramony Points`}
                           </span>
                         </div>
                         <div className="ud-points-bar">
                           <div className="ud-points-fill" style={{ width: `${tierInfo.fillPct}%` }} />
                         </div>
                         {tierInfo.nextTier
-                          ? <p className="ud-points-hint">สะสมอีก {tierInfo.needed} SookD Point เพื่อเลื่อนขึ้นเป็นระดับ {tierInfo.nextTier}</p>
+                          ? <p className="ud-points-hint">สะสมอีก {tierInfo.needed} Tramony Point เพื่อเลื่อนขึ้นเป็นระดับ {tierInfo.nextTier}</p>
                           : <p className="ud-points-hint">คุณอยู่ในระดับสูงสุด Legend แล้ว!</p>
                         }
                       </div>

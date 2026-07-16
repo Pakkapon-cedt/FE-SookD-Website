@@ -101,7 +101,7 @@ const DISCOVER_PLACES: PlaceData[] = [
     name: 'บางกะเจ้า(สมุทรปราการ)',
     nameEn: 'Bang Kachao(Samut Prakan)',
     image: 'https://drive.google.com/file/d/1dzAeWnM4dR1JSQ13wsD-a0W2CbInr8gB/view?usp=drive_link',
-    image2: 'https://drive.google.com/file/d/1RhST5yKE-pvc306zZJFVIO6_3kVEpult/view?usp=drive_link',
+    image2: 'https://drive.google.com/file/d/1WacIfXM30n03_IEgrrSb8kOOLhZiA6B5/view?usp=sharing',
     detail: 'ใครเบื่อห้าง อยากหาที่รีเซ็ตสมอง แนะนำให้มาปั่นจักรยานชิลๆ ที่คุ้งบางกะเจ้าเลยครับ ตอนนี้เที่ยวโคตรง่ายเพราะเขามี แอปพลิเคชันช่วยเที่ยว คอยนำทางให้ เช็กพิกัด แพลนทริปได้ในมือถือเลย ไม่มีหลงแน่นอน รอบนี้จัดมาให้เลือกตามใจชอบถึง 3 เส้นทาง 3 สไตล์ ชอบแบบไหนเลือกเลย!\n\n📌 ไฮไลท์ห้ามพลาดในทริป:\n📱 โหลดแอปฯ เดียวจบ: นำทางแม่นยำ เช็กกิจกรรมชุมชนได้แบบเรียลไทม์\n\n🗺️ 3 เส้นทางเลือกได้ตามฟีล:\nสายธรรมชาติ: ปั่นรับลม สูดโอโซน ถ่ายรูปมุมมหาชนที่ สวนศรีนครเขื่อนขันธ์\nสายกิจกรรม: ไปดูชีวิต ผึ้งชันโรง (ผึ้งจิ๋วไม่มีเหล็กไน) น่ารักและเป็นมิตรมาก\nสายวัฒนธรรม: แวะเสพประวัติศาสตร์ที่ พิพิธภัณฑ์บ้านคลองบน แล้วเดินสายไหว้พระตามวัดในพื้นที่\n\n🎨 เวิร์กช้อปทำมือสุดคราฟต์: ได้ลองทำสบู่สมุนไพร, มัดย้อมผ้าสีธรรมชาติ และทำขนมพื้นถิ่นกินเอง สนุกมาก!',
     detailEn: 'Tired of malls and looking for a mind reset? We highly recommend cycling around the green loop of Bang Kachao! Getting around is now super easy — there\'s a dedicated app to navigate, check coordinates, and plan your trip from your phone. Three routes, three styles — pick your vibe!\n\n📌 Must-See Highlights:\n📱 One app covers everything: accurate navigation and real-time community events.\n\n🗺️ 3 Routes to Choose:\nNature Ride: Pedal through fresh air and snap shots at Sri Nakhon Khuean Khan Park.\nActivity Route: Meet the adorable stingless bees (Chhannarong) — tiny, sting-free, and friendly!\nCultural Route: Explore history at Klong Bon Folk Museum and visit local temples.\n\n🎨 Craft Workshops: Make herbal soap, natural tie-dye fabric, and traditional local snacks!',
     onlineActivity: 'นี่คือไฮไลท์ทิวทัศน์และวิถีชีวิตที่คุณจะได้สัมผัส ณ \'คุ้งบางกะเจ้า\' พื้นที่สีเขียวที่ไม่ได้มีเพียงแค่ต้นไม้ แต่ยังเป็นบ้านของวิถีชีวิตที่เกื้อกูลกับธรรมชาติ มาร่วมเป็นส่วนหนึ่งที่ช่วยรักษาความเขียวขจีเหล่านี้ให้คงอยู่ ผ่านการอุดหนุนสินค้าจากชุมชนกันนะคะ',
@@ -459,6 +459,9 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
             <div className="disc-stagger">
               <div className="disc-stagger__img1">
                 <img src={driveThumb(place.image2)} alt={place.name} className="disc-strip-img" />
+                <span className="disc-stagger__place-label">
+                  {isTH ? place.name.split('(')[0].trim() : place.nameEn.split('(')[0].trim()}
+                </span>
               </div>
               {/* 🟢 เอาโค้ดคุณลุงมาใส่แทนที่ disc-stagger__empty เดิม */}
             {place.uncleAudioUrl ? (
@@ -803,7 +806,15 @@ export const DISCOVER_CSS = `
   grid-template-rows: 440px auto;
   margin-top: 2rem; /* 2 cm gap from tabs */
 }
-.disc-stagger__img1 { grid-column: 1; grid-row: 1; overflow: hidden; }
+.disc-stagger__img1 { grid-column: 1; grid-row: 1; overflow: hidden; position: relative; }
+.disc-stagger__place-label {
+  position: absolute; bottom: 1.5rem; left: 1.5rem;
+  font-size: 2.8rem; font-weight: 800; color: #fff;
+  font-family: 'Kanit', sans-serif;
+  text-shadow: 0 2px 12px rgba(0,0,0,.45);
+  letter-spacing: .02em;
+  pointer-events: none; line-height: 1.1;
+}
 .disc-stagger__empty { grid-column: 2; grid-row: 1; background: #fff; }
 .disc-stagger__text {
   grid-column: 1; grid-row: 2;
