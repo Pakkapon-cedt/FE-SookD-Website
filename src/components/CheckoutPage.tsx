@@ -303,13 +303,6 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
                 >
                   <FaRegCopy />
                 </button>
-                <button
-                  className="linkBox__copy"
-                  onClick={() => navigator.clipboard.writeText(paymentUrl)}
-                  title={isTH ? "คัดลอกลิงก์" : "Copy link"}
-                >
-                  dfghj
-                </button>
               </div>
 
               <div className="payment-actions">
