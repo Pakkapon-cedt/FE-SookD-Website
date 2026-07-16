@@ -65,6 +65,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
   const [agreed, setAgreed] = useState(false);
   const [regLoading, setRegLoading] = useState(false);
   const [regApiErr, setRegApiErr] = useState('');
+  const [regSuccess, setRegSuccess] = useState(false);
 
   /* ── Handlers ── */
   function validateLogin(): boolean {
@@ -146,8 +147,21 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     console.log("body",body);
     try {
       const res = await api.auth.register(body);
-      if (res.success) { (window as any).gtag?.('event', 'sign_up', { method: 'email' }); setView('login'); }
-      else setRegApiErr(res.message ?? 'สมัครสมาชิกไม่สำเร็จ');
+      if (res.success) {
+        (window as any).gtag?.('event', 'sign_up', { method: 'email' });
+        setRegSuccess(true);
+        const loginRes = await api.auth.login({ email: r2.email, password: r2.password });
+        if (loginRes.success) {
+          (window as any).gtag?.('event', 'login', { method: 'email' });
+          onLoginSuccess?.(loginRes.user);
+          onBack();
+          window.location.reload();
+        } else {
+          setView('login');
+        }
+      } else {
+        setRegApiErr(res.message ?? 'สมัครสมาชิกไม่สำเร็จ');
+      }
     } catch {
       setRegApiErr('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
     } finally {
@@ -203,6 +217,15 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
       <div className="auth-page">
         <div className="auth-card">
           <h1 className="auth-title">{isTH ? 'เข้าสู่ระบบ' : 'Login'}</h1>
+          {regSuccess && (
+            <div className="auth-reg-success-banner">
+              <span className="auth-reg-success-banner__icon">✓</span>
+              <div>
+                <p className="auth-reg-success-banner__title">สมัครสมาชิกสำเร็จ!</p>
+                <p className="auth-reg-success-banner__sub">กรุณารอประมาณ 1 นาที เพื่อให้ระบบอัปเดตข้อมูล จากนั้นจึงจะสามารถเข้าสู่ระบบ (Login) ได้ครับ/ค่ะ</p>
+              </div>
+            </div>
+          )}
           <form onSubmit={handleLogin} noValidate>
             <div className="auth-field">
               <label className="auth-field__label">{isTH ? 'อีเมลล์' : 'Email'}</label>
@@ -470,6 +493,26 @@ export const AUTH_CSS = `
   margin-top: .3rem; font-size: .78rem;
   color: #e53935; font-family: var(--font-th);
 }
+.auth-reg-success-banner {
+  display: flex; align-items: flex-start; gap: .75rem;
+  background: #e8f5e9; border: 1.5px solid #4caf50;
+  border-radius: 10px; padding: .9rem 1rem;
+  margin-bottom: 1.2rem;
+}
+.auth-reg-success-banner__icon {
+  flex-shrink: 0; width: 24px; height: 24px;
+  background: #4caf50; color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 700; margin-top: .05rem;
+}
+.auth-reg-success-banner__title {
+  font-size: .92rem; font-weight: 700; color: #2e7d32;
+  margin: 0 0 .25rem; font-family: var(--font-th);
+}
+.auth-reg-success-banner__sub {
+  font-size: .8rem; color: #388e3c; margin: 0;
+  line-height: 1.55; font-family: var(--font-th);
+}
 .auth-api-err {
   text-align: center; font-size: .83rem;
   color: #e53935; margin-bottom: .8rem;
@@ -484,6 +527,9 @@ export const AUTH_CSS = `
   background: none; border: none; cursor: pointer;
   color: #aaa; display: flex; align-items: center;
 }
+.auth-pw-wrap input::-ms-reveal,
+.auth-pw-wrap input::-ms-clear { display: none; }
+.auth-pw-wrap input::-webkit-credentials-auto-fill-button { display: none; }
 
 /* Birthdate 3-column */
 .auth-date-row {
