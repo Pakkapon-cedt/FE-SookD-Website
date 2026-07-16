@@ -325,8 +325,8 @@ export default function ChatWidget({
                 <img
                     src={
                         heroVisible
-                            ? "../../../img/uncle.png"
-                            : "../../../img/uncleMini.png"
+                            ? "/img/uncle.png"
+                            : "/img/uncleMini.png"
                     }
                     alt="chat"
                 />
