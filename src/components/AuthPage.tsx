@@ -150,15 +150,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
       if (res.success) {
         (window as any).gtag?.('event', 'sign_up', { method: 'email' });
         setRegSuccess(true);
-        const loginRes = await api.auth.login({ email: r2.email, password: r2.password });
-        if (loginRes.success) {
-          (window as any).gtag?.('event', 'login', { method: 'email' });
-          onLoginSuccess?.(loginRes.user);
-          onBack();
-          window.location.reload();
-        } else {
-          setView('login');
-        }
+        setView('login');
       } else {
         setRegApiErr(res.message ?? 'สมัครสมาชิกไม่สำเร็จ');
       }
