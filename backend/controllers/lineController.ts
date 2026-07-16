@@ -12,6 +12,8 @@ export async function webhook(
 ) {
 
     // console.log(JSON.stringify(req.body, null, 2));
+    // res.sendStatus(200);
+
     const events = req.body.events;
 
     if (!events) {
@@ -97,7 +99,7 @@ export async function webhook(
 
                 const match = text.match(/ORD\d+/i);
 
-                if (!match){
+                if (!match) {
                     await replyMessage(
                         event.replyToken,
                         "💸 สามารถพิมพ์รหัสorderเพื่อชำระเงินได้ที่นี่\n\nหากข้อความอัตโนมัติไม่ขึ้นสามารถส่งยืนยันการชำระเงินได้โดย\nOrder ID: (รหัสorderของคุณ)\nเช่น\nOrder ID: ORD000\nขอบคุณที่ใช้บริการของเรา"

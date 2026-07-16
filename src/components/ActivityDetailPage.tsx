@@ -377,7 +377,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                       </div>
                       <div>
                         <div className="adet__reviewer-name">
-                          {r.user_id ?? 'ผู้ใช้'}
+                          {r.username ?? 'ผู้ใช้'}
                         </div>
                         <Stars rating={Number(r.rating)} size={13} emptyFill={isDark ? 'rgba(255,255,255,0.5)' : '#d0d0d0'} />
                       </div>

@@ -285,8 +285,8 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
 
               <p>
                 {isTH
-                  ? "ส่งรหัส order ด้านล่างผ่าน LINE  @313nqlpt เพื่อแจ้งชำระเงินผ่าน LINE หรือกดปุ่มด้านล่าง"
-                  : "Send the Order ID below via LINE (@313nqlpt) to confirm your payment, or simply tap the button below."}
+                  ? "ส่งรหัส order ด้านล่างผ่าน LINE  @226xrnni เพื่อแจ้งชำระเงินผ่าน LINE หรือกดปุ่มด้านล่าง"
+                  : "Send the Order ID below via LINE @226xrnni to confirm your payment, or simply tap the button below."}
               </p>
 
               <div className="linkBox">
@@ -302,6 +302,13 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
                   title={isTH ? "คัดลอกลิงก์" : "Copy link"}
                 >
                   <FaRegCopy />
+                </button>
+                <button
+                  className="linkBox__copy"
+                  onClick={() => navigator.clipboard.writeText(paymentUrl)}
+                  title={isTH ? "คัดลอกลิงก์" : "Copy link"}
+                >
+                  dfghj
                 </button>
               </div>
 
