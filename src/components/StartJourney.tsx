@@ -21,8 +21,6 @@ export default function StartJourney({ heading, cards, onNavigate }: StartJourne
           </a>
         ))}
       </div>
-      {/* Mascot */}
-      <img src="/img/mascot.png" alt="" className="journey__mascot" aria-hidden="true" />
     </section>
   );
 }
