@@ -44,8 +44,6 @@ export default function Footer({ data }: FooterProps) {
               </li>
             ))}
           </ul>
-          {/* Mascot big — /img/mascot-big.png */}
-          <img src="/img/mascot-big.png" alt="" className="footer__mascot" aria-hidden="true" />
         </div>
       </div>
 

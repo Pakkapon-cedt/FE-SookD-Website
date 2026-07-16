@@ -12,8 +12,6 @@ export default function Hero({ heading, subheading }: HeroProps) {
         <h1 className="hero__heading">{heading}</h1>
         <p className="hero__subheading">{subheading}</p>
       </div>
-      {/* Mascot bird bottom-right */}
-      <img src="/img/mascot.png" alt="" className="hero__mascot" aria-hidden="true" />
     </section>
   );
 }
