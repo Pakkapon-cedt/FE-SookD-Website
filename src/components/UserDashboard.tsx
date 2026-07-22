@@ -146,9 +146,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const [newItemId, setNewItemId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(0);
+  const [reviewNotice, setReviewNotice] = useState(false);
 
   /* order filter state */
   const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | 'completed' | 'processing'>('all');
+  const [showAllOrders, setShowAllOrders] = useState(false);
+  const [showAllActivities, setShowAllActivities] = useState(false);
+  const ORDERS_VISIBLE = 5;
 
   /* review filter state */
   const [reviewTypeFilter, setReviewTypeFilter] = useState<'all' | 'product' | 'activity'>('all');
@@ -227,16 +231,26 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const productOrders = orders.filter(o => !!getProduct(o.item_id));
   const activityOrders = orders.filter(o => !!getActivity(o.item_id));
 
+  /* ── helpers ── */
+  function afterReviewAction() {
+    setDeleteId(null);
+    setEditId(null);
+    setNewItemId(null);
+    setEditText('');
+    setEditRating(0);
+    setReviewNotice(true);
+  }
+
   /* ── handlers ── */
   async function doDelete() {
     if (!deleteId) return;
     try { await api.reviews.delete(deleteId); } catch { }
-    window.location.reload();
+    afterReviewAction();
   }
 
   async function doSave(reviewId: string) {
     try { await api.reviews.update(reviewId, { rating: editRating, comment: editText }); } catch { }
-    window.location.reload();
+    afterReviewAction();
   }
 
   async function doCreate(itemId: string) {
@@ -250,7 +264,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
         review_date: new Date().toISOString().slice(0, 10),
       });
     } catch { }
-    window.location.reload();
+    afterReviewAction();
   }
 
   async function handleSaveInfo() {
@@ -493,7 +507,9 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
                 const filtered = productOrders.filter(o => orderStatusFilter === 'all' || o.order_status?.toLowerCase() === orderStatusFilter);
                 if (filtered.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีคำสั่งซื้อในหมวดนี้' : 'No orders in this category'}</p>;
-                return <>{filtered.map(o => {
+                const visible = showAllOrders ? filtered : filtered.slice(0, ORDERS_VISIBLE);
+                return <>
+                  {visible.map(o => {
                   const p = getProduct(o.item_id);
                   return (
                     <div key={o.order_id} className="ud-card">
@@ -507,26 +523,31 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                           <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
-                      <button className="ud-detail-btn" onClick={() => 
-                        {
+                      <button className="ud-detail-btn" onClick={() => {
                         trackEvent('select_item', {
                           item_list_name: 'Order History',
-                          items: [
-                            {
-                              item_id: o.item_id,
-                              item_name: p?.name ?? o.item_id,
-                              price: Number(o.total_price ?? 0)
-                            }
-                          ]
+                          items: [{ item_id: o.item_id, item_name: p?.name ?? o.item_id, price: Number(o.total_price ?? 0) }]
                         });
-                        onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products')}}>
+                        onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products');
+                      }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg> {isTH ? 'รายละเอียด' : 'Detail'}
                       </button>
                     </div>
                   );
-                })}</>;
+                })}
+                  {filtered.length > ORDERS_VISIBLE && (
+                    <div className="ud-more-wrap">
+                      <button className="ud-more-btn" onClick={() => setShowAllOrders(v => !v)}>
+                        {showAllOrders ? (isTH ? 'ย่อ' : 'Show less') : (isTH ? 'ดูทั้งหมด' : 'See more')}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points={showAllOrders ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </>;
               })()}
             </div>
           )}
@@ -536,9 +557,12 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
             <div className="ud-section">
               <h2 className="ud-section__title">{isTH ? 'การจองกิจกรรม' : 'Activity Reservations'}</h2>
               <p className="ud-section__sub">{isTH ? 'จัดการการจองกิจกรรมของคุณได้ที่นี่' : 'Anticipate your upcoming eco-experiences. Seamlessly manage your mindful itineraries.'}</p>
-              {loading ? <p className="ud-loading">กำลังโหลด...</p> : activityOrders.length === 0
-                ? <p className="ud-empty">ยังไม่มีการจองกิจกรรม</p>
-                : [...activityOrders].sort((a, b) => new Date(b.order_date).getTime() - new Date(a.order_date).getTime()).map(o => {
+              {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
+                const sorted = [...activityOrders].sort((a, b) => new Date(b.order_date).getTime() - new Date(a.order_date).getTime());
+                if (sorted.length === 0) return <p className="ud-empty">{isTH ? 'ยังไม่มีการจองกิจกรรม' : 'No activity reservations yet'}</p>;
+                const visible = showAllActivities ? sorted : sorted.slice(0, ORDERS_VISIBLE);
+                return <>
+                  {visible.map(o => {
                   const a = getActivity(o.item_id);
                   return (
                     <div key={o.order_id} className="ud-card">
@@ -553,19 +577,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                           <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
-                      <button className="ud-detail-btn" 
-                      onClick={() => {
-                       trackEvent('select_item', {
-                        item_list_name: 'Activity Reservations',
-                        items: [
-                          {
-                            item_id: o.item_id,
-                            item_name: a?.name ?? o.item_id,
-                            price: Number(o.total_price ?? 0)
-                          }
-                        ]
-                      }); 
-                        onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences')}}>
+                      <button className="ud-detail-btn" onClick={() => {
+                        trackEvent('select_item', {
+                          item_list_name: 'Activity Reservations',
+                          items: [{ item_id: o.item_id, item_name: a?.name ?? o.item_id, price: Number(o.total_price ?? 0) }]
+                        });
+                        onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences');
+                      }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg> {isTH ? 'รายละเอียด' : 'Detail'}
@@ -573,6 +591,18 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     </div>
                   );
                 })}
+                  {sorted.length > ORDERS_VISIBLE && (
+                    <div className="ud-more-wrap">
+                      <button className="ud-more-btn" onClick={() => setShowAllActivities(v => !v)}>
+                        {showAllActivities ? (isTH ? 'ย่อ' : 'Show less') : (isTH ? 'ดูทั้งหมด' : 'See more')}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points={showAllActivities ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </>;
+              })()}
             </div>
           )}
 
@@ -581,6 +611,17 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
             <div className="ud-section">
               <h2 className="ud-section__title">{isTH ? 'รีวิว' : 'To Reviews'}</h2>
               <p className="ud-section__sub">{isTH ? 'แบ่งปันความคิดเห็นของคุณเกี่ยวกับสินค้าและกิจกรรมของเรา' : 'Your voice matters. Share your thoughts on our sustainable products and experiences.'}</p>
+
+              {reviewNotice && (
+                <div className="ud-review-notice">
+                  <span className="ud-review-notice__icon">⏳</span>
+                  <div>
+                    <p className="ud-review-notice__title">{isTH ? 'กรุณารอสักครู่' : 'Please wait a moment'}</p>
+                    <p className="ud-review-notice__sub">{isTH ? 'การอัปเดทรีวิวจะเสร็จสิ้นภายใน 1 นาที จากนั้นกรุณารีเฟรชหน้าจอเพื่อดูผลลัพธ์' : 'Your review update will be completed within 1 minute. Please refresh the page to see the result.'}</p>
+                  </div>
+                  <button className="ud-review-notice__close" onClick={() => setReviewNotice(false)}>✕</button>
+                </div>
+              )}
 
               {/* Filter bar */}
               <div className="ud-review-filterbar">
@@ -1122,6 +1163,55 @@ export const USER_DASHBOARD_CSS = `
 }
 .ud-order-filter-btn:hover { border-color: #2d6a4f; color: #2d6a4f; }
 .ud-order-filter-btn.active { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
+
+/* ── See more button ────────────────────── */
+.ud-see-more-wrap {
+  display: flex; justify-content: center;
+  margin-top: 1.8rem; padding-top: 1.2rem;
+  border-top: 1px solid #e5e5e5;
+}
+.ud-see-more-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .65rem 2rem;
+  border: 1.5px solid var(--forest, #2d6a4f);
+  border-radius: 8px; background: #fff;
+  color: var(--forest, #2d6a4f);
+  font-size: .9rem; font-weight: 600;
+  font-family: Kanit, sans-serif;
+  text-decoration: none; cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.ud-see-more-btn:hover { background: var(--forest, #2d6a4f); color: #fff; }
+
+/* ── Show more / Show less ─────────────── */
+.ud-more-wrap { text-align: center; margin: 1.5rem 0 0; }
+.ud-more-btn {
+  display: inline-flex; align-items: center; gap: .45rem;
+  background: none; border: none; cursor: pointer;
+  font-size: .92rem; font-weight: 600;
+  color: #555; font-family: Kanit, sans-serif;
+  transition: color .2s;
+}
+.ud-more-btn:hover { color: var(--forest, #2d6a4f); }
+
+/* ── Review notice banner ──────────────── */
+.ud-review-notice {
+  display: flex; align-items: center; gap: 1rem;
+  background: #fff8e1; border: 1.5px solid #f0c040;
+  border-radius: 10px; padding: .85rem 1.1rem;
+  margin-bottom: 1.2rem;
+}
+.ud-review-notice__icon { font-size: 1.4rem; flex-shrink: 0; }
+.ud-review-notice__title {
+  font-size: .92rem; font-weight: 700; color: #7a5800; margin: 0 0 .15rem;
+}
+.ud-review-notice__sub { font-size: .82rem; color: #8a6800; margin: 0; }
+.ud-review-notice__close {
+  margin-left: auto; background: none; border: none;
+  cursor: pointer; font-size: 1rem; color: #aaa; flex-shrink: 0;
+  line-height: 1; padding: .2rem;
+}
+.ud-review-notice__close:hover { color: #555; }
 
 /* ── Review filter bar ──────────────────── */
 .ud-review-filterbar {
