@@ -616,12 +616,17 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     .filter(o => { if (seenItemIds.has(o.item_id)) return false; seenItemIds.add(o.item_id); return true; })
                     .map(o => ({ order: o, review: reviews.find(r => r.item_id === o.item_id) ?? null }));
 
-                  const filtered = mergedItems.filter(({ order, review }) => {
+                  const filtered = mergedItems.filter(({ order, review: _review }) => {
                     const isPrd = String(order.item_id).startsWith('PRD');
                     if (reviewTypeFilter === 'product' && !isPrd) return false;
                     if (reviewTypeFilter === 'activity' && isPrd) return false;
-                    if (reviewDateFilter && review?.review_date) {
-                      if (review.review_date.slice(0, 10) !== reviewDateFilter) return false;
+                    if (reviewDateFilter) {
+                      const n = Number(order.order_date);
+                      const d = !isNaN(n) && n > 1000
+                        ? new Date((n - 25569) * 86400 * 1000)
+                        : new Date(order.order_date);
+                      const iso = isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+                      if (iso !== reviewDateFilter) return false;
                     }
                     return true;
                   });

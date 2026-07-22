@@ -95,10 +95,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
   ))];
 
   const filtered = langActivities.filter(a => {
-    const matchSearch =
-      a.name?.toLowerCase().includes(search.toLowerCase()) ||
-      a.description?.toLowerCase().includes(search.toLowerCase()) ||
-      a.location?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search || a.name?.toLowerCase().includes(search.toLowerCase());
     const matchType =
       activeType === allLabel ||
       a.type?.split(',').map(t => t.trim()).includes(activeType);

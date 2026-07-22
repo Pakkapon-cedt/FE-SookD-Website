@@ -69,8 +69,8 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
           <div className="about__founder-content">
             <blockquote className="about__founder-quote">
               {isTH
-                ? <>"ความสุขจากการเดินทางที่แท้จริง<br />คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"</>
-                : <>"True happiness in travel<br />is being part of the company's journey and discovering yourself along the way."</>
+                ? <>"มากกว่าการได้เยือนสถานที่ใหม่ คือการได้เปิดใจสัมผัสโลกจริง และค้นพบตัวตนในเวอร์ชันที่ดีกว่าเดิม"</>
+                : <>"More than visiting new places — it's about opening your heart to experience the real world and discovering a better version of yourself."</>
               }
             </blockquote>
             <p className="about__founder-name">

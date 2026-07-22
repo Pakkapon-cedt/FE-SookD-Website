@@ -110,7 +110,7 @@ export const SITE_CONTENT: SiteContent = {
     cards: [
       { id: 'taste', title: 'Taste', href: '#taste', page: 'products' },
       { id: 'activity', title: 'Activity', href: '#activity', page: 'experiences' },
-      { id: 'travel', title: 'Travel', href: '#travel' },
+      { id: 'travel', title: 'Travel', href: '#travel', page: 'discover' },
     ],
   },
   // ====================================================//

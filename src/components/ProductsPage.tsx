@@ -71,10 +71,7 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
   ))];
 
   const filtered = langProducts.filter(p => {
-    const matchSearch =
-      p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      p.note?.toLowerCase().includes(search.toLowerCase()) ||
-      p.origin?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase());
     const matchOrigin =
       activeOrigin === allLabel ||
       p.origin?.split(',').map((o: string) => o.trim()).includes(activeOrigin);

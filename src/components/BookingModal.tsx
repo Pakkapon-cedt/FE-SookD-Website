@@ -38,6 +38,7 @@ function driveThumb(url: string, size = 'w400'): string {
 
 function Calendar({ selected, onSelect, error }: { selected: Date | null; onSelect: (d: Date) => void; error?: boolean }) {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const [viewing, setViewing] = useState(() => selected ?? new Date());
   const year = viewing.getFullYear();
   const month = viewing.getMonth();
@@ -63,10 +64,25 @@ function Calendar({ selected, onSelect, error }: { selected: Date | null; onSele
     today.getMonth() === month &&
     today.getDate() === d;
 
+  const isPast = (d: number | null) => {
+    if (d === null) return false;
+    const date = new Date(year, month, d);
+    return date < today;
+  };
+
+  const isCurrentMonthOrPast =
+    year < today.getFullYear() ||
+    (year === today.getFullYear() && month <= today.getMonth());
+
   return (
     <div className={`bk__cal${error ? ' bk__cal--error' : ''}`}>
       <div className="bk__cal-header">
-        <button className="bk__cal-nav" onClick={() => setViewing(new Date(year, month - 1, 1))}>
+        <button
+          className="bk__cal-nav"
+          onClick={() => setViewing(new Date(year, month - 1, 1))}
+          disabled={isCurrentMonthOrPast}
+          style={isCurrentMonthOrPast ? { opacity: 0.3, cursor: 'default', pointerEvents: 'none' } : undefined}
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <span className="bk__cal-title">{MONTH_NAMES[month]} {year}</span>
@@ -84,9 +100,10 @@ function Calendar({ selected, onSelect, error }: { selected: Date | null; onSele
               d === null ? 'bk__cal-day--empty' : '',
               isSel(d) ? 'bk__cal-day--sel' : '',
               isToday(d) && !isSel(d) ? 'bk__cal-day--today' : '',
+              isPast(d) ? 'bk__cal-day--past' : '',
             ].join(' ').trim()}
-            disabled={d === null}
-            onClick={() => d && onSelect(new Date(year, month, d))}
+            disabled={d === null || isPast(d)}
+            onClick={() => d && !isPast(d) && onSelect(new Date(year, month, d))}
           >
             {d ?? ''}
           </button>
@@ -666,6 +683,10 @@ export const BOOKING_MODAL_CSS = `
 .bk__cal-day--today {
   border: 1.5px solid var(--forest); color: var(--forest); font-weight: 600;
 }
+.bk__cal-day--past {
+  color: #ccc; cursor: default;
+}
+.bk__cal-day--past:hover { background: none; color: #ccc; }
 
 /* -- Right panel -- */
 .bk__right { display: flex; flex-direction: column; gap: 1.5rem; padding-top: 1cm; }
