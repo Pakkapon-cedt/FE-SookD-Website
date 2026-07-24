@@ -334,13 +334,14 @@ return;
                   <span>{isTH ? "ชำระเงิน" : "Pay here"}</span>
                 </button>
 
-                {/* <button
-                  className="payment-actions__cancel"
-                  onClick={() => setPaymentUrl("")}
-                >
-                  {isTH ? "ยกเลิก" : "Cancel"}
-                </button> */}
               </div>
+
+              <button
+                onClick={() => setPaymentUrl("")}
+                style={{ marginTop: '12px', background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontFamily: 'Kanit, sans-serif', fontSize: '.9rem' }}
+              >
+                {isTH ? "ปิด" : "Close"}
+              </button>
 
             </div>
 
