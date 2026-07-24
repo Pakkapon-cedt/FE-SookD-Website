@@ -33,6 +33,14 @@ function toTs(d: any): number {
   const n = Number(d);
   return (!isNaN(n) && n > 1000) ? (n - 25569) * 86400 * 1000 : new Date(d).getTime() || 0;
 }
+function sortOrders(a: any, b: any): number {
+  /* primary: order_id number descending (ORD065 > ORD020) */
+  const aId = parseInt(String(a.order_id).replace(/\D/g, '')) || 0;
+  const bId = parseInt(String(b.order_id).replace(/\D/g, '')) || 0;
+  if (bId !== aId) return bId - aId;
+  /* fallback: order_date descending */
+  return toTs(b.order_date) - toTs(a.order_date);
+}
 
 function fmtDate(d: string | Date | number) {
   if (d === '' || d === null || d === undefined) return '-';
@@ -579,7 +587,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   groupMap.get(id)!.push(o);
                 });
                 const groups = [...groupMap.entries()]
-                  .sort((a, b) => toTs(b[1][0].order_date) - toTs(a[1][0].order_date))
+                  .sort(([, aItems], [, bItems]) => sortOrders(bItems[0], aItems[0]))
                   .filter(([orderId]) => !dismissedOrderIds.has(orderId));
                 if (groups.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีรายการรอชำระเงิน' : 'No pending payments'}</p>;
                 return (
@@ -653,7 +661,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   return s === orderStatusFilter;
                 });
                 if (filtered.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีคำสั่งซื้อในหมวดนี้' : 'No orders in this category'}</p>;
-                const sortedOrders = [...filtered].sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
+                const sortedOrders = [...filtered].sort((a, b) => sortOrders(a, b));
                 const visible = showAllOrders ? sortedOrders : sortedOrders.slice(0, ORDERS_VISIBLE);
                 return <>
                   {visible.map(o => {
@@ -704,7 +712,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
                 const sorted = [...activityOrders]
                   .filter(o => o.order_status?.toLowerCase().trim() === 'completed')
-                  .sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
+                  .sort((a, b) => sortOrders(a, b));
                 if (sorted.length === 0) return <p className="ud-empty">{isTH ? 'ยังไม่มีการจองกิจกรรม' : 'No activity reservations yet'}</p>;
                 const visible = showAllActivities ? sorted : sorted.slice(0, ORDERS_VISIBLE);
                 return <>
