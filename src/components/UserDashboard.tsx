@@ -600,14 +600,22 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                         </div>
                       );
                     })}
-                    {selectedPendingKeys.size > 0 && (
-                      <div className="ud-pending-bar">
-                        <span className="ud-pending-bar__count">{isTH ? `เลือก ${selectedPendingKeys.size} รายการ` : `${selectedPendingKeys.size} selected`}</span>
-                        <button className="ud-pending-bar__btn" onClick={e => { e.stopPropagation(); handlePendingPay(); }} disabled={pendingPayLoading}>
-                          {pendingPayLoading ? '...' : (isTH ? 'ชำระเงิน' : 'Pay Now')}
-                        </button>
-                      </div>
-                    )}
+                    {selectedPendingKeys.size > 0 && (() => {
+                      const totalSelected = pendingAll
+                        .filter(o => selectedPendingKeys.has(`${o.order_id}_${o.item_id}`))
+                        .reduce((sum, o) => sum + (Number(o.total_price) || 0), 0);
+                      return (
+                        <div className="ud-pending-bar">
+                          <div className="ud-pending-bar__info">
+                            <span className="ud-pending-bar__count">{isTH ? `เลือก ${selectedPendingKeys.size} รายการ` : `${selectedPendingKeys.size} selected`}</span>
+                            <span className="ud-pending-bar__total">{totalSelected.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
+                          </div>
+                          <button className="ud-pending-bar__btn" onClick={e => { e.stopPropagation(); handlePendingPay(); }} disabled={pendingPayLoading}>
+                            {pendingPayLoading ? '...' : (isTH ? 'ชำระเงิน' : 'Pay Now')}
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })() : (() => {
@@ -1818,17 +1826,29 @@ export const USER_DASHBOARD_CSS = `
   display: flex; align-items: center; justify-content: space-between;
   background: #fff; border-top: 2px solid #2d6a4f;
   padding: .9rem 1.2rem;
+  /* right padding แบบ safe-area + กันถูก chat widget บัง */
+  padding-right: max(1.2rem, calc(env(safe-area-inset-right) + 1.2rem));
   box-shadow: 0 -2px 12px rgba(0,0,0,.1);
   z-index: 50; border-radius: 0 0 12px 12px;
   margin-top: .5rem;
 }
-.ud-pending-bar__count { font-size: .95rem; font-weight: 600; color: #2d6a4f; }
+.ud-pending-bar__info {
+  display: flex; flex-direction: column; gap: .1rem;
+}
+.ud-pending-bar__count { font-size: .88rem; font-weight: 600; color: #2d6a4f; }
+.ud-pending-bar__total { font-size: 1.05rem; font-weight: 700; color: #1a3f2b; }
 .ud-pending-bar__btn {
   background: #06c755; color: #fff;
   border: none; border-radius: 8px;
   padding: .55rem 1.4rem; font-size: .95rem; font-weight: 700;
   cursor: pointer; font-family: Kanit, sans-serif;
   transition: background .2s;
+  /* เว้นระยะจาก chat widget ฝั่งขวา */
+  margin-right: 80px;
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .ud-pending-bar__btn { margin-right: 72px; }
 }
 .ud-pending-bar__btn:hover { background: #05b04a; }
 .ud-pending-bar__btn:disabled { opacity: .6; cursor: default; }
