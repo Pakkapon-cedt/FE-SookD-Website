@@ -587,7 +587,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   groupMap.get(id)!.push(o);
                 });
                 const groups = [...groupMap.entries()]
-                  .sort(([, aItems], [, bItems]) => sortOrders(bItems[0], aItems[0]))
+                  .sort(([, aItems], [, bItems]) => sortOrders(aItems[0], bItems[0]))
                   .filter(([orderId]) => !dismissedOrderIds.has(orderId));
                 if (groups.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีรายการรอชำระเงิน' : 'No pending payments'}</p>;
                 return (
